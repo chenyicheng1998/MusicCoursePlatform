@@ -1,6 +1,6 @@
 # Software Engineering Project 1
 ## Music Course Platform
-## Group 6
+## Group 5
 
 ## Team Members
 - **Luo Ying** - Frontend Development, Documentation
