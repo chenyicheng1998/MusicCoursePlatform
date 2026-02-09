@@ -58,10 +58,10 @@ The application uses **JavaFX** for the user interface, **MariaDB** for database
 - [UI/UX Design](document/UIDesign.md) *(Coming in Sprint 3)*
 
 ### Sprint Reviews
-- [Sprint 1 Review](document/Sprint_1_Review_Report.md)
-- [Sprint 2 Review](document/Sprint_2_Review_Report.md) *(Coming Soon)*
-- [Sprint 3 Review](document/Sprint_3_Review_Report.md) *(Coming Soon)*
-- [Sprint 4 Review](document/Sprint_4_Review_Report.md) *(Coming Soon)*
+- [Sprint 1 Review](document/Sprint_1_Review_Report.pdf)
+- [Sprint 2 Review](document/Sprint_2_Review_Report.pdf) *(Coming Soon)*
+- [Sprint 3 Review](document/Sprint_3_Review_Report.pdf) *(Coming Soon)*
+- [Sprint 4 Review](document/Sprint_4_Review_Report.pdf) *(Coming Soon)*
 
 ### Quality Assurance
 - [Testing Strategy](document/Testing.md) *(Coming in Sprint 3)*
