@@ -16,16 +16,14 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
         try {
-            // Load the login screen FXML
             Parent root = FXMLLoader.load(getClass().getResource("/fxml/login.fxml"));
-
-            // Create scene
             Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
 
-            // Configure primary stage
             primaryStage.setTitle("Music Course Platform - Login");
             primaryStage.setScene(scene);
-            primaryStage.setResizable(false); // Fixed size window
+            primaryStage.setMinWidth(450);
+            primaryStage.setMinHeight(550);
             primaryStage.show();
 
             System.out.println("Application started successfully!");

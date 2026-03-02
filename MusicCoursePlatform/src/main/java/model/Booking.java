@@ -1,222 +1,126 @@
 package model;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
-/**
- * Booking entity class representing a lesson booking in the Music Course Platform.
- * Bookings link learners to time slots.
- * 
- * @author Lu Liu
- * @version 1.0 (Sprint 3)
- */
 public class Booking {
-
-    // Status constants
+    
     public static final String STATUS_PENDING = "PENDING";
     public static final String STATUS_CONFIRMED = "CONFIRMED";
     public static final String STATUS_CANCELLED = "CANCELLED";
-
+    
     private int bookingId;
-    private int slotId;
-    private int learnerId;
-    private LocalDateTime bookingDate;
-    private String status;  // "PENDING", "CONFIRMED", or "CANCELLED"
+    private LocalDate bookingDate;
+    private String bookingStatus;
     private String notes;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
-    // Optional: Associated objects for convenience
-    private TimeSlot timeSlot;
-    private User learner;
-
-    /**
-     * Default constructor
-     */
+    private LocalDate createdAt;
+    private LocalDate updatedAt;
+    private int learnerProfileId;
+    private int slotId;
+    
     public Booking() {
-        this.status = STATUS_PENDING;
-        this.bookingDate = LocalDateTime.now();
+        this.bookingStatus = STATUS_PENDING;
+        this.bookingDate = LocalDate.now();
+        this.createdAt = LocalDate.now();
+        this.updatedAt = LocalDate.now();
     }
-
-    /**
-     * Constructor with essential fields
-     * 
-     * @param slotId The ID of the time slot being booked
-     * @param learnerId The ID of the learner making the booking
-     */
-    public Booking(int slotId, int learnerId) {
+    
+    public Booking(int learnerProfileId, int slotId) {
+        this();
+        this.learnerProfileId = learnerProfileId;
         this.slotId = slotId;
-        this.learnerId = learnerId;
-        this.status = STATUS_PENDING;
-        this.bookingDate = LocalDateTime.now();
     }
-
-    /**
-     * Constructor with notes
-     */
-    public Booking(int slotId, int learnerId, String notes) {
-        this.slotId = slotId;
-        this.learnerId = learnerId;
-        this.notes = notes;
-        this.status = STATUS_PENDING;
-        this.bookingDate = LocalDateTime.now();
-    }
-
-    /**
-     * Full constructor with all fields
-     */
-    public Booking(int bookingId, int slotId, int learnerId, LocalDateTime bookingDate,
-                   String status, String notes, LocalDateTime createdAt, LocalDateTime updatedAt) {
-        this.bookingId = bookingId;
-        this.slotId = slotId;
-        this.learnerId = learnerId;
-        this.bookingDate = bookingDate;
-        this.status = status;
-        this.notes = notes;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
-    }
-
-    // ==================== Getters and Setters ====================
-
+    
     public int getBookingId() {
         return bookingId;
     }
-
+    
     public void setBookingId(int bookingId) {
         this.bookingId = bookingId;
     }
-
-    public int getSlotId() {
-        return slotId;
-    }
-
-    public void setSlotId(int slotId) {
-        this.slotId = slotId;
-    }
-
-    public int getLearnerId() {
-        return learnerId;
-    }
-
-    public void setLearnerId(int learnerId) {
-        this.learnerId = learnerId;
-    }
-
-    public LocalDateTime getBookingDate() {
+    
+    public LocalDate getBookingDate() {
         return bookingDate;
     }
-
-    public void setBookingDate(LocalDateTime bookingDate) {
+    
+    public void setBookingDate(LocalDate bookingDate) {
         this.bookingDate = bookingDate;
     }
-
+    
+    public String getBookingStatus() {
+        return bookingStatus;
+    }
+    
+    public void setBookingStatus(String bookingStatus) {
+        this.bookingStatus = bookingStatus;
+    }
+    
     public String getStatus() {
-        return status;
+        return bookingStatus;
     }
-
+    
     public void setStatus(String status) {
-        this.status = status;
+        this.bookingStatus = status;
     }
-
+    
     public String getNotes() {
         return notes;
     }
-
+    
     public void setNotes(String notes) {
         this.notes = notes;
     }
-
-    public LocalDateTime getCreatedAt() {
+    
+    public LocalDate getCreatedAt() {
         return createdAt;
     }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
+    
+    public void setCreatedAt(LocalDate createdAt) {
         this.createdAt = createdAt;
     }
-
-    public LocalDateTime getUpdatedAt() {
+    
+    public LocalDate getUpdatedAt() {
         return updatedAt;
     }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
+    
+    public void setUpdatedAt(LocalDate updatedAt) {
         this.updatedAt = updatedAt;
     }
-
-    public TimeSlot getTimeSlot() {
-        return timeSlot;
+    
+    public int getLearnerProfileId() {
+        return learnerProfileId;
     }
-
-    public void setTimeSlot(TimeSlot timeSlot) {
-        this.timeSlot = timeSlot;
+    
+    public void setLearnerProfileId(int learnerProfileId) {
+        this.learnerProfileId = learnerProfileId;
     }
-
-    public User getLearner() {
-        return learner;
+    
+    public int getSlotId() {
+        return slotId;
     }
-
-    public void setLearner(User learner) {
-        this.learner = learner;
+    
+    public void setSlotId(int slotId) {
+        this.slotId = slotId;
     }
-
-    // ==================== Utility Methods ====================
-
-    /**
-     * Check if booking is pending
-     * @return true if status is PENDING
-     */
+    
     public boolean isPending() {
-        return STATUS_PENDING.equals(status);
+        return STATUS_PENDING.equals(bookingStatus);
     }
-
-    /**
-     * Check if booking is confirmed
-     * @return true if status is CONFIRMED
-     */
+    
     public boolean isConfirmed() {
-        return STATUS_CONFIRMED.equals(status);
+        return STATUS_CONFIRMED.equals(bookingStatus);
     }
-
-    /**
-     * Check if booking is cancelled
-     * @return true if status is CANCELLED
-     */
+    
     public boolean isCancelled() {
-        return STATUS_CANCELLED.equals(status);
+        return STATUS_CANCELLED.equals(bookingStatus);
     }
-
-    /**
-     * Confirm the booking
-     */
+    
     public void confirm() {
-        this.status = STATUS_CONFIRMED;
-        this.updatedAt = LocalDateTime.now();
+        this.bookingStatus = STATUS_CONFIRMED;
+        this.updatedAt = LocalDate.now();
     }
-
-    /**
-     * Cancel the booking
-     */
+    
     public void cancel() {
-        this.status = STATUS_CANCELLED;
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    /**
-     * Check if booking is active (not cancelled)
-     * @return true if booking is pending or confirmed
-     */
-    public boolean isActive() {
-        return isPending() || isConfirmed();
-    }
-
-    @Override
-    public String toString() {
-        return "Booking{" +
-                "bookingId=" + bookingId +
-                ", slotId=" + slotId +
-                ", learnerId=" + learnerId +
-                ", bookingDate=" + bookingDate +
-                ", status='" + status + '\'' +
-                ", notes='" + notes + '\'' +
-                '}';
+        this.bookingStatus = STATUS_CANCELLED;
+        this.updatedAt = LocalDate.now();
     }
 }

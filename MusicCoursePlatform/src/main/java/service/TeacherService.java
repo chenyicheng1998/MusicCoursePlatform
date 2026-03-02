@@ -5,7 +5,6 @@ import dao.UserDAO;
 import model.TeacherProfile;
 import model.User;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public class TeacherService {
@@ -24,7 +23,7 @@ public class TeacherService {
     }
 
     public TeacherProfile createProfile(int userId, String biography, String instruments,
-                                         int yearsExperience, BigDecimal hourlyRate, String location) {
+                                         int yearsExperience, int hourlyRate, String location) {
         User user = userDAO.findById(userId);
         if (user == null) {
             throw new IllegalArgumentException("User not found");
@@ -40,8 +39,11 @@ public class TeacherService {
 
         validateProfile(instruments, yearsExperience, hourlyRate);
 
-        TeacherProfile profile = new TeacherProfile(userId, biography, instruments,
-                yearsExperience, hourlyRate, location);
+        TeacherProfile profile = new TeacherProfile(userId, instruments);
+        profile.setBiography(biography);
+        profile.setYearsExperience(yearsExperience);
+        profile.setHourlyRate(hourlyRate);
+        profile.setLocation(location);
         
         boolean success = teacherProfileDAO.create(profile);
         if (!success) {
@@ -52,7 +54,7 @@ public class TeacherService {
     }
 
     public TeacherProfile updateProfile(int profileId, String biography, String instruments,
-                                         int yearsExperience, BigDecimal hourlyRate, String location) {
+                                         int yearsExperience, int hourlyRate, String location) {
         TeacherProfile profile = teacherProfileDAO.findById(profileId);
         if (profile == null) {
             throw new IllegalArgumentException("Teacher profile not found");
@@ -108,14 +110,14 @@ public class TeacherService {
         return teacherProfileDAO.delete(profileId);
     }
 
-    private void validateProfile(String instruments, int yearsExperience, BigDecimal hourlyRate) {
+    private void validateProfile(String instruments, int yearsExperience, int hourlyRate) {
         if (instruments == null || instruments.trim().isEmpty()) {
             throw new IllegalArgumentException("Instruments cannot be empty");
         }
         if (yearsExperience < 0) {
             throw new IllegalArgumentException("Years of experience cannot be negative");
         }
-        if (hourlyRate != null && hourlyRate.compareTo(BigDecimal.ZERO) < 0) {
+        if (hourlyRate < 0) {
             throw new IllegalArgumentException("Hourly rate cannot be negative");
         }
     }

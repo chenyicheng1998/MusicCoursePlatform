@@ -48,6 +48,22 @@ public class UserService {
         }
         return user;
     }
+    public User authenticateByEmail(String email, String plainPassword) {
+        if (email == null || email.isEmpty()) {
+            throw new IllegalArgumentException("Email cannot be empty");
+        }
+        if (plainPassword == null || plainPassword.isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be empty");
+        }
+        User user = userDAO.findByEmail(email);
+        if (user == null) {
+            throw new IllegalArgumentException("Invalid email or password");
+        }
+        if (!PasswordUtil.verifyPassword(plainPassword, user.getPasswordHash())) {
+            throw new IllegalArgumentException("Invalid email or password");
+        }
+        return user;
+    }
     public void validateUsername(String username) {
         if (username == null || username.isEmpty()) {
             throw new IllegalArgumentException("Username cannot be empty");

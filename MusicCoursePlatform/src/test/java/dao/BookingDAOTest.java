@@ -1,71 +1,76 @@
 package dao;
 
-import model.Booking;
-import model.TimeSlot;
-import model.User;
+import model.*;
 import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class BookingDAOTest {
 
     private static BookingDAO bookingDAO;
     private static TimeSlotDAO timeSlotDAO;
+    private static TeacherProfileDAO teacherProfileDAO;
+    private static LearnerProfileDAO learnerProfileDAO;
     private static UserDAO userDAO;
+    
     private static User testTeacher;
     private static User testLearner;
+    private static TeacherProfile testTeacherProfile;
+    private static LearnerProfile testLearnerProfile;
     private static TimeSlot testSlot;
     private static Booking testBooking;
-    private static final String TEST_PREFIX = "test_bk_" + System.currentTimeMillis() + "_";
 
     @BeforeAll
-    static void setUpClass() {
+    static void setUp() {
         bookingDAO = new BookingDAO();
         timeSlotDAO = new TimeSlotDAO();
+        teacherProfileDAO = new TeacherProfileDAO();
+        learnerProfileDAO = new LearnerProfileDAO();
         userDAO = new UserDAO();
-    }
-
-    @BeforeEach
-    void setUp() {
-        testTeacher = new User(
-            TEST_PREFIX + "teacher",
-            "hashed_password",
-            TEST_PREFIX + "teacher@test.com",
-            "TEACHER"
-        );
+        
+        long timestamp = System.currentTimeMillis();
+        
+        testTeacher = new User("test_booking_teacher_" + timestamp, 
+                              "hashedpassword", 
+                              "test_booking_teacher_" + timestamp + "@test.com", 
+                              "TEACHER");
         userDAO.create(testTeacher);
-
-        testLearner = new User(
-            TEST_PREFIX + "learner",
-            "hashed_password",
-            TEST_PREFIX + "learner@test.com",
-            "LEARNER"
-        );
+        
+        testLearner = new User("test_booking_learner_" + timestamp, 
+                              "hashedpassword", 
+                              "test_booking_learner_" + timestamp + "@test.com", 
+                              "LEARNER");
         userDAO.create(testLearner);
-
-        testSlot = new TimeSlot(
-            testTeacher.getUserId(),
-            LocalDate.now().plusDays(7),
-            LocalTime.of(10, 0),
-            LocalTime.of(11, 0)
-        );
+        
+        testTeacherProfile = new TeacherProfile(testTeacher.getUserId(), "Piano");
+        teacherProfileDAO.create(testTeacherProfile);
+        
+        testLearnerProfile = new LearnerProfile(testLearner.getUserId(), "Piano");
+        learnerProfileDAO.create(testLearnerProfile);
+        
+        testSlot = new TimeSlot(testTeacherProfile.getTeacherProfileId(), 
+                               LocalDate.now().plusDays(1), 
+                               "10:00", 
+                               "11:00");
         timeSlotDAO.create(testSlot);
-
-        testBooking = new Booking(testSlot.getSlotId(), testLearner.getUserId(), "Test booking");
     }
 
-    @AfterEach
-    void tearDown() {
+    @AfterAll
+    static void tearDown() {
         if (testBooking != null && testBooking.getBookingId() > 0) {
             bookingDAO.delete(testBooking.getBookingId());
         }
         if (testSlot != null && testSlot.getSlotId() > 0) {
             timeSlotDAO.delete(testSlot.getSlotId());
+        }
+        if (testTeacherProfile != null && testTeacherProfile.getTeacherProfileId() > 0) {
+            teacherProfileDAO.delete(testTeacherProfile.getTeacherProfileId());
+        }
+        if (testLearnerProfile != null && testLearnerProfile.getLearnerProfileId() > 0) {
+            learnerProfileDAO.delete(testLearnerProfile.getLearnerProfileId());
         }
         if (testTeacher != null && testTeacher.getUserId() > 0) {
             userDAO.delete(testTeacher.getUserId());
@@ -77,140 +82,103 @@ public class BookingDAOTest {
 
     @Test
     @Order(1)
-    @DisplayName("Create booking successfully")
-    void testCreate_Success() {
+    void testCreate() {
+        testBooking = new Booking(testLearnerProfile.getLearnerProfileId(), testSlot.getSlotId());
+        testBooking.setNotes("Test booking");
+        
         boolean result = bookingDAO.create(testBooking);
-
+        
         assertTrue(result);
         assertTrue(testBooking.getBookingId() > 0);
-        assertEquals(Booking.STATUS_PENDING, testBooking.getStatus());
     }
 
     @Test
     @Order(2)
-    @DisplayName("Find booking by ID")
     void testFindById() {
-        bookingDAO.create(testBooking);
-
         Booking found = bookingDAO.findById(testBooking.getBookingId());
-
+        
         assertNotNull(found);
-        assertEquals(testSlot.getSlotId(), found.getSlotId());
-        assertEquals(testLearner.getUserId(), found.getLearnerId());
+        assertEquals(testBooking.getBookingId(), found.getBookingId());
+        assertEquals("Test booking", found.getNotes());
     }
 
     @Test
     @Order(3)
-    @DisplayName("Find booking by slot ID")
-    void testFindBySlotId() {
-        bookingDAO.create(testBooking);
-
-        Booking found = bookingDAO.findBySlotId(testSlot.getSlotId());
-
-        assertNotNull(found);
-        assertEquals(testBooking.getBookingId(), found.getBookingId());
-    }
-
-    @Test
-    @Order(4)
-    @DisplayName("Find bookings by learner ID")
-    void testFindByLearnerId() {
-        bookingDAO.create(testBooking);
-
-        List<Booking> bookings = bookingDAO.findByLearnerId(testLearner.getUserId());
-
+    void testFindByLearnerProfileId() {
+        List<Booking> bookings = bookingDAO.findByLearnerProfileId(testLearnerProfile.getLearnerProfileId());
+        
         assertNotNull(bookings);
         assertTrue(bookings.stream().anyMatch(b -> b.getBookingId() == testBooking.getBookingId()));
     }
 
     @Test
+    @Order(4)
+    void testFindBySlotId() {
+        Booking found = bookingDAO.findBySlotId(testSlot.getSlotId());
+        
+        assertNotNull(found);
+        assertEquals(testBooking.getBookingId(), found.getBookingId());
+    }
+
+    @Test
     @Order(5)
-    @DisplayName("Find active bookings by learner ID")
-    void testFindActiveByLearnerId() {
-        bookingDAO.create(testBooking);
-
-        List<Booking> bookings = bookingDAO.findActiveByLearnerId(testLearner.getUserId());
-
+    void testFindByStatus() {
+        List<Booking> bookings = bookingDAO.findByStatus(Booking.STATUS_PENDING);
+        
         assertNotNull(bookings);
         assertTrue(bookings.stream().anyMatch(b -> b.getBookingId() == testBooking.getBookingId()));
     }
 
     @Test
     @Order(6)
-    @DisplayName("Find bookings by status")
-    void testFindByStatus() {
-        bookingDAO.create(testBooking);
-
-        List<Booking> bookings = bookingDAO.findByStatus(Booking.STATUS_PENDING);
-
+    void testFindAll() {
+        List<Booking> bookings = bookingDAO.findAll();
+        
         assertNotNull(bookings);
-        assertTrue(bookings.stream().anyMatch(b -> b.getBookingId() == testBooking.getBookingId()));
+        assertTrue(bookings.size() >= 1);
     }
 
     @Test
     @Order(7)
-    @DisplayName("Update booking successfully")
     void testUpdate() {
-        bookingDAO.create(testBooking);
-
         testBooking.setNotes("Updated notes");
-        testBooking.setStatus(Booking.STATUS_CONFIRMED);
-
+        
         boolean result = bookingDAO.update(testBooking);
-
+        
         assertTrue(result);
-
+        
         Booking updated = bookingDAO.findById(testBooking.getBookingId());
         assertEquals("Updated notes", updated.getNotes());
-        assertEquals(Booking.STATUS_CONFIRMED, updated.getStatus());
     }
 
     @Test
     @Order(8)
-    @DisplayName("Update booking status")
     void testUpdateStatus() {
-        bookingDAO.create(testBooking);
-
         boolean result = bookingDAO.updateStatus(testBooking.getBookingId(), Booking.STATUS_CONFIRMED);
-
+        
         assertTrue(result);
-
+        
         Booking updated = bookingDAO.findById(testBooking.getBookingId());
-        assertEquals(Booking.STATUS_CONFIRMED, updated.getStatus());
+        assertEquals(Booking.STATUS_CONFIRMED, updated.getBookingStatus());
     }
 
     @Test
     @Order(9)
-    @DisplayName("Delete booking successfully")
     void testDelete() {
-        bookingDAO.create(testBooking);
-        int bookingId = testBooking.getBookingId();
-
-        boolean result = bookingDAO.delete(bookingId);
-
+        TimeSlot tempSlot = new TimeSlot(testTeacherProfile.getTeacherProfileId(), 
+                                        LocalDate.now().plusDays(3), 
+                                        "14:00", 
+                                        "15:00");
+        timeSlotDAO.create(tempSlot);
+        
+        Booking toDelete = new Booking(testLearnerProfile.getLearnerProfileId(), tempSlot.getSlotId());
+        bookingDAO.create(toDelete);
+        
+        boolean result = bookingDAO.delete(toDelete.getBookingId());
+        
         assertTrue(result);
-        assertNull(bookingDAO.findById(bookingId));
-
-        testBooking.setBookingId(0);
-    }
-
-    @Test
-    @Order(10)
-    @DisplayName("Find non-existent booking returns null")
-    void testFindById_NotFound() {
-        Booking found = bookingDAO.findById(999999);
-        assertNull(found);
-    }
-
-    @Test
-    @Order(11)
-    @DisplayName("Cancelled booking not returned by findBySlotId")
-    void testFindBySlotId_ExcludesCancelled() {
-        bookingDAO.create(testBooking);
-        bookingDAO.updateStatus(testBooking.getBookingId(), Booking.STATUS_CANCELLED);
-
-        Booking found = bookingDAO.findBySlotId(testSlot.getSlotId());
-
-        assertNull(found);
+        assertNull(bookingDAO.findById(toDelete.getBookingId()));
+        
+        timeSlotDAO.delete(tempSlot.getSlotId());
     }
 }

@@ -10,15 +10,16 @@ import java.util.List;
 public class BookingDAO {
 
     public boolean create(Booking booking) {
-        String sql = "INSERT INTO bookings (slot_id, learner_id, status, notes) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO BOOKING (booking_date, booking_status, notes, learner_profile_id, slot_id) VALUES (?, ?, ?, ?, ?)";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
-            stmt.setInt(1, booking.getSlotId());
-            stmt.setInt(2, booking.getLearnerId());
-            stmt.setString(3, booking.getStatus());
-            stmt.setString(4, booking.getNotes());
+            stmt.setDate(1, Date.valueOf(booking.getBookingDate()));
+            stmt.setString(2, booking.getBookingStatus());
+            stmt.setString(3, booking.getNotes());
+            stmt.setInt(4, booking.getLearnerProfileId());
+            stmt.setInt(5, booking.getSlotId());
             
             int affectedRows = stmt.executeUpdate();
             
@@ -39,7 +40,7 @@ public class BookingDAO {
     }
 
     public Booking findById(int bookingId) {
-        String sql = "SELECT * FROM bookings WHERE booking_id = ?";
+        String sql = "SELECT * FROM BOOKING WHERE booking_id = ?";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -57,8 +58,28 @@ public class BookingDAO {
         return null;
     }
 
+    public List<Booking> findByLearnerProfileId(int learnerProfileId) {
+        List<Booking> bookings = new ArrayList<>();
+        String sql = "SELECT * FROM BOOKING WHERE learner_profile_id = ? ORDER BY booking_date DESC";
+        
+        try (Connection conn = DatabaseConnection.getNewConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, learnerProfileId);
+            
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    bookings.add(mapResultSetToBooking(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error finding bookings by learner profile ID: " + e.getMessage());
+        }
+        return bookings;
+    }
+
     public Booking findBySlotId(int slotId) {
-        String sql = "SELECT * FROM bookings WHERE slot_id = ? AND status != 'CANCELLED'";
+        String sql = "SELECT * FROM BOOKING WHERE slot_id = ?";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -76,49 +97,9 @@ public class BookingDAO {
         return null;
     }
 
-    public List<Booking> findByLearnerId(int learnerId) {
-        List<Booking> bookings = new ArrayList<>();
-        String sql = "SELECT * FROM bookings WHERE learner_id = ? ORDER BY booking_date DESC";
-        
-        try (Connection conn = DatabaseConnection.getNewConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setInt(1, learnerId);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    bookings.add(mapResultSetToBooking(rs));
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error finding bookings by learner ID: " + e.getMessage());
-        }
-        return bookings;
-    }
-
-    public List<Booking> findActiveByLearnerId(int learnerId) {
-        List<Booking> bookings = new ArrayList<>();
-        String sql = "SELECT * FROM bookings WHERE learner_id = ? AND status != 'CANCELLED' ORDER BY booking_date DESC";
-        
-        try (Connection conn = DatabaseConnection.getNewConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setInt(1, learnerId);
-            
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    bookings.add(mapResultSetToBooking(rs));
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error finding active bookings by learner ID: " + e.getMessage());
-        }
-        return bookings;
-    }
-
     public List<Booking> findByStatus(String status) {
         List<Booking> bookings = new ArrayList<>();
-        String sql = "SELECT * FROM bookings WHERE status = ? ORDER BY booking_date DESC";
+        String sql = "SELECT * FROM BOOKING WHERE booking_status = ? ORDER BY booking_date DESC";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -138,7 +119,7 @@ public class BookingDAO {
 
     public List<Booking> findAll() {
         List<Booking> bookings = new ArrayList<>();
-        String sql = "SELECT * FROM bookings ORDER BY booking_date DESC";
+        String sql = "SELECT * FROM BOOKING ORDER BY booking_date DESC";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              Statement stmt = conn.createStatement();
@@ -154,16 +135,14 @@ public class BookingDAO {
     }
 
     public boolean update(Booking booking) {
-        String sql = "UPDATE bookings SET slot_id = ?, learner_id = ?, status = ?, notes = ? WHERE booking_id = ?";
+        String sql = "UPDATE BOOKING SET booking_status = ?, notes = ?, updated_at = CURRENT_DATE WHERE booking_id = ?";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setInt(1, booking.getSlotId());
-            stmt.setInt(2, booking.getLearnerId());
-            stmt.setString(3, booking.getStatus());
-            stmt.setString(4, booking.getNotes());
-            stmt.setInt(5, booking.getBookingId());
+            stmt.setString(1, booking.getBookingStatus());
+            stmt.setString(2, booking.getNotes());
+            stmt.setInt(3, booking.getBookingId());
             
             return stmt.executeUpdate() > 0;
             
@@ -174,7 +153,7 @@ public class BookingDAO {
     }
 
     public boolean updateStatus(int bookingId, String status) {
-        String sql = "UPDATE bookings SET status = ? WHERE booking_id = ?";
+        String sql = "UPDATE BOOKING SET booking_status = ?, updated_at = CURRENT_DATE WHERE booking_id = ?";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -191,7 +170,7 @@ public class BookingDAO {
     }
 
     public boolean delete(int bookingId) {
-        String sql = "DELETE FROM bookings WHERE booking_id = ?";
+        String sql = "DELETE FROM BOOKING WHERE booking_id = ?";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -205,42 +184,23 @@ public class BookingDAO {
         }
     }
 
-    public boolean deleteByLearnerId(int learnerId) {
-        String sql = "DELETE FROM bookings WHERE learner_id = ?";
-        
-        try (Connection conn = DatabaseConnection.getNewConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setInt(1, learnerId);
-            return stmt.executeUpdate() > 0;
-            
-        } catch (SQLException e) {
-            System.err.println("Error deleting bookings by learner ID: " + e.getMessage());
-            return false;
-        }
-    }
-
     private Booking mapResultSetToBooking(ResultSet rs) throws SQLException {
         Booking booking = new Booking();
         booking.setBookingId(rs.getInt("booking_id"));
-        booking.setSlotId(rs.getInt("slot_id"));
-        booking.setLearnerId(rs.getInt("learner_id"));
-        booking.setStatus(rs.getString("status"));
+        booking.setBookingDate(rs.getDate("booking_date").toLocalDate());
+        booking.setBookingStatus(rs.getString("booking_status"));
         booking.setNotes(rs.getString("notes"));
+        booking.setLearnerProfileId(rs.getInt("learner_profile_id"));
+        booking.setSlotId(rs.getInt("slot_id"));
         
-        Timestamp bookingDate = rs.getTimestamp("booking_date");
-        if (bookingDate != null) {
-            booking.setBookingDate(bookingDate.toLocalDateTime());
-        }
-        
-        Timestamp createdAt = rs.getTimestamp("created_at");
+        Date createdAt = rs.getDate("created_at");
         if (createdAt != null) {
-            booking.setCreatedAt(createdAt.toLocalDateTime());
+            booking.setCreatedAt(createdAt.toLocalDate());
         }
         
-        Timestamp updatedAt = rs.getTimestamp("updated_at");
+        Date updatedAt = rs.getDate("updated_at");
         if (updatedAt != null) {
-            booking.setUpdatedAt(updatedAt.toLocalDateTime());
+            booking.setUpdatedAt(updatedAt.toLocalDate());
         }
         
         return booking;

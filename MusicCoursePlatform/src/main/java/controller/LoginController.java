@@ -6,20 +6,15 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import model.User;
+import service.UserService;
 
 import java.io.IOException;
 
-/**
- * Controller for the login screen.
- * Handles user login functionality.
- *
- * @author CHEN Yicheng
- * @version 1.0
- */
 public class LoginController {
 
     @FXML
@@ -28,68 +23,101 @@ public class LoginController {
     @FXML
     private PasswordField passwordField;
 
-    /**
-     * Initialize method called after FXML is loaded.
-     */
+    @FXML
+    private Label errorLabel;
+
+    private UserService userService;
+
     @FXML
     public void initialize() {
-        // Initialization logic can be added here
-        System.out.println("LoginController initialized");
+        userService = new UserService();
     }
 
-    /**
-     * Handle login button click.
-     * Currently just shows a message - business logic will be implemented later.
-     */
     @FXML
     private void handleLogin(ActionEvent event) {
-        String email = emailField.getText();
+        String email = emailField.getText().trim();
         String password = passwordField.getText();
 
-        // Validation
         if (email.isEmpty() || password.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Validation Error", "Please fill in all fields!");
+            showError("Please fill in all fields!");
             return;
         }
 
-        // TODO: Implement actual login logic using UserService
-        System.out.println("Login attempt - Email: " + email);
-
-        // For now, just show a success message
-        showAlert(Alert.AlertType.INFORMATION, "Login", "Login functionality will be implemented soon!");
-    }
-
-    /**
-     * Handle "Create account" link click.
-     * Navigates to signup screen.
-     */
-    @FXML
-    private void handleSignup(ActionEvent event) {
         try {
-            // Load signup screen
-            Parent signupRoot = FXMLLoader.load(getClass().getResource("/fxml/signup.fxml"));
-            Scene signupScene = new Scene(signupRoot);
-
-            // Get current stage
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(signupScene);
-            stage.setTitle("Music Course Platform - Sign Up");
-
-            System.out.println("Navigated to signup screen");
-        } catch (IOException e) {
-            e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Navigation Error", "Could not load signup screen!");
+            User user = userService.authenticateByEmail(email, password);
+            if (user != null) {
+                SessionManager.getInstance().setCurrentUser(user);
+                navigateToDashboard(event, user);
+            } else {
+                showError("Invalid email or password!");
+            }
+        } catch (IllegalArgumentException e) {
+            showError(e.getMessage());
+        } catch (Exception e) {
+            showError("Login failed: " + e.getMessage());
         }
     }
 
-    /**
-     * Show alert dialog.
-     */
-    private void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+    private void navigateToDashboard(ActionEvent event, User user) {
+        try {
+            String fxmlPath;
+            String title;
+            
+            if (user.isTeacher()) {
+                fxmlPath = "/fxml/teacher_dashboard.fxml";
+                title = "Music Course Platform - Teacher Dashboard";
+            } else {
+                fxmlPath = "/fxml/student_dashboard.fxml";
+                title = "Music Course Platform - Student Dashboard";
+            }
+            
+            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
+            Scene scene = new Scene(root);
+            scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
+            
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(scene);
+            stage.setTitle(title);
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Could not load dashboard!");
+        }
+    }
+
+    @FXML
+    private void handleSignup(ActionEvent event) {
+        try {
+            Parent signupRoot = FXMLLoader.load(getClass().getResource("/fxml/signup.fxml"));
+            Scene signupScene = new Scene(signupRoot);
+            
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(signupScene);
+            stage.setTitle("Music Course Platform - Sign Up");
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Could not load signup screen!");
+        }
+    }
+
+    @FXML
+    private void handleBack(ActionEvent event) {
+        emailField.clear();
+        passwordField.clear();
+        hideError();
+    }
+
+    private void showError(String message) {
+        if (errorLabel != null) {
+            errorLabel.setText(message);
+            errorLabel.setVisible(true);
+            errorLabel.setManaged(true);
+        }
+    }
+
+    private void hideError() {
+        if (errorLabel != null) {
+            errorLabel.setVisible(false);
+            errorLabel.setManaged(false);
+        }
     }
 }

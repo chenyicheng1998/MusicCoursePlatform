@@ -1,43 +1,39 @@
 package service;
 
 import dao.TimeSlotDAO;
-import dao.UserDAO;
+import dao.TeacherProfileDAO;
 import model.TimeSlot;
-import model.User;
+import model.TeacherProfile;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 public class TimeSlotService {
 
     private final TimeSlotDAO timeSlotDAO;
-    private final UserDAO userDAO;
+    private final TeacherProfileDAO teacherProfileDAO;
 
     public TimeSlotService() {
         this.timeSlotDAO = new TimeSlotDAO();
-        this.userDAO = new UserDAO();
+        this.teacherProfileDAO = new TeacherProfileDAO();
     }
 
-    public TimeSlotService(TimeSlotDAO timeSlotDAO, UserDAO userDAO) {
+    public TimeSlotService(TimeSlotDAO timeSlotDAO, TeacherProfileDAO teacherProfileDAO) {
         this.timeSlotDAO = timeSlotDAO;
-        this.userDAO = userDAO;
+        this.teacherProfileDAO = teacherProfileDAO;
     }
 
-    public TimeSlot createTimeSlot(int teacherId, LocalDate lessonDate, 
-                                    LocalTime startTime, LocalTime endTime) {
-        User teacher = userDAO.findById(teacherId);
-        if (teacher == null) {
-            throw new IllegalArgumentException("Teacher not found");
-        }
-        if (!teacher.isTeacher()) {
-            throw new IllegalArgumentException("User is not a teacher");
+    public TimeSlot createTimeSlot(int teacherProfileId, LocalDate lessonDate, 
+                                    String startTime, String endTime) {
+        TeacherProfile profile = teacherProfileDAO.findById(teacherProfileId);
+        if (profile == null) {
+            throw new IllegalArgumentException("Teacher profile not found");
         }
 
         validateTimeSlot(lessonDate, startTime, endTime);
-        checkForOverlap(teacherId, lessonDate, startTime, endTime, -1);
+        checkForOverlap(teacherProfileId, lessonDate, startTime, endTime, -1);
 
-        TimeSlot slot = new TimeSlot(teacherId, lessonDate, startTime, endTime);
+        TimeSlot slot = new TimeSlot(teacherProfileId, lessonDate, startTime, endTime);
         
         boolean success = timeSlotDAO.create(slot);
         if (!success) {
@@ -48,7 +44,7 @@ public class TimeSlotService {
     }
 
     public TimeSlot updateTimeSlot(int slotId, LocalDate lessonDate,
-                                    LocalTime startTime, LocalTime endTime) {
+                                    String startTime, String endTime) {
         TimeSlot slot = timeSlotDAO.findById(slotId);
         if (slot == null) {
             throw new IllegalArgumentException("Time slot not found");
@@ -58,7 +54,7 @@ public class TimeSlotService {
         }
 
         validateTimeSlot(lessonDate, startTime, endTime);
-        checkForOverlap(slot.getTeacherId(), lessonDate, startTime, endTime, slotId);
+        checkForOverlap(slot.getTeacherProfileId(), lessonDate, startTime, endTime, slotId);
 
         slot.setLessonDate(lessonDate);
         slot.setStartTime(startTime);
@@ -76,16 +72,16 @@ public class TimeSlotService {
         return timeSlotDAO.findById(slotId);
     }
 
-    public List<TimeSlot> getTimeSlotsByTeacher(int teacherId) {
-        return timeSlotDAO.findByTeacherId(teacherId);
+    public List<TimeSlot> getTimeSlotsByTeacherProfile(int teacherProfileId) {
+        return timeSlotDAO.findByTeacherProfileId(teacherProfileId);
     }
 
-    public List<TimeSlot> getTimeSlotsByTeacherAndDate(int teacherId, LocalDate date) {
-        return timeSlotDAO.findByTeacherIdAndDate(teacherId, date);
+    public List<TimeSlot> getTimeSlotsByTeacherProfileAndDate(int teacherProfileId, LocalDate date) {
+        return timeSlotDAO.findByTeacherProfileIdAndDate(teacherProfileId, date);
     }
 
-    public List<TimeSlot> getAvailableSlotsByTeacher(int teacherId) {
-        return timeSlotDAO.findAvailableByTeacherId(teacherId);
+    public List<TimeSlot> getAvailableSlotsByTeacherProfile(int teacherProfileId) {
+        return timeSlotDAO.findAvailableByTeacherProfileId(teacherProfileId);
     }
 
     public List<TimeSlot> getAvailableSlotsByDate(LocalDate date) {
@@ -129,30 +125,27 @@ public class TimeSlotService {
         return timeSlotDAO.delete(slotId);
     }
 
-    private void validateTimeSlot(LocalDate lessonDate, LocalTime startTime, LocalTime endTime) {
+    private void validateTimeSlot(LocalDate lessonDate, String startTime, String endTime) {
         if (lessonDate == null) {
             throw new IllegalArgumentException("Lesson date cannot be null");
         }
-        if (startTime == null || endTime == null) {
-            throw new IllegalArgumentException("Start time and end time cannot be null");
-        }
-        if (!startTime.isBefore(endTime)) {
-            throw new IllegalArgumentException("Start time must be before end time");
+        if (startTime == null || endTime == null || startTime.isEmpty() || endTime.isEmpty()) {
+            throw new IllegalArgumentException("Start time and end time cannot be empty");
         }
         if (lessonDate.isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("Lesson date cannot be in the past");
         }
     }
 
-    private void checkForOverlap(int teacherId, LocalDate date, LocalTime startTime, 
-                                  LocalTime endTime, int excludeSlotId) {
-        List<TimeSlot> existingSlots = timeSlotDAO.findByTeacherIdAndDate(teacherId, date);
+    private void checkForOverlap(int teacherProfileId, LocalDate date, String startTime, 
+                                  String endTime, int excludeSlotId) {
+        List<TimeSlot> existingSlots = timeSlotDAO.findByTeacherProfileIdAndDate(teacherProfileId, date);
         
         for (TimeSlot existing : existingSlots) {
             if (existing.getSlotId() == excludeSlotId) {
                 continue;
             }
-            if (startTime.isBefore(existing.getEndTime()) && endTime.isAfter(existing.getStartTime())) {
+            if (startTime.compareTo(existing.getEndTime()) < 0 && endTime.compareTo(existing.getStartTime()) > 0) {
                 throw new IllegalArgumentException("Time slot overlaps with existing slot");
             }
         }

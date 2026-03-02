@@ -1,114 +1,115 @@
--- ============================================
 -- Music Course Platform Database Schema
--- Sprint 2: Complete Database Foundation
--- ============================================
+-- Based on team member's design
 
--- 创建数据库
-CREATE DATABASE IF NOT EXISTS music_course_platform;
-USE music_course_platform;
+-- Disable foreign key checks temporarily
+SET FOREIGN_KEY_CHECKS = 0;
 
--- ============================================
--- 1. 用户表 (users)
--- 存储所有用户的基本信息（教师和学习者）
--- ============================================
-CREATE TABLE IF NOT EXISTS users (
-    user_id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    user_type ENUM('TEACHER', 'LEARNER') NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
-    INDEX idx_username (username),
-    INDEX idx_email (email),
-    INDEX idx_user_type (user_type)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- Drop all tables
+DROP TABLE IF EXISTS BOOKING;
+DROP TABLE IF EXISTS TIMESLOT;
+DROP TABLE IF EXISTS LEARNERPROFILE;
+DROP TABLE IF EXISTS TEACHERPROFILE;
+DROP TABLE IF EXISTS USERS;
+DROP TABLE IF EXISTS bookings;
+DROP TABLE IF EXISTS time_slots;
+DROP TABLE IF EXISTS teacher_profiles;
+DROP TABLE IF EXISTS users;
 
--- ============================================
--- 2. 教师资料表 (teacher_profiles)
--- 存储教师的详细资料信息
--- ============================================
-CREATE TABLE IF NOT EXISTS teacher_profiles (
-    profile_id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL UNIQUE,
-    biography TEXT,
-    instruments_taught VARCHAR(255) COMMENT '教授的乐器，逗号分隔',
-    years_experience INT DEFAULT 0,
-    hourly_rate DECIMAL(10,2) COMMENT '每小时费率',
-    location VARCHAR(100),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    INDEX idx_instruments (instruments_taught),
-    INDEX idx_location (location)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- Re-enable foreign key checks
+SET FOREIGN_KEY_CHECKS = 1;
 
--- ============================================
--- 3. 时间段表 (time_slots)
--- 存储教师可预约的时间段
--- ============================================
-CREATE TABLE IF NOT EXISTS time_slots (
-    slot_id INT AUTO_INCREMENT PRIMARY KEY,
-    teacher_id INT NOT NULL,
-    lesson_date DATE NOT NULL,
-    start_time TIME NOT NULL,
-    end_time TIME NOT NULL,
-    status ENUM('AVAILABLE', 'BOOKED') DEFAULT 'AVAILABLE',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (teacher_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    INDEX idx_teacher_date (teacher_id, lesson_date),
-    INDEX idx_status (status),
-    INDEX idx_lesson_date (lesson_date)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- Users table
+CREATE TABLE USERS
+(
+  user_id INT NOT NULL AUTO_INCREMENT,
+  username VARCHAR(50) NOT NULL UNIQUE,
+  password_hash VARCHAR(255) NOT NULL,
+  email VARCHAR(100) NOT NULL UNIQUE,
+  user_type VARCHAR(20) NOT NULL,
+  created_at DATE NOT NULL DEFAULT (CURRENT_DATE),
+  PRIMARY KEY (user_id)
+);
 
--- ============================================
--- 4. 预约表 (bookings)
--- 存储学习者的课程预约记录
--- ============================================
-CREATE TABLE IF NOT EXISTS bookings (
-    booking_id INT AUTO_INCREMENT PRIMARY KEY,
-    slot_id INT NOT NULL,
-    learner_id INT NOT NULL,
-    booking_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    status ENUM('PENDING', 'CONFIRMED', 'CANCELLED') DEFAULT 'PENDING',
-    notes TEXT COMMENT '预约备注',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    FOREIGN KEY (slot_id) REFERENCES time_slots(slot_id) ON DELETE CASCADE,
-    FOREIGN KEY (learner_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    INDEX idx_learner (learner_id),
-    INDEX idx_status (status),
-    INDEX idx_booking_date (booking_date)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- Teacher Profile table
+CREATE TABLE TEACHERPROFILE
+(
+  teacher_profile_id INT NOT NULL AUTO_INCREMENT,
+  biography VARCHAR(500),
+  instruments_taught VARCHAR(100) NOT NULL,
+  years_experience INT NOT NULL DEFAULT 0,
+  hourly_rate INT NOT NULL DEFAULT 0,
+  location VARCHAR(100),
+  created_at DATE NOT NULL DEFAULT (CURRENT_DATE),
+  updated_at DATE NOT NULL DEFAULT (CURRENT_DATE),
+  user_id INT NOT NULL,
+  PRIMARY KEY (teacher_profile_id),
+  FOREIGN KEY (user_id) REFERENCES USERS(user_id) ON DELETE CASCADE
+);
 
--- ============================================
--- 测试数据 (Sample Data)
--- ============================================
+-- Learner Profile table
+CREATE TABLE LEARNERPROFILE
+(
+  learner_profile_id INT NOT NULL AUTO_INCREMENT,
+  instrument VARCHAR(100),
+  created_at DATE NOT NULL DEFAULT (CURRENT_DATE),
+  updated_at DATE NOT NULL DEFAULT (CURRENT_DATE),
+  user_id INT NOT NULL,
+  PRIMARY KEY (learner_profile_id),
+  FOREIGN KEY (user_id) REFERENCES USERS(user_id) ON DELETE CASCADE
+);
 
--- 插入测试用户
-INSERT INTO users (username, password_hash, email, user_type) VALUES
-('teacher_john', 'hashed_password_123', 'john@example.com', 'TEACHER'),
-('teacher_mary', 'hashed_password_456', 'mary@example.com', 'TEACHER'),
-('learner_tom', 'hashed_password_789', 'tom@example.com', 'LEARNER'),
-('learner_lucy', 'hashed_password_abc', 'lucy@example.com', 'LEARNER');
+-- Time Slot table
+CREATE TABLE TIMESLOT
+(
+  slot_id INT NOT NULL AUTO_INCREMENT,
+  lesson_date DATE NOT NULL,
+  start_time VARCHAR(20) NOT NULL,
+  end_time VARCHAR(20) NOT NULL,
+  slot_status VARCHAR(20) NOT NULL DEFAULT 'AVAILABLE',
+  created_at DATE NOT NULL DEFAULT (CURRENT_DATE),
+  teacher_profile_id INT NOT NULL,
+  PRIMARY KEY (slot_id),
+  FOREIGN KEY (teacher_profile_id) REFERENCES TEACHERPROFILE(teacher_profile_id) ON DELETE CASCADE
+);
 
--- 插入教师资料
-INSERT INTO teacher_profiles (user_id, biography, instruments_taught, years_experience, hourly_rate, location) VALUES
-(1, 'Experienced piano teacher with 10 years of teaching experience.', 'Piano,Keyboard', 10, 50.00, 'Helsinki'),
-(2, 'Professional violin instructor, specializing in classical music.', 'Violin,Viola', 8, 45.00, 'Espoo');
+-- Booking table
+CREATE TABLE BOOKING
+(
+  booking_id INT NOT NULL AUTO_INCREMENT,
+  booking_date DATE NOT NULL DEFAULT (CURRENT_DATE),
+  booking_status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+  notes VARCHAR(500),
+  created_at DATE NOT NULL DEFAULT (CURRENT_DATE),
+  updated_at DATE NOT NULL DEFAULT (CURRENT_DATE),
+  learner_profile_id INT NOT NULL,
+  slot_id INT NOT NULL,
+  PRIMARY KEY (booking_id),
+  FOREIGN KEY (learner_profile_id) REFERENCES LEARNERPROFILE(learner_profile_id) ON DELETE CASCADE,
+  FOREIGN KEY (slot_id) REFERENCES TIMESLOT(slot_id) ON DELETE CASCADE
+);
 
--- 插入可用时间段
-INSERT INTO time_slots (teacher_id, lesson_date, start_time, end_time, status) VALUES
-(1, '2026-02-01', '09:00:00', '10:00:00', 'AVAILABLE'),
-(1, '2026-02-01', '10:00:00', '11:00:00', 'AVAILABLE'),
-(1, '2026-02-02', '14:00:00', '15:00:00', 'BOOKED'),
-(2, '2026-02-01', '13:00:00', '14:00:00', 'AVAILABLE'),
-(2, '2026-02-03', '10:00:00', '11:00:00', 'AVAILABLE');
+-- Create indexes for better performance
+CREATE INDEX idx_users_username ON USERS(username);
+CREATE INDEX idx_users_email ON USERS(email);
+CREATE INDEX idx_users_type ON USERS(user_type);
+CREATE INDEX idx_teacherprofile_user ON TEACHERPROFILE(user_id);
+CREATE INDEX idx_learnerprofile_user ON LEARNERPROFILE(user_id);
+CREATE INDEX idx_timeslot_teacher ON TIMESLOT(teacher_profile_id);
+CREATE INDEX idx_timeslot_date ON TIMESLOT(lesson_date);
+CREATE INDEX idx_booking_learner ON BOOKING(learner_profile_id);
+CREATE INDEX idx_booking_slot ON BOOKING(slot_id);
 
--- 插入预约记录
-INSERT INTO bookings (slot_id, learner_id, status, notes) VALUES
-(3, 3, 'CONFIRMED', 'First piano lesson');
+-- Sample data for testing
+INSERT INTO USERS (username, password_hash, email, user_type) VALUES
+('teacher1', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqYrQSCDa', 'teacher1@example.com', 'TEACHER'),
+('teacher2', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqYrQSCDa', 'teacher2@example.com', 'TEACHER'),
+('learner1', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqYrQSCDa', 'learner1@example.com', 'LEARNER'),
+('learner2', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqYrQSCDa', 'learner2@example.com', 'LEARNER');
 
+INSERT INTO TEACHERPROFILE (biography, instruments_taught, years_experience, hourly_rate, location, user_id) VALUES
+('Experienced piano teacher with classical background', 'Piano', 10, 50, 'New York', 1),
+('Guitar instructor specializing in rock and blues', 'Guitar,Bass', 8, 45, 'Los Angeles', 2);
+
+INSERT INTO LEARNERPROFILE (instrument, user_id) VALUES
+('Piano', 3),
+('Guitar', 4);

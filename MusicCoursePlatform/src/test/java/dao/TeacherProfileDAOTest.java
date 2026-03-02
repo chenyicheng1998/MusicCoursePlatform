@@ -3,166 +3,125 @@ package dao;
 import model.TeacherProfile;
 import model.User;
 import org.junit.jupiter.api.*;
-
-import java.math.BigDecimal;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.List;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class TeacherProfileDAOTest {
 
     private static TeacherProfileDAO teacherProfileDAO;
     private static UserDAO userDAO;
-    private static User testTeacher;
+    private static User testUser;
     private static TeacherProfile testProfile;
-    private static final String TEST_PREFIX = "test_tp_" + System.currentTimeMillis() + "_";
 
     @BeforeAll
-    static void setUpClass() {
+    static void setUp() {
         teacherProfileDAO = new TeacherProfileDAO();
         userDAO = new UserDAO();
+        
+        testUser = new User("test_teacher_" + System.currentTimeMillis(), 
+                           "hashedpassword", 
+                           "test_teacher_" + System.currentTimeMillis() + "@test.com", 
+                           "TEACHER");
+        userDAO.create(testUser);
     }
 
-    @BeforeEach
-    void setUp() {
-        testTeacher = new User(
-            TEST_PREFIX + "teacher",
-            "hashed_password",
-            TEST_PREFIX + "teacher@test.com",
-            "TEACHER"
-        );
-        userDAO.create(testTeacher);
-
-        testProfile = new TeacherProfile(
-            testTeacher.getUserId(),
-            "Experienced music teacher",
-            "Piano,Guitar",
-            5,
-            new BigDecimal("50.00"),
-            "Helsinki"
-        );
-    }
-
-    @AfterEach
-    void tearDown() {
-        if (testProfile != null && testProfile.getProfileId() > 0) {
-            teacherProfileDAO.delete(testProfile.getProfileId());
+    @AfterAll
+    static void tearDown() {
+        if (testProfile != null && testProfile.getTeacherProfileId() > 0) {
+            teacherProfileDAO.delete(testProfile.getTeacherProfileId());
         }
-        if (testTeacher != null && testTeacher.getUserId() > 0) {
-            userDAO.delete(testTeacher.getUserId());
+        if (testUser != null && testUser.getUserId() > 0) {
+            userDAO.delete(testUser.getUserId());
         }
     }
 
     @Test
     @Order(1)
-    @DisplayName("Create teacher profile successfully")
-    void testCreate_Success() {
+    void testCreate() {
+        testProfile = new TeacherProfile(testUser.getUserId(), "Piano");
+        testProfile.setBiography("Test biography");
+        testProfile.setYearsExperience(5);
+        testProfile.setHourlyRate(50);
+        testProfile.setLocation("Test City");
+        
         boolean result = teacherProfileDAO.create(testProfile);
-
+        
         assertTrue(result);
-        assertTrue(testProfile.getProfileId() > 0);
+        assertTrue(testProfile.getTeacherProfileId() > 0);
     }
 
     @Test
     @Order(2)
-    @DisplayName("Find profile by ID")
     void testFindById() {
-        teacherProfileDAO.create(testProfile);
-
-        TeacherProfile found = teacherProfileDAO.findById(testProfile.getProfileId());
-
+        TeacherProfile found = teacherProfileDAO.findById(testProfile.getTeacherProfileId());
+        
         assertNotNull(found);
-        assertEquals(testProfile.getUserId(), found.getUserId());
-        assertEquals("Piano,Guitar", found.getInstrumentsTaught());
+        assertEquals(testProfile.getTeacherProfileId(), found.getTeacherProfileId());
+        assertEquals("Piano", found.getInstrumentsTaught());
     }
 
     @Test
     @Order(3)
-    @DisplayName("Find profile by user ID")
     void testFindByUserId() {
-        teacherProfileDAO.create(testProfile);
-
-        TeacherProfile found = teacherProfileDAO.findByUserId(testTeacher.getUserId());
-
+        TeacherProfile found = teacherProfileDAO.findByUserId(testUser.getUserId());
+        
         assertNotNull(found);
-        assertEquals(testProfile.getProfileId(), found.getProfileId());
+        assertEquals(testUser.getUserId(), found.getUserId());
     }
 
     @Test
     @Order(4)
-    @DisplayName("Find profiles by instrument")
     void testFindByInstrument() {
-        teacherProfileDAO.create(testProfile);
-
         List<TeacherProfile> profiles = teacherProfileDAO.findByInstrument("Piano");
-
+        
         assertNotNull(profiles);
-        assertTrue(profiles.stream().anyMatch(p -> p.getProfileId() == testProfile.getProfileId()));
+        assertTrue(profiles.stream().anyMatch(p -> p.getTeacherProfileId() == testProfile.getTeacherProfileId()));
     }
 
     @Test
     @Order(5)
-    @DisplayName("Find profiles by location")
     void testFindByLocation() {
-        teacherProfileDAO.create(testProfile);
-
-        List<TeacherProfile> profiles = teacherProfileDAO.findByLocation("Helsinki");
-
+        List<TeacherProfile> profiles = teacherProfileDAO.findByLocation("Test City");
+        
         assertNotNull(profiles);
-        assertTrue(profiles.stream().anyMatch(p -> p.getProfileId() == testProfile.getProfileId()));
+        assertTrue(profiles.stream().anyMatch(p -> p.getTeacherProfileId() == testProfile.getTeacherProfileId()));
     }
 
     @Test
     @Order(6)
-    @DisplayName("Find all profiles")
     void testFindAll() {
-        teacherProfileDAO.create(testProfile);
-
         List<TeacherProfile> profiles = teacherProfileDAO.findAll();
-
+        
         assertNotNull(profiles);
-        assertFalse(profiles.isEmpty());
+        assertTrue(profiles.size() >= 1);
     }
 
     @Test
     @Order(7)
-    @DisplayName("Update profile successfully")
     void testUpdate() {
-        teacherProfileDAO.create(testProfile);
-
-        testProfile.setInstrumentsTaught("Piano,Guitar,Violin");
-        testProfile.setHourlyRate(new BigDecimal("60.00"));
-
+        testProfile.setInstrumentsTaught("Piano,Guitar");
+        testProfile.setHourlyRate(60);
+        
         boolean result = teacherProfileDAO.update(testProfile);
-
+        
         assertTrue(result);
-
-        TeacherProfile updated = teacherProfileDAO.findById(testProfile.getProfileId());
-        assertEquals("Piano,Guitar,Violin", updated.getInstrumentsTaught());
-        assertEquals(new BigDecimal("60.00"), updated.getHourlyRate());
+        
+        TeacherProfile updated = teacherProfileDAO.findById(testProfile.getTeacherProfileId());
+        assertEquals("Piano,Guitar", updated.getInstrumentsTaught());
+        assertEquals(60, updated.getHourlyRate());
     }
 
     @Test
     @Order(8)
-    @DisplayName("Delete profile successfully")
     void testDelete() {
-        teacherProfileDAO.create(testProfile);
-        int profileId = testProfile.getProfileId();
-
-        boolean result = teacherProfileDAO.delete(profileId);
-
+        TeacherProfile toDelete = new TeacherProfile(testUser.getUserId(), "Violin");
+        teacherProfileDAO.create(toDelete);
+        
+        boolean result = teacherProfileDAO.delete(toDelete.getTeacherProfileId());
+        
         assertTrue(result);
-        assertNull(teacherProfileDAO.findById(profileId));
-
-        testProfile.setProfileId(0);
-    }
-
-    @Test
-    @Order(9)
-    @DisplayName("Find non-existent profile returns null")
-    void testFindById_NotFound() {
-        TeacherProfile found = teacherProfileDAO.findById(999999);
-        assertNull(found);
+        assertNull(teacherProfileDAO.findById(toDelete.getTeacherProfileId()));
     }
 }

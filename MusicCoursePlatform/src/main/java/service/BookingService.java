@@ -2,10 +2,10 @@ package service;
 
 import dao.BookingDAO;
 import dao.TimeSlotDAO;
-import dao.UserDAO;
+import dao.LearnerProfileDAO;
 import model.Booking;
 import model.TimeSlot;
-import model.User;
+import model.LearnerProfile;
 
 import java.util.List;
 
@@ -13,27 +13,24 @@ public class BookingService {
 
     private final BookingDAO bookingDAO;
     private final TimeSlotDAO timeSlotDAO;
-    private final UserDAO userDAO;
+    private final LearnerProfileDAO learnerProfileDAO;
 
     public BookingService() {
         this.bookingDAO = new BookingDAO();
         this.timeSlotDAO = new TimeSlotDAO();
-        this.userDAO = new UserDAO();
+        this.learnerProfileDAO = new LearnerProfileDAO();
     }
 
-    public BookingService(BookingDAO bookingDAO, TimeSlotDAO timeSlotDAO, UserDAO userDAO) {
+    public BookingService(BookingDAO bookingDAO, TimeSlotDAO timeSlotDAO, LearnerProfileDAO learnerProfileDAO) {
         this.bookingDAO = bookingDAO;
         this.timeSlotDAO = timeSlotDAO;
-        this.userDAO = userDAO;
+        this.learnerProfileDAO = learnerProfileDAO;
     }
 
-    public Booking createBooking(int slotId, int learnerId, String notes) {
-        User learner = userDAO.findById(learnerId);
-        if (learner == null) {
-            throw new IllegalArgumentException("Learner not found");
-        }
-        if (!learner.isLearner()) {
-            throw new IllegalArgumentException("User is not a learner");
+    public Booking createBooking(int slotId, int learnerProfileId, String notes) {
+        LearnerProfile learnerProfile = learnerProfileDAO.findById(learnerProfileId);
+        if (learnerProfile == null) {
+            throw new IllegalArgumentException("Learner profile not found");
         }
 
         TimeSlot slot = timeSlotDAO.findById(slotId);
@@ -49,7 +46,8 @@ public class BookingService {
             throw new IllegalArgumentException("Time slot is already booked");
         }
 
-        Booking booking = new Booking(slotId, learnerId, notes);
+        Booking booking = new Booking(learnerProfileId, slotId);
+        booking.setNotes(notes);
         
         boolean success = bookingDAO.create(booking);
         if (!success) {
@@ -107,12 +105,8 @@ public class BookingService {
         return bookingDAO.findBySlotId(slotId);
     }
 
-    public List<Booking> getBookingsByLearner(int learnerId) {
-        return bookingDAO.findByLearnerId(learnerId);
-    }
-
-    public List<Booking> getActiveBookingsByLearner(int learnerId) {
-        return bookingDAO.findActiveByLearnerId(learnerId);
+    public List<Booking> getBookingsByLearnerProfile(int learnerProfileId) {
+        return bookingDAO.findByLearnerProfileId(learnerProfileId);
     }
 
     public List<Booking> getBookingsByStatus(String status) {
@@ -136,7 +130,7 @@ public class BookingService {
             throw new IllegalArgumentException("Booking not found");
         }
 
-        if (booking.isActive()) {
+        if (!booking.isCancelled()) {
             timeSlotDAO.updateStatus(booking.getSlotId(), TimeSlot.STATUS_AVAILABLE);
         }
 

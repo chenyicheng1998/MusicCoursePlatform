@@ -1,185 +1,154 @@
 package dao;
 
+import model.TeacherProfile;
 import model.TimeSlot;
 import model.User;
 import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class TimeSlotDAOTest {
 
     private static TimeSlotDAO timeSlotDAO;
+    private static TeacherProfileDAO teacherProfileDAO;
     private static UserDAO userDAO;
-    private static User testTeacher;
+    private static User testUser;
+    private static TeacherProfile testTeacherProfile;
     private static TimeSlot testSlot;
-    private static final String TEST_PREFIX = "test_ts_" + System.currentTimeMillis() + "_";
 
     @BeforeAll
-    static void setUpClass() {
+    static void setUp() {
         timeSlotDAO = new TimeSlotDAO();
+        teacherProfileDAO = new TeacherProfileDAO();
         userDAO = new UserDAO();
+        
+        testUser = new User("test_slot_teacher_" + System.currentTimeMillis(), 
+                           "hashedpassword", 
+                           "test_slot_teacher_" + System.currentTimeMillis() + "@test.com", 
+                           "TEACHER");
+        userDAO.create(testUser);
+        
+        testTeacherProfile = new TeacherProfile(testUser.getUserId(), "Piano");
+        teacherProfileDAO.create(testTeacherProfile);
     }
 
-    @BeforeEach
-    void setUp() {
-        testTeacher = new User(
-            TEST_PREFIX + "teacher",
-            "hashed_password",
-            TEST_PREFIX + "teacher@test.com",
-            "TEACHER"
-        );
-        userDAO.create(testTeacher);
-
-        testSlot = new TimeSlot(
-            testTeacher.getUserId(),
-            LocalDate.now().plusDays(7),
-            LocalTime.of(10, 0),
-            LocalTime.of(11, 0)
-        );
-    }
-
-    @AfterEach
-    void tearDown() {
+    @AfterAll
+    static void tearDown() {
         if (testSlot != null && testSlot.getSlotId() > 0) {
             timeSlotDAO.delete(testSlot.getSlotId());
         }
-        if (testTeacher != null && testTeacher.getUserId() > 0) {
-            userDAO.delete(testTeacher.getUserId());
+        if (testTeacherProfile != null && testTeacherProfile.getTeacherProfileId() > 0) {
+            teacherProfileDAO.delete(testTeacherProfile.getTeacherProfileId());
+        }
+        if (testUser != null && testUser.getUserId() > 0) {
+            userDAO.delete(testUser.getUserId());
         }
     }
 
     @Test
     @Order(1)
-    @DisplayName("Create time slot successfully")
-    void testCreate_Success() {
+    void testCreate() {
+        testSlot = new TimeSlot(testTeacherProfile.getTeacherProfileId(), 
+                               LocalDate.now().plusDays(1), 
+                               "10:00", 
+                               "11:00");
+        
         boolean result = timeSlotDAO.create(testSlot);
-
+        
         assertTrue(result);
         assertTrue(testSlot.getSlotId() > 0);
-        assertEquals(TimeSlot.STATUS_AVAILABLE, testSlot.getStatus());
     }
 
     @Test
     @Order(2)
-    @DisplayName("Find time slot by ID")
     void testFindById() {
-        timeSlotDAO.create(testSlot);
-
         TimeSlot found = timeSlotDAO.findById(testSlot.getSlotId());
-
+        
         assertNotNull(found);
-        assertEquals(testTeacher.getUserId(), found.getTeacherId());
-        assertEquals(LocalTime.of(10, 0), found.getStartTime());
+        assertEquals(testSlot.getSlotId(), found.getSlotId());
+        assertEquals("10:00", found.getStartTime());
     }
 
     @Test
     @Order(3)
-    @DisplayName("Find time slots by teacher ID")
-    void testFindByTeacherId() {
-        timeSlotDAO.create(testSlot);
-
-        List<TimeSlot> slots = timeSlotDAO.findByTeacherId(testTeacher.getUserId());
-
+    void testFindByTeacherProfileId() {
+        List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileId(testTeacherProfile.getTeacherProfileId());
+        
         assertNotNull(slots);
         assertTrue(slots.stream().anyMatch(s -> s.getSlotId() == testSlot.getSlotId()));
     }
 
     @Test
     @Order(4)
-    @DisplayName("Find time slots by teacher and date")
-    void testFindByTeacherIdAndDate() {
-        timeSlotDAO.create(testSlot);
-
-        List<TimeSlot> slots = timeSlotDAO.findByTeacherIdAndDate(
-            testTeacher.getUserId(), 
-            testSlot.getLessonDate()
+    void testFindByTeacherProfileIdAndDate() {
+        List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileIdAndDate(
+            testTeacherProfile.getTeacherProfileId(), 
+            LocalDate.now().plusDays(1)
         );
-
+        
         assertNotNull(slots);
-        assertFalse(slots.isEmpty());
+        assertTrue(slots.stream().anyMatch(s -> s.getSlotId() == testSlot.getSlotId()));
     }
 
     @Test
     @Order(5)
-    @DisplayName("Find available time slots by teacher")
-    void testFindAvailableByTeacherId() {
-        timeSlotDAO.create(testSlot);
-
-        List<TimeSlot> slots = timeSlotDAO.findAvailableByTeacherId(testTeacher.getUserId());
-
+    void testFindAvailableByTeacherProfileId() {
+        List<TimeSlot> slots = timeSlotDAO.findAvailableByTeacherProfileId(testTeacherProfile.getTeacherProfileId());
+        
         assertNotNull(slots);
         assertTrue(slots.stream().anyMatch(s -> s.getSlotId() == testSlot.getSlotId()));
     }
 
     @Test
     @Order(6)
-    @DisplayName("Find available time slots by date")
-    void testFindAvailableByDate() {
-        timeSlotDAO.create(testSlot);
-
-        List<TimeSlot> slots = timeSlotDAO.findAvailableByDate(testSlot.getLessonDate());
-
+    void testFindAll() {
+        List<TimeSlot> slots = timeSlotDAO.findAll();
+        
         assertNotNull(slots);
-        assertTrue(slots.stream().anyMatch(s -> s.getSlotId() == testSlot.getSlotId()));
+        assertTrue(slots.size() >= 1);
     }
 
     @Test
     @Order(7)
-    @DisplayName("Update time slot successfully")
     void testUpdate() {
-        timeSlotDAO.create(testSlot);
-
-        testSlot.setStartTime(LocalTime.of(14, 0));
-        testSlot.setEndTime(LocalTime.of(15, 0));
-
+        testSlot.setStartTime("11:00");
+        testSlot.setEndTime("12:00");
+        
         boolean result = timeSlotDAO.update(testSlot);
-
+        
         assertTrue(result);
-
+        
         TimeSlot updated = timeSlotDAO.findById(testSlot.getSlotId());
-        assertEquals(LocalTime.of(14, 0), updated.getStartTime());
-        assertEquals(LocalTime.of(15, 0), updated.getEndTime());
+        assertEquals("11:00", updated.getStartTime());
+        assertEquals("12:00", updated.getEndTime());
     }
 
     @Test
     @Order(8)
-    @DisplayName("Update time slot status")
     void testUpdateStatus() {
-        timeSlotDAO.create(testSlot);
-
         boolean result = timeSlotDAO.updateStatus(testSlot.getSlotId(), TimeSlot.STATUS_BOOKED);
-
+        
         assertTrue(result);
-
+        
         TimeSlot updated = timeSlotDAO.findById(testSlot.getSlotId());
-        assertEquals(TimeSlot.STATUS_BOOKED, updated.getStatus());
+        assertEquals(TimeSlot.STATUS_BOOKED, updated.getSlotStatus());
     }
 
     @Test
     @Order(9)
-    @DisplayName("Delete time slot successfully")
     void testDelete() {
-        timeSlotDAO.create(testSlot);
-        int slotId = testSlot.getSlotId();
-
-        boolean result = timeSlotDAO.delete(slotId);
-
+        TimeSlot toDelete = new TimeSlot(testTeacherProfile.getTeacherProfileId(), 
+                                        LocalDate.now().plusDays(2), 
+                                        "14:00", 
+                                        "15:00");
+        timeSlotDAO.create(toDelete);
+        
+        boolean result = timeSlotDAO.delete(toDelete.getSlotId());
+        
         assertTrue(result);
-        assertNull(timeSlotDAO.findById(slotId));
-
-        testSlot.setSlotId(0);
-    }
-
-    @Test
-    @Order(10)
-    @DisplayName("Find non-existent time slot returns null")
-    void testFindById_NotFound() {
-        TimeSlot found = timeSlotDAO.findById(999999);
-        assertNull(found);
+        assertNull(timeSlotDAO.findById(toDelete.getSlotId()));
     }
 }

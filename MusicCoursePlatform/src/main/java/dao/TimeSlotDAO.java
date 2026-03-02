@@ -11,16 +11,16 @@ import java.util.List;
 public class TimeSlotDAO {
 
     public boolean create(TimeSlot slot) {
-        String sql = "INSERT INTO time_slots (teacher_id, lesson_date, start_time, end_time, status) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO TIMESLOT (lesson_date, start_time, end_time, slot_status, teacher_profile_id) VALUES (?, ?, ?, ?, ?)";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             
-            stmt.setInt(1, slot.getTeacherId());
-            stmt.setDate(2, Date.valueOf(slot.getLessonDate()));
-            stmt.setTime(3, Time.valueOf(slot.getStartTime()));
-            stmt.setTime(4, Time.valueOf(slot.getEndTime()));
-            stmt.setString(5, slot.getStatus());
+            stmt.setDate(1, Date.valueOf(slot.getLessonDate()));
+            stmt.setString(2, slot.getStartTime());
+            stmt.setString(3, slot.getEndTime());
+            stmt.setString(4, slot.getSlotStatus());
+            stmt.setInt(5, slot.getTeacherProfileId());
             
             int affectedRows = stmt.executeUpdate();
             
@@ -41,7 +41,7 @@ public class TimeSlotDAO {
     }
 
     public TimeSlot findById(int slotId) {
-        String sql = "SELECT * FROM time_slots WHERE slot_id = ?";
+        String sql = "SELECT * FROM TIMESLOT WHERE slot_id = ?";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -59,14 +59,14 @@ public class TimeSlotDAO {
         return null;
     }
 
-    public List<TimeSlot> findByTeacherId(int teacherId) {
+    public List<TimeSlot> findByTeacherProfileId(int teacherProfileId) {
         List<TimeSlot> slots = new ArrayList<>();
-        String sql = "SELECT * FROM time_slots WHERE teacher_id = ? ORDER BY lesson_date, start_time";
+        String sql = "SELECT * FROM TIMESLOT WHERE teacher_profile_id = ? ORDER BY lesson_date, start_time";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setInt(1, teacherId);
+            stmt.setInt(1, teacherProfileId);
             
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -74,19 +74,19 @@ public class TimeSlotDAO {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("Error finding time slots by teacher ID: " + e.getMessage());
+            System.err.println("Error finding time slots by teacher profile ID: " + e.getMessage());
         }
         return slots;
     }
 
-    public List<TimeSlot> findByTeacherIdAndDate(int teacherId, LocalDate date) {
+    public List<TimeSlot> findByTeacherProfileIdAndDate(int teacherProfileId, LocalDate date) {
         List<TimeSlot> slots = new ArrayList<>();
-        String sql = "SELECT * FROM time_slots WHERE teacher_id = ? AND lesson_date = ? ORDER BY start_time";
+        String sql = "SELECT * FROM TIMESLOT WHERE teacher_profile_id = ? AND lesson_date = ? ORDER BY start_time";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setInt(1, teacherId);
+            stmt.setInt(1, teacherProfileId);
             stmt.setDate(2, Date.valueOf(date));
             
             try (ResultSet rs = stmt.executeQuery()) {
@@ -100,14 +100,14 @@ public class TimeSlotDAO {
         return slots;
     }
 
-    public List<TimeSlot> findAvailableByTeacherId(int teacherId) {
+    public List<TimeSlot> findAvailableByTeacherProfileId(int teacherProfileId) {
         List<TimeSlot> slots = new ArrayList<>();
-        String sql = "SELECT * FROM time_slots WHERE teacher_id = ? AND status = 'AVAILABLE' ORDER BY lesson_date, start_time";
+        String sql = "SELECT * FROM TIMESLOT WHERE teacher_profile_id = ? AND slot_status = 'AVAILABLE' ORDER BY lesson_date, start_time";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setInt(1, teacherId);
+            stmt.setInt(1, teacherProfileId);
             
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -122,7 +122,7 @@ public class TimeSlotDAO {
 
     public List<TimeSlot> findAvailableByDate(LocalDate date) {
         List<TimeSlot> slots = new ArrayList<>();
-        String sql = "SELECT * FROM time_slots WHERE lesson_date = ? AND status = 'AVAILABLE' ORDER BY start_time";
+        String sql = "SELECT * FROM TIMESLOT WHERE lesson_date = ? AND slot_status = 'AVAILABLE' ORDER BY start_time";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -142,7 +142,7 @@ public class TimeSlotDAO {
 
     public List<TimeSlot> findAll() {
         List<TimeSlot> slots = new ArrayList<>();
-        String sql = "SELECT * FROM time_slots ORDER BY lesson_date, start_time";
+        String sql = "SELECT * FROM TIMESLOT ORDER BY lesson_date, start_time";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              Statement stmt = conn.createStatement();
@@ -158,17 +158,16 @@ public class TimeSlotDAO {
     }
 
     public boolean update(TimeSlot slot) {
-        String sql = "UPDATE time_slots SET teacher_id = ?, lesson_date = ?, start_time = ?, end_time = ?, status = ? WHERE slot_id = ?";
+        String sql = "UPDATE TIMESLOT SET lesson_date = ?, start_time = ?, end_time = ?, slot_status = ? WHERE slot_id = ?";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
-            stmt.setInt(1, slot.getTeacherId());
-            stmt.setDate(2, Date.valueOf(slot.getLessonDate()));
-            stmt.setTime(3, Time.valueOf(slot.getStartTime()));
-            stmt.setTime(4, Time.valueOf(slot.getEndTime()));
-            stmt.setString(5, slot.getStatus());
-            stmt.setInt(6, slot.getSlotId());
+            stmt.setDate(1, Date.valueOf(slot.getLessonDate()));
+            stmt.setString(2, slot.getStartTime());
+            stmt.setString(3, slot.getEndTime());
+            stmt.setString(4, slot.getSlotStatus());
+            stmt.setInt(5, slot.getSlotId());
             
             return stmt.executeUpdate() > 0;
             
@@ -179,7 +178,7 @@ public class TimeSlotDAO {
     }
 
     public boolean updateStatus(int slotId, String status) {
-        String sql = "UPDATE time_slots SET status = ? WHERE slot_id = ?";
+        String sql = "UPDATE TIMESLOT SET slot_status = ? WHERE slot_id = ?";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -196,7 +195,7 @@ public class TimeSlotDAO {
     }
 
     public boolean delete(int slotId) {
-        String sql = "DELETE FROM time_slots WHERE slot_id = ?";
+        String sql = "DELETE FROM TIMESLOT WHERE slot_id = ?";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -210,33 +209,18 @@ public class TimeSlotDAO {
         }
     }
 
-    public boolean deleteByTeacherId(int teacherId) {
-        String sql = "DELETE FROM time_slots WHERE teacher_id = ?";
-        
-        try (Connection conn = DatabaseConnection.getNewConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            
-            stmt.setInt(1, teacherId);
-            return stmt.executeUpdate() > 0;
-            
-        } catch (SQLException e) {
-            System.err.println("Error deleting time slots by teacher ID: " + e.getMessage());
-            return false;
-        }
-    }
-
     private TimeSlot mapResultSetToTimeSlot(ResultSet rs) throws SQLException {
         TimeSlot slot = new TimeSlot();
         slot.setSlotId(rs.getInt("slot_id"));
-        slot.setTeacherId(rs.getInt("teacher_id"));
         slot.setLessonDate(rs.getDate("lesson_date").toLocalDate());
-        slot.setStartTime(rs.getTime("start_time").toLocalTime());
-        slot.setEndTime(rs.getTime("end_time").toLocalTime());
-        slot.setStatus(rs.getString("status"));
+        slot.setStartTime(rs.getString("start_time"));
+        slot.setEndTime(rs.getString("end_time"));
+        slot.setSlotStatus(rs.getString("slot_status"));
+        slot.setTeacherProfileId(rs.getInt("teacher_profile_id"));
         
-        Timestamp createdAt = rs.getTimestamp("created_at");
+        Date createdAt = rs.getDate("created_at");
         if (createdAt != null) {
-            slot.setCreatedAt(createdAt.toLocalDateTime());
+            slot.setCreatedAt(createdAt.toLocalDate());
         }
         
         return slot;
