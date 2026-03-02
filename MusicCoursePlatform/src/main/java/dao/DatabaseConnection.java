@@ -16,7 +16,7 @@ public class DatabaseConnection {
     // Database configuration
     private static final String URL = "jdbc:mariadb://localhost:3306/music_course_platform?serverTimezone=UTC";
     private static final String USER = "root";
-    private static final String PASSWORD = "123456"; // Update with your MariaDB password
+    private static final String PASSWORD = "Lethergo123."; // Update with your MariaDB password
     
     // Connection instance for connection pooling (simple implementation)
     private static Connection connection = null;

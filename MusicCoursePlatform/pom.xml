@@ -19,7 +19,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <javafx.version>17.0.2</javafx.version>
         <junit.version>5.9.3</junit.version>
-        <jacoco.version>0.8.10</jacoco.version>
+        <jacoco.version>0.8.12</jacoco.version>
     </properties>
 
     <dependencies>
