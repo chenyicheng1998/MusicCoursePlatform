@@ -22,14 +22,18 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the project...'
-                sh 'mvn clean compile -DskipTests'
+                dir('MusicCoursePlatform') {
+                    sh 'mvn clean compile -DskipTests'
+                }
             }
         }
         
         stage('Unit Tests') {
             steps {
                 echo 'Running unit tests...'
-                sh 'mvn test'
+                dir('MusicCoursePlatform') {
+                    sh 'mvn test'
+                }
             }
             post {
                 always {
@@ -41,7 +45,9 @@ pipeline {
         stage('Code Coverage') {
             steps {
                 echo 'Generating code coverage report...'
-                sh 'mvn jacoco:report'
+                dir('MusicCoursePlatform') {
+                    sh 'mvn jacoco:report'
+                }
             }
             post {
                 always {
@@ -58,7 +64,9 @@ pipeline {
         stage('Package') {
             steps {
                 echo 'Packaging the application...'
-                sh 'mvn package -DskipTests'
+                dir('MusicCoursePlatform') {
+                    sh 'mvn package -DskipTests'
+                }
             }
         }
     }
@@ -70,7 +78,7 @@ pipeline {
                 allowMissing: true,
                 alwaysLinkToLastBuild: true,
                 keepAll: true,
-                reportDir: 'target/site/jacoco',
+                reportDir: 'MusicCoursePlatform/target/site/jacoco',
                 reportFiles: 'index.html',
                 reportName: 'JaCoCo Code Coverage Report'
             ])
