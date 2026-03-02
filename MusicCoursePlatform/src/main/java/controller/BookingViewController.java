@@ -1,9 +1,9 @@
 package controller;
 
-import dao.TeacherProfileDAO;
-import dao.TimeSlotDAO;
 import dao.BookingDAO;
 import dao.LearnerProfileDAO;
+import dao.TeacherProfileDAO;
+import dao.TimeSlotDAO;
 import dao.UserDAO;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -14,9 +14,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 import model.Booking;
 import model.LearnerProfile;
@@ -29,22 +31,31 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
-public class StudentDashboardController {
+public class BookingViewController {
 
     @FXML private Label teacherNameLabel;
-    @FXML private Label teacherInstrumentLabel;
-    @FXML private Label teacherExperienceLabel;
-    @FXML private Label teacherRateLabel;
-    @FXML private ComboBox<String> instrumentCombo;
-    @FXML private ComboBox<String> teacherCombo;
+    @FXML private Label teacherTitleLabel;
     @FXML private Label monthLabel;
     @FXML private FlowPane calendarGrid;
     @FXML private Label selectedDateLabel;
     @FXML private Label selectedTimeLabel;
+    @FXML private Label timeSlotsDateLabel;
     @FXML private VBox timeSlotsContainer;
+    @FXML private Button continueBtn;
     @FXML private ComboBox<String> languageCombo;
-    @FXML private Button bookButton;
+    
+    @FXML private VBox calendarPanel;
+    @FXML private VBox confirmPanel;
+    @FXML private Label confirmDateLabel;
+    @FXML private Label confirmTimeLabel;
+    @FXML private TextArea notesField;
+    
+    @FXML private Circle step1Circle;
+    @FXML private Circle step2Circle;
+    @FXML private Circle step3Circle;
+    @FXML private Circle step4Circle;
 
     private TeacherProfileDAO teacherProfileDAO;
     private TimeSlotDAO timeSlotDAO;
@@ -54,10 +65,12 @@ public class StudentDashboardController {
     
     private YearMonth currentMonth;
     private LocalDate selectedDate;
+    private TimeSlot selectedSlot;
     private TeacherProfile selectedTeacher;
     private LearnerProfile learnerProfile;
-    private List<TeacherProfile> teacherProfiles;
-    private TimeSlot selectedSlot;
+    
+    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy", Locale.ENGLISH);
+    private DateTimeFormatter shortDateFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy", Locale.ENGLISH);
 
     @FXML
     public void initialize() {
@@ -70,74 +83,32 @@ public class StudentDashboardController {
         currentMonth = YearMonth.now();
         
         loadLearnerProfile();
-        setupInstrumentCombo();
+        loadTeacher();
         setupLanguageCombo();
         updateCalendar();
-        loadTeachers();
+        updateStepIndicators(1);
     }
 
     private void loadLearnerProfile() {
-        User currentUser = SessionManager.getInstance().getCurrentUser();
+        var currentUser = SessionManager.getInstance().getCurrentUser();
         if (currentUser != null) {
             learnerProfile = learnerProfileDAO.findByUserId(currentUser.getUserId());
-            if (learnerProfile == null) {
-                learnerProfile = new LearnerProfile(currentUser.getUserId(), "Piano");
-                learnerProfileDAO.create(learnerProfile);
-            }
         }
     }
 
-    private void setupInstrumentCombo() {
-        instrumentCombo.getItems().addAll(
-            "Piano", "Guitar", "Violin", "Drums", "Flute", "Saxophone", "Cello", "Voice"
-        );
-        instrumentCombo.setValue("Piano");
-    }
-
-    private void setupLanguageCombo() {
-        if (languageCombo != null) {
-            languageCombo.getItems().addAll("EN", "DE", "ZH");
-            languageCombo.setValue("EN");
-        }
-    }
-
-    private void loadTeachers() {
-        String instrument = instrumentCombo.getValue();
-        if (instrument != null) {
-            teacherProfiles = teacherProfileDAO.findByInstrument(instrument);
-            teacherCombo.getItems().clear();
-            for (TeacherProfile profile : teacherProfiles) {
-                User user = userDAO.findById(profile.getUserId());
-                String name = (user != null) ? user.getUsername() : "Teacher " + profile.getTeacherProfileId();
-                teacherCombo.getItems().add(name);
-            }
-            if (!teacherProfiles.isEmpty()) {
-                teacherCombo.setValue(teacherCombo.getItems().get(0));
-                selectedTeacher = teacherProfiles.get(0);
-                updateTeacherDisplay();
-                updateCalendar();
-            } else {
-                teacherNameLabel.setText("No teachers available");
-                if (teacherInstrumentLabel != null) teacherInstrumentLabel.setText("");
-                if (teacherExperienceLabel != null) teacherExperienceLabel.setText("");
-                if (teacherRateLabel != null) teacherRateLabel.setText("");
-            }
-        }
-    }
-
-    @FXML
-    private void handleInstrumentChange(ActionEvent event) {
-        loadTeachers();
-        updateTimeSlots();
-    }
-
-    @FXML
-    private void handleTeacherChange(ActionEvent event) {
-        int index = teacherCombo.getSelectionModel().getSelectedIndex();
-        if (index >= 0 && index < teacherProfiles.size()) {
-            selectedTeacher = teacherProfiles.get(index);
+    private void loadTeacher() {
+        List<TeacherProfile> teachers = teacherProfileDAO.findAll();
+        if (!teachers.isEmpty()) {
+            selectedTeacher = teachers.get(0);
             updateTeacherDisplay();
-            updateTimeSlots();
+        }
+    }
+
+    public void setTeacher(TeacherProfile teacher) {
+        this.selectedTeacher = teacher;
+        if (teacher != null) {
+            updateTeacherDisplay();
+            updateCalendar();
         }
     }
 
@@ -146,16 +117,16 @@ public class StudentDashboardController {
             User user = userDAO.findById(selectedTeacher.getUserId());
             String name = (user != null) ? user.getUsername() : "Teacher " + selectedTeacher.getTeacherProfileId();
             teacherNameLabel.setText(name);
-            
-            if (teacherInstrumentLabel != null) {
-                teacherInstrumentLabel.setText(selectedTeacher.getInstrumentsTaught());
+            if (teacherTitleLabel != null) {
+                teacherTitleLabel.setText(selectedTeacher.getInstrumentsTaught() + " Instructor");
             }
-            if (teacherExperienceLabel != null) {
-                teacherExperienceLabel.setText(selectedTeacher.getYearsExperience() + " years exp.");
-            }
-            if (teacherRateLabel != null) {
-                teacherRateLabel.setText("$" + selectedTeacher.getHourlyRate() + "/hr");
-            }
+        }
+    }
+
+    private void setupLanguageCombo() {
+        if (languageCombo != null) {
+            languageCombo.getItems().addAll("EN", "DE", "ZH");
+            languageCombo.setValue("EN");
         }
     }
 
@@ -197,15 +168,22 @@ public class StudentDashboardController {
 
     private boolean hasAvailableSlots(LocalDate date) {
         if (selectedTeacher == null) return false;
-        List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileIdAndDate(selectedTeacher.getTeacherProfileId(), date);
+        List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileIdAndDate(
+            selectedTeacher.getTeacherProfileId(), date);
         return slots.stream().anyMatch(TimeSlot::isAvailable);
     }
 
     private void handleDateClick(LocalDate date) {
         selectedDate = date;
-        selectedDateLabel.setText(date.format(DateTimeFormatter.ofPattern("EEEE, MMMM d")));
+        selectedSlot = null;
+        continueBtn.setDisable(true);
+        
+        selectedDateLabel.setText(date.format(shortDateFormatter));
+        timeSlotsDateLabel.setText(date.format(dateFormatter));
+        
         updateCalendar();
         updateTimeSlots();
+        updateStepIndicators(2);
     }
 
     private void updateTimeSlots() {
@@ -215,7 +193,8 @@ public class StudentDashboardController {
             return;
         }
         
-        List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileIdAndDate(selectedTeacher.getTeacherProfileId(), selectedDate);
+        List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileIdAndDate(
+            selectedTeacher.getTeacherProfileId(), selectedDate);
         
         for (TimeSlot slot : slots) {
             if (slot.isAvailable()) {
@@ -236,77 +215,83 @@ public class StudentDashboardController {
         
         Button slotBtn = new Button(timeText);
         slotBtn.getStyleClass().add("time-slot");
-        slotBtn.setPrefWidth(160);
+        slotBtn.setPrefWidth(140);
         
         if (selectedSlot != null && selectedSlot.getSlotId() == slot.getSlotId()) {
             slotBtn.getStyleClass().add("time-slot-selected");
         }
         
-        slotBtn.setOnAction(e -> handleSlotSelect(slot));
+        slotBtn.setOnAction(e -> handleSlotSelect(slot, slotBtn));
         
         HBox box = new HBox(slotBtn);
         box.setStyle("-fx-alignment: CENTER;");
         return box;
     }
 
-    private void handleSlotSelect(TimeSlot slot) {
+    private void handleSlotSelect(TimeSlot slot, Button btn) {
         selectedSlot = slot;
-        if (selectedTimeLabel != null) {
-            selectedTimeLabel.setText(slot.getStartTime() + " - " + slot.getEndTime());
-        }
-        if (bookButton != null) {
-            bookButton.setDisable(false);
-        }
+        selectedTimeLabel.setText(slot.getStartTime() + " - " + slot.getEndTime());
+        continueBtn.setDisable(false);
+        
         updateTimeSlots();
+        updateStepIndicators(3);
     }
 
-    private void confirmBooking() {
-        if (learnerProfile == null) {
-            showError("Learner profile not found!");
+    @FXML
+    private void handleContinue(ActionEvent event) {
+        if (selectedSlot == null || selectedDate == null) {
             return;
         }
-        if (selectedSlot == null) {
-            showError("Please select a time slot first!");
+        
+        calendarPanel.setVisible(false);
+        calendarPanel.setManaged(false);
+        confirmPanel.setVisible(true);
+        confirmPanel.setManaged(true);
+        
+        confirmDateLabel.setText(selectedDate.format(dateFormatter));
+        confirmTimeLabel.setText(selectedSlot.getStartTime() + " - " + selectedSlot.getEndTime());
+        
+        updateStepIndicators(4);
+    }
+
+    @FXML
+    private void handleBackToCalendar(ActionEvent event) {
+        confirmPanel.setVisible(false);
+        confirmPanel.setManaged(false);
+        calendarPanel.setVisible(true);
+        calendarPanel.setManaged(true);
+        
+        updateStepIndicators(3);
+    }
+
+    @FXML
+    private void handleConfirmBooking(ActionEvent event) {
+        if (selectedSlot == null || learnerProfile == null) {
+            showError("Cannot create booking");
             return;
         }
         
         Booking booking = new Booking(learnerProfile.getLearnerProfileId(), selectedSlot.getSlotId());
+        booking.setNotes(notesField.getText());
         
         boolean created = bookingDAO.create(booking);
         if (created) {
             timeSlotDAO.updateStatus(selectedSlot.getSlotId(), TimeSlot.STATUS_BOOKED);
-            selectedSlot = null;
-            if (selectedTimeLabel != null) {
-                selectedTimeLabel.setText("Select a time");
-            }
-            if (bookButton != null) {
-                bookButton.setDisable(true);
-            }
-            updateTimeSlots();
-            showSuccessMessage("Booking created successfully!");
+            showSuccess("Booking confirmed successfully!");
+            navigateBack(event);
         } else {
             showError("Failed to create booking");
         }
     }
 
-    private void showSuccessMessage(String message) {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-            javafx.scene.control.Alert.AlertType.INFORMATION
-        );
-        alert.setTitle("Success");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
-    private void showError(String message) {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-            javafx.scene.control.Alert.AlertType.ERROR
-        );
-        alert.setTitle("Error");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+    private void updateStepIndicators(int currentStep) {
+        String activeColor = "-fx-fill: #2D4A47;";
+        String inactiveColor = "-fx-fill: #CBD5E0;";
+        
+        step1Circle.setStyle(currentStep >= 1 ? activeColor : inactiveColor);
+        step2Circle.setStyle(currentStep >= 2 ? activeColor : inactiveColor);
+        step3Circle.setStyle(currentStep >= 3 ? activeColor : inactiveColor);
+        step4Circle.setStyle(currentStep >= 4 ? activeColor : inactiveColor);
     }
 
     @FXML
@@ -321,19 +306,9 @@ public class StudentDashboardController {
         updateCalendar();
     }
 
-    @FXML
-    private void handleViewProfile(ActionEvent event) {
-        if (selectedTeacher == null) {
-            showError("Please select a teacher first");
-            return;
-        }
+    private void navigateBack(ActionEvent event) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/teacher_profile_view.fxml"));
-            Parent root = loader.load();
-            
-            TeacherProfileViewController controller = loader.getController();
-            controller.setTeacherProfile(selectedTeacher);
-            
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/student_dashboard.fxml"));
             Scene scene = new Scene(root);
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(scene);
@@ -343,39 +318,38 @@ public class StudentDashboardController {
     }
 
     @FXML
-    private void handleBookNow(ActionEvent event) {
-        if (selectedTeacher == null) {
-            showError("Please select a teacher first");
-            return;
-        }
-        if (selectedSlot == null) {
-            showError("Please select a time slot first");
-            return;
-        }
-        confirmBooking();
-    }
-
-    @FXML
-    private void handlePrevPage(ActionEvent event) {
-        // Handle pagination
-    }
-
-    @FXML
-    private void handleNextPage(ActionEvent event) {
-        // Handle pagination
+    private void handleBackToDashboard(ActionEvent event) {
+        navigateBack(event);
     }
 
     @FXML
     private void handleLogout(ActionEvent event) {
         SessionManager.getInstance().logout();
         try {
-            Parent loginRoot = FXMLLoader.load(getClass().getResource("/fxml/login.fxml"));
-            Scene loginScene = new Scene(loginRoot);
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/login.fxml"));
+            Scene scene = new Scene(root);
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(loginScene);
-            stage.setTitle("Music Course Platform - Login");
+            stage.setScene(scene);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void showError(String message) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+            javafx.scene.control.Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    private void showSuccess(String message) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+            javafx.scene.control.Alert.AlertType.INFORMATION);
+        alert.setTitle("Success");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }

@@ -23,7 +23,7 @@ public class UserDAO {
      * @return true if creation was successful, false otherwise
      */
     public boolean create(User user) {
-        String sql = "INSERT INTO users (username, password_hash, email, user_type) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO USERS (username, password_hash, email, user_type) VALUES (?, ?, ?, ?)";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -59,7 +59,7 @@ public class UserDAO {
      * @return User object if found, null otherwise
      */
     public User findById(int userId) {
-        String sql = "SELECT * FROM users WHERE user_id = ?";
+        String sql = "SELECT * FROM USERS WHERE user_id = ?";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -85,7 +85,7 @@ public class UserDAO {
      * @return User object if found, null otherwise
      */
     public User findByUsername(String username) {
-        String sql = "SELECT * FROM users WHERE username = ?";
+        String sql = "SELECT * FROM USERS WHERE username = ?";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -110,7 +110,7 @@ public class UserDAO {
      * @return User object if found, null otherwise
      */
     public User findByEmail(String email) {
-        String sql = "SELECT * FROM users WHERE email = ?";
+        String sql = "SELECT * FROM USERS WHERE email = ?";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -135,7 +135,7 @@ public class UserDAO {
      */
     public List<User> findAll() {
         List<User> users = new ArrayList<>();
-        String sql = "SELECT * FROM users ORDER BY created_at DESC";
+        String sql = "SELECT * FROM USERS ORDER BY created_at DESC";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              Statement stmt = conn.createStatement();
@@ -158,7 +158,7 @@ public class UserDAO {
      */
     public List<User> findByUserType(String userType) {
         List<User> users = new ArrayList<>();
-        String sql = "SELECT * FROM users WHERE user_type = ? ORDER BY created_at DESC";
+        String sql = "SELECT * FROM USERS WHERE user_type = ? ORDER BY created_at DESC";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -183,7 +183,7 @@ public class UserDAO {
      * @return true if update was successful, false otherwise
      */
     public boolean update(User user) {
-        String sql = "UPDATE users SET username = ?, password_hash = ?, email = ?, user_type = ? WHERE user_id = ?";
+        String sql = "UPDATE USERS SET username = ?, password_hash = ?, email = ?, user_type = ? WHERE user_id = ?";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -209,7 +209,7 @@ public class UserDAO {
      * @return true if deletion was successful, false otherwise
      */
     public boolean delete(int userId) {
-        String sql = "DELETE FROM users WHERE user_id = ?";
+        String sql = "DELETE FROM USERS WHERE user_id = ?";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -230,7 +230,7 @@ public class UserDAO {
      * @return true if username exists, false otherwise
      */
     public boolean usernameExists(String username) {
-        String sql = "SELECT COUNT(*) FROM users WHERE username = ?";
+        String sql = "SELECT COUNT(*) FROM USERS WHERE username = ?";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -255,7 +255,7 @@ public class UserDAO {
      * @return true if email exists, false otherwise
      */
     public boolean emailExists(String email) {
-        String sql = "SELECT COUNT(*) FROM users WHERE email = ?";
+        String sql = "SELECT COUNT(*) FROM USERS WHERE email = ?";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -279,7 +279,7 @@ public class UserDAO {
      * @return Total count of users
      */
     public int countAll() {
-        String sql = "SELECT COUNT(*) FROM users";
+        String sql = "SELECT COUNT(*) FROM USERS";
         
         try (Connection conn = DatabaseConnection.getNewConnection();
              Statement stmt = conn.createStatement();
