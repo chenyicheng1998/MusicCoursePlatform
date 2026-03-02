@@ -13,11 +13,11 @@ import java.sql.SQLException;
  */
 public class DatabaseConnection {
     
-    // Database configuration
-    private static final String URL = "jdbc:mariadb://localhost:3306/music_course_platform?serverTimezone=UTC";
+    // Database configuration (change yours)
+    private static final String URL = "jdbc:mariadb://localhost:3306/music_lesson_db";
     private static final String USER = "root";
-    private static final String PASSWORD = "Lethergo123."; // Update with your MariaDB password
-    
+    private static final String PASSWORD = "swp123";
+
     // Connection instance for connection pooling (simple implementation)
     private static Connection connection = null;
 
