@@ -64,10 +64,10 @@ public class LoginController {
             String title;
             
             if (user.isTeacher()) {
-                fxmlPath = "/fxml/teacher_dashboard.fxml";
+                fxmlPath = "/fxml/teacher_set_availability.fxml";
                 title = "Music Course Platform - Teacher Dashboard";
             } else {
-                fxmlPath = "/fxml/student_dashboard.fxml";
+                fxmlPath = "/fxml/student_course_booking.fxml";
                 title = "Music Course Platform - Student Dashboard";
             }
             

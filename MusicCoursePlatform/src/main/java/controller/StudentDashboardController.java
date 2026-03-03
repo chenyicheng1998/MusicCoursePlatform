@@ -137,6 +137,7 @@ public class StudentDashboardController {
         if (index >= 0 && index < teacherProfiles.size()) {
             selectedTeacher = teacherProfiles.get(index);
             updateTeacherDisplay();
+            updateCalendar(); // Update calendar to show available dates
             updateTimeSlots();
         }
     }
@@ -321,26 +322,6 @@ public class StudentDashboardController {
         updateCalendar();
     }
 
-    @FXML
-    private void handleViewProfile(ActionEvent event) {
-        if (selectedTeacher == null) {
-            showError("Please select a teacher first");
-            return;
-        }
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/teacher_profile_view.fxml"));
-            Parent root = loader.load();
-            
-            TeacherProfileViewController controller = loader.getController();
-            controller.setTeacherProfile(selectedTeacher);
-            
-            Scene scene = new Scene(root);
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(scene);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     @FXML
     private void handleBookNow(ActionEvent event) {
@@ -356,13 +337,17 @@ public class StudentDashboardController {
     }
 
     @FXML
-    private void handlePrevPage(ActionEvent event) {
-        // Handle pagination
-    }
-
-    @FXML
-    private void handleNextPage(ActionEvent event) {
-        // Handle pagination
+    private void handleViewSchedule(ActionEvent event) {
+        try {
+            Parent scheduleRoot = FXMLLoader.load(getClass().getResource("/fxml/student_schedule_view.fxml"));
+            Scene scheduleScene = new Scene(scheduleRoot);
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(scheduleScene);
+            stage.setTitle("Music Course Platform - My Schedule");
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Failed to load schedule view");
+        }
     }
 
     @FXML

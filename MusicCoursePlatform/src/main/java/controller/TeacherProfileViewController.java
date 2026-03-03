@@ -2,15 +2,17 @@ package controller;
 
 import dao.TeacherProfileDAO;
 import dao.TimeSlotDAO;
-import dao.UserDAO;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import model.TeacherProfile;
@@ -26,163 +28,207 @@ import java.util.List;
 public class TeacherProfileViewController {
 
     @FXML private Label teacherNameLabel;
-    @FXML private Label titleLabel;
-    @FXML private Label instrumentsLabel;
-    @FXML private Label experienceLabel;
-    @FXML private Label locationLabel;
-    @FXML private Label rateLabel;
-    @FXML private Label biographyLabel;
     @FXML private Label weekLabel;
-    
-    @FXML private VBox day1Box;
-    @FXML private VBox day2Box;
-    @FXML private VBox day3Box;
-    @FXML private VBox day4Box;
-    @FXML private VBox day5Box;
-    @FXML private VBox day6Box;
-    @FXML private VBox day7Box;
-    
+    @FXML private HBox availabilityGrid;
+    @FXML private ComboBox<String> languageCombo;
+    @FXML private ComboBox<String> dayCombo;
+    @FXML private ComboBox<String> startTimeCombo;
+    @FXML private ComboBox<String> endTimeCombo;
+
     private TeacherProfileDAO teacherProfileDAO;
     private TimeSlotDAO timeSlotDAO;
-    private UserDAO userDAO;
-    
+
     private TeacherProfile teacherProfile;
     private LocalDate weekStart;
-    
-    private DateTimeFormatter dayFormatter = DateTimeFormatter.ofPattern("EEE");
-    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("d");
+
+    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM d");
 
     @FXML
     public void initialize() {
         teacherProfileDAO = new TeacherProfileDAO();
         timeSlotDAO = new TimeSlotDAO();
-        userDAO = new UserDAO();
-        
+
         weekStart = LocalDate.now().with(DayOfWeek.MONDAY);
+
+        setupLanguageCombo();
+        setupTimeComboBoxes();
+        loadTeacherInfo();
+        updateAvailabilityGrid();
     }
 
-    public void setTeacherProfile(TeacherProfile profile) {
-        this.teacherProfile = profile;
-        loadTeacherDetails();
-        updateWeekView();
-    }
-
-    public void setTeacherProfileId(int profileId) {
-        this.teacherProfile = teacherProfileDAO.findById(profileId);
-        if (teacherProfile != null) {
-            loadTeacherDetails();
-            updateWeekView();
+    private void setupLanguageCombo() {
+        if (languageCombo != null) {
+            languageCombo.getItems().addAll("EN", "DE", "ZH");
+            languageCombo.setValue("EN");
         }
     }
 
-    private void loadTeacherDetails() {
-        if (teacherProfile == null) return;
-        
-        User user = userDAO.findById(teacherProfile.getUserId());
-        if (user != null) {
-            teacherNameLabel.setText(user.getUsername());
-        } else {
-            teacherNameLabel.setText("Teacher " + teacherProfile.getTeacherProfileId());
-        }
-        
-        titleLabel.setText("Music Instructor");
-        instrumentsLabel.setText(teacherProfile.getInstrumentsTaught());
-        experienceLabel.setText(teacherProfile.getYearsExperience() + " years");
-        locationLabel.setText(teacherProfile.getLocation() != null ? 
-            teacherProfile.getLocation() : "Not specified");
-        rateLabel.setText("$" + teacherProfile.getHourlyRate() + "/hr");
-        biographyLabel.setText(teacherProfile.getBiography() != null ? 
-            teacherProfile.getBiography() : "No biography available.");
+    private void setupTimeComboBoxes() {
+        dayCombo.getItems().addAll(
+            "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+        );
+
+        String[] times = {
+            "08:00", "09:00", "10:00", "11:00", "12:00",
+            "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"
+        };
+
+        startTimeCombo.getItems().addAll(times);
+        endTimeCombo.getItems().addAll(times);
     }
 
-    private void updateWeekView() {
-        weekLabel.setText(weekStart.format(DateTimeFormatter.ofPattern("MMM d")) + 
-            " - " + weekStart.plusDays(6).format(DateTimeFormatter.ofPattern("MMM d, yyyy")));
-        
-        VBox[] dayBoxes = {day1Box, day2Box, day3Box, day4Box, day5Box, day6Box, day7Box};
-        
-        for (int i = 0; i < 7; i++) {
-            LocalDate date = weekStart.plusDays(i);
-            VBox dayBox = dayBoxes[i];
-            dayBox.getChildren().clear();
-            dayBox.setPrefWidth(120);
-            
-            Label dayLabel = new Label(date.format(dayFormatter));
-            dayLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #2D4A47;");
-            
-            Label dateLabel = new Label(date.format(dateFormatter));
-            dateLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
-            
-            dayBox.getChildren().addAll(dayLabel, dateLabel);
-            
-            if (teacherProfile != null) {
-                List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileIdAndDate(
-                    teacherProfile.getTeacherProfileId(), date);
-                
-                for (TimeSlot slot : slots) {
-                    if (slot.isAvailable()) {
-                        Button slotBtn = new Button(slot.getStartTime());
-                        slotBtn.getStyleClass().add("time-slot-mini");
-                        slotBtn.setPrefWidth(80);
-                        slotBtn.setOnAction(e -> handleSlotClick(slot));
-                        dayBox.getChildren().add(slotBtn);
-                    }
-                }
-                
-                if (slots.stream().noneMatch(TimeSlot::isAvailable)) {
-                    Label noSlots = new Label("-");
-                    noSlots.setStyle("-fx-text-fill: #CBD5E0;");
-                    dayBox.getChildren().add(noSlots);
-                }
+    private void loadTeacherInfo() {
+        User currentUser = SessionManager.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            teacherNameLabel.setText(currentUser.getUsername());
+            teacherProfile = teacherProfileDAO.findByUserId(currentUser.getUserId());
+
+            if (teacherProfile == null) {
+                teacherProfile = new TeacherProfile(currentUser.getUserId(), "Piano");
+                teacherProfileDAO.create(teacherProfile);
             }
         }
     }
 
-    private void handleSlotClick(TimeSlot slot) {
-        navigateToBooking(slot);
+    private void updateAvailabilityGrid() {
+        availabilityGrid.getChildren().clear();
+
+        weekLabel.setText(weekStart.format(DateTimeFormatter.ofPattern("MMM d")) +
+            " - " + weekStart.plusDays(6).format(DateTimeFormatter.ofPattern("MMM d, yyyy")));
+
+        for (int i = 0; i < 7; i++) {
+            LocalDate date = weekStart.plusDays(i);
+            VBox dayColumn = createDayColumn(date);
+            availabilityGrid.getChildren().add(dayColumn);
+        }
+    }
+
+    private VBox createDayColumn(LocalDate date) {
+        VBox column = new VBox(8);
+        column.setAlignment(Pos.TOP_CENTER);
+        column.setPrefWidth(130);
+        column.setStyle("-fx-background-color: #F7FAFC; -fx-background-radius: 8; -fx-padding: 12;");
+
+        Label dateLabel = new Label(date.format(dateFormatter));
+        dateLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #718096;");
+        dateLabel.setWrapText(true);
+        dateLabel.setMaxWidth(110);
+        column.getChildren().add(dateLabel);
+
+        if (teacherProfile != null) {
+            List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileIdAndDate(
+                teacherProfile.getTeacherProfileId(), date);
+
+            for (TimeSlot slot : slots) {
+                HBox slotBox = createSlotBox(slot);
+                column.getChildren().add(slotBox);
+            }
+        }
+
+        return column;
+    }
+
+    private HBox createSlotBox(TimeSlot slot) {
+        HBox box = new HBox(4);
+        box.setAlignment(Pos.CENTER);
+
+        String timeText = slot.getStartTime() + "-" + slot.getEndTime();
+
+        Button timeBtn = new Button(timeText);
+        timeBtn.setPrefWidth(80);
+        if (slot.isAvailable()) {
+            timeBtn.setStyle("-fx-background-color: white; -fx-border-color: #2D4A47; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 6 8; -fx-font-size: 10px;");
+        } else {
+            timeBtn.setStyle("-fx-background-color: #CBD5E0; -fx-border-color: #CBD5E0; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 6 8; -fx-text-fill: #718096; -fx-font-size: 10px;");
+        }
+
+        Button deleteBtn = new Button("🗑");
+        deleteBtn.setStyle("-fx-background-color: transparent; -fx-cursor: hand; -fx-font-size: 12px;");
+        deleteBtn.setOnAction(e -> handleDeleteSlot(slot));
+
+        box.getChildren().addAll(timeBtn, deleteBtn);
+
+        return box;
     }
 
     @FXML
-    private void handleBookNow(ActionEvent event) {
-        navigateToBookingView(event);
+    private void handleAddTimeSlot(ActionEvent event) {
+        String selectedDay = dayCombo.getValue();
+        String startTime = startTimeCombo.getValue();
+        String endTime = endTimeCombo.getValue();
+
+        if (selectedDay == null || startTime == null || endTime == null) {
+            showError("Please select day, start time, and end time");
+            return;
+        }
+
+        if (startTime.compareTo(endTime) >= 0) {
+            showError("End time must be after start time");
+            return;
+        }
+
+        if (teacherProfile == null) {
+            showError("Teacher profile not found");
+            return;
+        }
+
+        LocalDate slotDate = getDateForDay(selectedDay);
+
+        TimeSlot newSlot = new TimeSlot(
+            teacherProfile.getTeacherProfileId(),
+            slotDate,
+            startTime,
+            endTime
+        );
+
+        boolean created = timeSlotDAO.create(newSlot);
+        if (created) {
+            updateAvailabilityGrid();
+            dayCombo.setValue(null);
+            startTimeCombo.setValue(null);
+            endTimeCombo.setValue(null);
+        } else {
+            showError("Failed to create time slot");
+        }
     }
 
-    private void navigateToBooking(TimeSlot slot) {
-        // Navigate to booking view with pre-selected slot
+    private LocalDate getDateForDay(String day) {
+        int dayOffset = switch (day) {
+            case "Monday" -> 0;
+            case "Tuesday" -> 1;
+            case "Wednesday" -> 2;
+            case "Thursday" -> 3;
+            case "Friday" -> 4;
+            case "Saturday" -> 5;
+            case "Sunday" -> 6;
+            default -> 0;
+        };
+        return weekStart.plusDays(dayOffset);
     }
 
-    private void navigateToBookingView(ActionEvent event) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/booking_view.fxml"));
-            Parent root = loader.load();
-            
-            BookingViewController controller = loader.getController();
-            controller.setTeacher(teacherProfile);
-            
-            Scene scene = new Scene(root);
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(scene);
-        } catch (IOException e) {
-            e.printStackTrace();
+    private void handleDeleteSlot(TimeSlot slot) {
+        boolean deleted = timeSlotDAO.delete(slot.getSlotId());
+        if (deleted) {
+            updateAvailabilityGrid();
         }
     }
 
     @FXML
-    private void handlePrevWeek(ActionEvent event) {
+    private void handlePrevPage(ActionEvent event) {
         weekStart = weekStart.minusWeeks(1);
-        updateWeekView();
+        updateAvailabilityGrid();
     }
 
     @FXML
-    private void handleNextWeek(ActionEvent event) {
+    private void handleNextPage(ActionEvent event) {
         weekStart = weekStart.plusWeeks(1);
-        updateWeekView();
+        updateAvailabilityGrid();
     }
 
     @FXML
     private void handleBack(ActionEvent event) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/fxml/student_dashboard.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/fxml/teacher_set_availability.fxml"));
             Scene scene = new Scene(root);
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(scene);
@@ -203,4 +249,14 @@ public class TeacherProfileViewController {
             e.printStackTrace();
         }
     }
+
+    private void showError(String message) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+            javafx.scene.control.Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
 }
+

@@ -32,6 +32,7 @@ public class TeacherDashboardController {
 
     @FXML private Label nameLabel;
     @FXML private ComboBox<String> instrumentsCombo;
+    @FXML private TextField experienceField;
     @FXML private TextField pricingField;
     @FXML private TextArea bioField;
     @FXML private Label monthLabel;
@@ -100,6 +101,7 @@ public class TeacherDashboardController {
             if (teacherProfile.getInstrumentsTaught() != null) {
                 instrumentsCombo.setValue(teacherProfile.getInstrumentsTaught().split(",")[0].trim());
             }
+            experienceField.setText(String.valueOf(teacherProfile.getYearsExperience()));
             pricingField.setText(String.valueOf(teacherProfile.getHourlyRate()));
             if (teacherProfile.getBiography() != null) {
                 bioField.setText(teacherProfile.getBiography());
@@ -116,10 +118,21 @@ public class TeacherDashboardController {
         if (currentUser == null || teacherProfile == null) return;
         
         String instrument = instrumentsCombo.getValue();
+        String experience = experienceField.getText();
         String pricing = pricingField.getText();
         String bio = bioField.getText();
         
         teacherProfile.setInstrumentsTaught(instrument);
+
+        if (experience != null && !experience.isEmpty()) {
+            try {
+                teacherProfile.setYearsExperience(Integer.parseInt(experience));
+            } catch (NumberFormatException e) {
+                showError("Invalid experience format. Please enter a number.");
+                return;
+            }
+        }
+
         if (pricing != null && !pricing.isEmpty()) {
             try {
                 teacherProfile.setHourlyRate(Integer.parseInt(pricing));
@@ -285,13 +298,17 @@ public class TeacherDashboardController {
     }
 
     @FXML
-    private void handlePrevPage(ActionEvent event) {
-        // Handle pagination
-    }
-
-    @FXML
-    private void handleNextPage(ActionEvent event) {
-        // Handle pagination
+    private void handleViewSchedule(ActionEvent event) {
+        try {
+            Parent scheduleRoot = FXMLLoader.load(getClass().getResource("/fxml/teacher_schedule_view.fxml"));
+            Scene scheduleScene = new Scene(scheduleRoot);
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(scheduleScene);
+            stage.setTitle("Music Course Platform - My Schedule");
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Failed to load schedule view");
+        }
     }
 
     private void showError(String message) {
