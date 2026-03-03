@@ -65,12 +65,12 @@ public class TeacherProfileViewController {
 
     private void setupTimeComboBoxes() {
         dayCombo.getItems().addAll(
-            "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+                "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
         );
 
         String[] times = {
-            "08:00", "09:00", "10:00", "11:00", "12:00",
-            "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"
+                "08:00", "09:00", "10:00", "11:00", "12:00",
+                "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"
         };
 
         startTimeCombo.getItems().addAll(times);
@@ -94,7 +94,7 @@ public class TeacherProfileViewController {
         availabilityGrid.getChildren().clear();
 
         weekLabel.setText(weekStart.format(DateTimeFormatter.ofPattern("MMM d")) +
-            " - " + weekStart.plusDays(6).format(DateTimeFormatter.ofPattern("MMM d, yyyy")));
+                " - " + weekStart.plusDays(6).format(DateTimeFormatter.ofPattern("MMM d, yyyy")));
 
         for (int i = 0; i < 7; i++) {
             LocalDate date = weekStart.plusDays(i);
@@ -117,7 +117,7 @@ public class TeacherProfileViewController {
 
         if (teacherProfile != null) {
             List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileIdAndDate(
-                teacherProfile.getTeacherProfileId(), date);
+                    teacherProfile.getTeacherProfileId(), date);
 
             for (TimeSlot slot : slots) {
                 HBox slotBox = createSlotBox(slot);
@@ -175,10 +175,10 @@ public class TeacherProfileViewController {
         LocalDate slotDate = getDateForDay(selectedDay);
 
         TimeSlot newSlot = new TimeSlot(
-            teacherProfile.getTeacherProfileId(),
-            slotDate,
-            startTime,
-            endTime
+                teacherProfile.getTeacherProfileId(),
+                slotDate,
+                startTime,
+                endTime
         );
 
         boolean created = timeSlotDAO.create(newSlot);
@@ -250,13 +250,13 @@ public class TeacherProfileViewController {
         }
     }
 
+    @FXML private Label errorLabel;
+
     private void showError(String message) {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-            javafx.scene.control.Alert.AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        if (errorLabel != null) {
+            errorLabel.setStyle("-fx-text-fill: #e53e3e;");
+            errorLabel.setText(message);
+            errorLabel.setVisible(true);
+        }
     }
 }
-

@@ -138,7 +138,7 @@ public class StudentDashboardController {
         if (index >= 0 && index < teacherProfiles.size()) {
             selectedTeacher = teacherProfiles.get(index);
             updateTeacherDisplay();
-            updateCalendar(); // Update calendar to show available dates
+            updateCalendar();
             updateTimeSlots();
         }
     }
@@ -319,7 +319,6 @@ public class StudentDashboardController {
         currentMonth = currentMonth.plusMonths(1);
         updateCalendar();
     }
-
 
     @FXML
     private void handleBookNow(ActionEvent event) {
