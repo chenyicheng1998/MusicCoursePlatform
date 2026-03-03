@@ -24,9 +24,10 @@
         <HBox styleClass="navbar" alignment="CENTER_LEFT" spacing="20">
             <Label text="MusicCoursePlatform" styleClass="navbar-title"/>
             <Region HBox.hgrow="ALWAYS"/>
+            <Button text="View Schedule" styleClass="secondary-button" onAction="#handleViewSchedule"/>
             <ComboBox fx:id="languageCombo" promptText="EN" prefWidth="80"/>
             <Circle fx:id="avatarCircle" radius="20" style="-fx-fill: #E2E8F0;"/>
-            <Circle radius="6" style="-fx-fill: #E53E3E;"/>
+            <Button text="Logout" styleClass="secondary-button" onAction="#handleLogout"/>
         </HBox>
     </top>
     
@@ -56,7 +57,13 @@
                         <ComboBox fx:id="instrumentsCombo" 
                                   promptText="Instruments" 
                                   prefWidth="200"/>
-                        
+
+                        <!-- Years of Experience Field -->
+                        <TextField fx:id="experienceField"
+                                   promptText="Years of Experience"
+                                   styleClass="text-field"
+                                   prefWidth="200"/>
+
                         <!-- Pricing Field -->
                         <TextField fx:id="pricingField" 
                                    promptText="Pricing ($/hr)" 
@@ -106,14 +113,14 @@
                     
                     <!-- Right Panel - Set Availability -->
                     <VBox spacing="16" prefWidth="220">
-                        <Label text="View Schedule" styleClass="section-title"/>
-                        
+                        <Label text="Set Availability" styleClass="section-title"/>
+
                         <Label fx:id="selectedDateLabel" text="Select a date" style="-fx-text-fill: #718096;"/>
                         
                         <!-- Time Input -->
                         <HBox spacing="10" alignment="CENTER_LEFT">
-                            <Button fx:id="startTimeBtn" text="Start" styleClass="secondary-button" prefWidth="70"/>
-                            <Button fx:id="endTimeBtn" text="End" styleClass="primary-button" prefWidth="70"/>
+                            <Button fx:id="startTimeBtn" text="Start" styleClass="secondary-button" prefWidth="90"/>
+                            <Button fx:id="endTimeBtn" text="End" styleClass="primary-button" prefWidth="90"/>
                         </HBox>
                         
                         <!-- Add Time Slot -->
@@ -139,12 +146,4 @@
             </VBox>
         </HBox>
     </center>
-    
-    <!-- Bottom Navigation -->
-    <bottom>
-        <HBox alignment="CENTER" spacing="20" style="-fx-background-color: #F5F5F5; -fx-padding: 20;">
-            <Button text="‹" styleClass="back-button" onAction="#handlePrevPage"/>
-            <Button text="›" styleClass="back-button" onAction="#handleNextPage"/>
-        </HBox>
-    </bottom>
 </BorderPane>

@@ -14,9 +14,9 @@ import java.sql.SQLException;
 public class DatabaseConnection {
     
     // Database configuration (change yours)
-    private static final String URL = "jdbc:mariadb://localhost:3306/music_lesson_db";
+    private static final String URL = "jdbc:mariadb://localhost:3306/music_course_platform";
     private static final String USER = "root";
-    private static final String PASSWORD = "swp123";
+    private static final String PASSWORD = "123456";
 
     // Connection instance for connection pooling (simple implementation)
     private static Connection connection = null;

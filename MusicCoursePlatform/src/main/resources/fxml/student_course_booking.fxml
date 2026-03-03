@@ -22,9 +22,10 @@
         <HBox styleClass="navbar" alignment="CENTER_LEFT" spacing="20">
             <Label text="MusicCoursePlatform" styleClass="navbar-title"/>
             <Region HBox.hgrow="ALWAYS"/>
+            <Button text="View Schedule" styleClass="secondary-button" onAction="#handleViewSchedule"/>
             <ComboBox fx:id="languageCombo" promptText="EN" prefWidth="80"/>
             <Circle fx:id="avatarCircle" radius="20" style="-fx-fill: #E2E8F0;"/>
-            <Circle radius="6" style="-fx-fill: #E53E3E;"/>
+            <Button text="Logout" styleClass="secondary-button" onAction="#handleLogout"/>
         </HBox>
     </top>
     
@@ -81,12 +82,6 @@
                                 </VBox>
                             </HBox>
                         </VBox>
-                        
-                        <!-- Action Buttons -->
-                        <Button text="View Full Profile" 
-                                styleClass="secondary-button"
-                                onAction="#handleViewProfile"
-                                prefWidth="240"/>
                     </VBox>
                     
                     <!-- Center Panel - Calendar -->
@@ -146,12 +141,4 @@
             </VBox>
         </HBox>
     </center>
-    
-    <!-- Bottom Navigation -->
-    <bottom>
-        <HBox alignment="CENTER" spacing="20" style="-fx-background-color: #F5F5F5; -fx-padding: 20;">
-            <Button text="‹" styleClass="back-button" onAction="#handlePrevPage"/>
-            <Button text="›" styleClass="back-button" onAction="#handleNextPage"/>
-        </HBox>
-    </bottom>
 </BorderPane>

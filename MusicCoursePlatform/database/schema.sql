@@ -2,8 +2,8 @@
 -- CI/CD Compatible Version
 
 -- Create database
-CREATE DATABASE IF NOT EXISTS music_lesson_db;
-USE music_lesson_db;
+CREATE DATABASE IF NOT EXISTS music_course_platform;
+USE music_course_platform;
 
 -- Disable foreign key checks for clean reset
 SET FOREIGN_KEY_CHECKS = 0;
