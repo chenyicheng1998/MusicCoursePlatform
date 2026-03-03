@@ -45,13 +45,14 @@ public class StudentDashboardController {
     @FXML private VBox timeSlotsContainer;
     @FXML private ComboBox<String> languageCombo;
     @FXML private Button bookButton;
+    @FXML private Label errorLabel;
 
     private TeacherProfileDAO teacherProfileDAO;
     private TimeSlotDAO timeSlotDAO;
     private BookingDAO bookingDAO;
     private LearnerProfileDAO learnerProfileDAO;
     private UserDAO userDAO;
-    
+
     private YearMonth currentMonth;
     private LocalDate selectedDate;
     private TeacherProfile selectedTeacher;
@@ -66,9 +67,9 @@ public class StudentDashboardController {
         bookingDAO = new BookingDAO();
         learnerProfileDAO = new LearnerProfileDAO();
         userDAO = new UserDAO();
-        
+
         currentMonth = YearMonth.now();
-        
+
         loadLearnerProfile();
         setupInstrumentCombo();
         setupLanguageCombo();
@@ -89,7 +90,7 @@ public class StudentDashboardController {
 
     private void setupInstrumentCombo() {
         instrumentCombo.getItems().addAll(
-            "Piano", "Guitar", "Violin", "Drums", "Flute", "Saxophone", "Cello", "Voice"
+                "Piano", "Guitar", "Violin", "Drums", "Flute", "Saxophone", "Cello", "Voice"
         );
         instrumentCombo.setValue("Piano");
     }
@@ -137,6 +138,7 @@ public class StudentDashboardController {
         if (index >= 0 && index < teacherProfiles.size()) {
             selectedTeacher = teacherProfiles.get(index);
             updateTeacherDisplay();
+            updateCalendar();
             updateTimeSlots();
         }
     }
@@ -146,7 +148,7 @@ public class StudentDashboardController {
             User user = userDAO.findById(selectedTeacher.getUserId());
             String name = (user != null) ? user.getUsername() : "Teacher " + selectedTeacher.getTeacherProfileId();
             teacherNameLabel.setText(name);
-            
+
             if (teacherInstrumentLabel != null) {
                 teacherInstrumentLabel.setText(selectedTeacher.getInstrumentsTaught());
             }
@@ -162,35 +164,35 @@ public class StudentDashboardController {
     private void updateCalendar() {
         monthLabel.setText(currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")));
         calendarGrid.getChildren().clear();
-        
+
         LocalDate firstOfMonth = currentMonth.atDay(1);
         int dayOfWeek = firstOfMonth.getDayOfWeek().getValue() % 7;
-        
+
         for (int i = 0; i < dayOfWeek; i++) {
             Label emptyLabel = new Label("");
             emptyLabel.setPrefWidth(40);
             emptyLabel.setPrefHeight(40);
             calendarGrid.getChildren().add(emptyLabel);
         }
-        
+
         for (int day = 1; day <= currentMonth.lengthOfMonth(); day++) {
             LocalDate date = currentMonth.atDay(day);
             Button dayBtn = new Button(String.valueOf(day));
             dayBtn.setPrefWidth(40);
             dayBtn.setPrefHeight(40);
             dayBtn.getStyleClass().add("calendar-day");
-            
+
             if (hasAvailableSlots(date)) {
                 dayBtn.getStyleClass().add("calendar-day-available");
             }
-            
+
             if (date.equals(selectedDate)) {
                 dayBtn.getStyleClass().add("calendar-day-selected");
             }
-            
+
             final LocalDate clickedDate = date;
             dayBtn.setOnAction(e -> handleDateClick(clickedDate));
-            
+
             calendarGrid.getChildren().add(dayBtn);
         }
     }
@@ -210,20 +212,21 @@ public class StudentDashboardController {
 
     private void updateTimeSlots() {
         timeSlotsContainer.getChildren().clear();
-        
+
         if (selectedDate == null || selectedTeacher == null) {
             return;
         }
-        
-        List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileIdAndDate(selectedTeacher.getTeacherProfileId(), selectedDate);
-        
+
+        List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileIdAndDate(
+                selectedTeacher.getTeacherProfileId(), selectedDate);
+
         for (TimeSlot slot : slots) {
             if (slot.isAvailable()) {
                 HBox slotBox = createTimeSlotBox(slot);
                 timeSlotsContainer.getChildren().add(slotBox);
             }
         }
-        
+
         if (timeSlotsContainer.getChildren().isEmpty()) {
             Label noSlotsLabel = new Label("No available slots");
             noSlotsLabel.setStyle("-fx-text-fill: #718096;");
@@ -233,17 +236,17 @@ public class StudentDashboardController {
 
     private HBox createTimeSlotBox(TimeSlot slot) {
         String timeText = slot.getStartTime() + " - " + slot.getEndTime();
-        
+
         Button slotBtn = new Button(timeText);
         slotBtn.getStyleClass().add("time-slot");
         slotBtn.setPrefWidth(160);
-        
+
         if (selectedSlot != null && selectedSlot.getSlotId() == slot.getSlotId()) {
             slotBtn.getStyleClass().add("time-slot-selected");
         }
-        
+
         slotBtn.setOnAction(e -> handleSlotSelect(slot));
-        
+
         HBox box = new HBox(slotBtn);
         box.setStyle("-fx-alignment: CENTER;");
         return box;
@@ -269,9 +272,9 @@ public class StudentDashboardController {
             showError("Please select a time slot first!");
             return;
         }
-        
+
         Booking booking = new Booking(learnerProfile.getLearnerProfileId(), selectedSlot.getSlotId());
-        
+
         boolean created = bookingDAO.create(booking);
         if (created) {
             timeSlotDAO.updateStatus(selectedSlot.getSlotId(), TimeSlot.STATUS_BOOKED);
@@ -290,23 +293,19 @@ public class StudentDashboardController {
     }
 
     private void showSuccessMessage(String message) {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-            javafx.scene.control.Alert.AlertType.INFORMATION
-        );
-        alert.setTitle("Success");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        if (errorLabel != null) {
+            errorLabel.setStyle("-fx-text-fill: #38a169;");
+            errorLabel.setText(message);
+            errorLabel.setVisible(true);
+        }
     }
 
     private void showError(String message) {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
-            javafx.scene.control.Alert.AlertType.ERROR
-        );
-        alert.setTitle("Error");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        if (errorLabel != null) {
+            errorLabel.setStyle("-fx-text-fill: #e53e3e;");
+            errorLabel.setText(message);
+            errorLabel.setVisible(true);
+        }
     }
 
     @FXML
@@ -319,27 +318,6 @@ public class StudentDashboardController {
     private void handleNextMonth(ActionEvent event) {
         currentMonth = currentMonth.plusMonths(1);
         updateCalendar();
-    }
-
-    @FXML
-    private void handleViewProfile(ActionEvent event) {
-        if (selectedTeacher == null) {
-            showError("Please select a teacher first");
-            return;
-        }
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/teacher_profile_view.fxml"));
-            Parent root = loader.load();
-            
-            TeacherProfileViewController controller = loader.getController();
-            controller.setTeacherProfile(selectedTeacher);
-            
-            Scene scene = new Scene(root);
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(scene);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @FXML
@@ -356,13 +334,17 @@ public class StudentDashboardController {
     }
 
     @FXML
-    private void handlePrevPage(ActionEvent event) {
-        // Handle pagination
-    }
-
-    @FXML
-    private void handleNextPage(ActionEvent event) {
-        // Handle pagination
+    private void handleViewSchedule(ActionEvent event) {
+        try {
+            Parent scheduleRoot = FXMLLoader.load(getClass().getResource("/fxml/student_schedule_view.fxml"));
+            Scene scheduleScene = new Scene(scheduleRoot);
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            stage.setScene(scheduleScene);
+            stage.setTitle("Music Course Platform - My Schedule");
+        } catch (IOException e) {
+            e.printStackTrace();
+            showError("Failed to load schedule view");
+        }
     }
 
     @FXML
