@@ -36,6 +36,7 @@ public class StudentDashboardController {
     @FXML private Label teacherInstrumentLabel;
     @FXML private Label teacherExperienceLabel;
     @FXML private Label teacherRateLabel;
+    @FXML private Label teacherBioLabel;
     @FXML private ComboBox<String> instrumentCombo;
     @FXML private ComboBox<String> teacherCombo;
     @FXML private Label monthLabel;
@@ -156,6 +157,10 @@ public class StudentDashboardController {
             }
             if (teacherRateLabel != null) {
                 teacherRateLabel.setText("$" + selectedTeacher.getHourlyRate() + "/hr");
+            }
+            if (teacherBioLabel != null) {
+                String bio = selectedTeacher.getBiography();
+                teacherBioLabel.setText((bio != null && !bio.isEmpty()) ? bio : "No biography available.");
             }
         }
     }

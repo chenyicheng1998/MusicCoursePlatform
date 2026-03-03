@@ -81,6 +81,12 @@
                                     <Label fx:id="teacherRateLabel" text="" style="-fx-font-weight: bold; -fx-font-size: 12px; -fx-text-fill: #2D4A47;"/>
                                 </VBox>
                             </HBox>
+
+                            <!-- Teacher Bio -->
+                            <VBox spacing="4">
+                                <Label text="About" style="-fx-text-fill: #A0AEC0; -fx-font-size: 10px;"/>
+                                <Label fx:id="teacherBioLabel" text="" wrapText="true" style="-fx-font-size: 11px; -fx-text-fill: #4A5568;" prefWidth="220"/>
+                            </VBox>
                         </VBox>
                     </VBox>
                     

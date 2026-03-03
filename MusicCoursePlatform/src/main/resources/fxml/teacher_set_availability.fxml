@@ -117,19 +117,17 @@
 
                         <Label fx:id="selectedDateLabel" text="Select a date" style="-fx-text-fill: #718096;"/>
                         
-                        <!-- Time Input -->
-                        <HBox spacing="10" alignment="CENTER_LEFT">
-                            <Button fx:id="startTimeBtn" text="Start" styleClass="secondary-button" prefWidth="90"/>
-                            <Button fx:id="endTimeBtn" text="End" styleClass="primary-button" prefWidth="90"/>
-                        </HBox>
-                        
-                        <!-- Add Time Slot -->
-                        <HBox spacing="10" alignment="CENTER_LEFT">
-                            <ComboBox fx:id="startTimeCombo" promptText="Start" prefWidth="90"/>
-                            <Label text="-"/>
-                            <ComboBox fx:id="endTimeCombo" promptText="End" prefWidth="90"/>
-                        </HBox>
-                        
+                        <!-- Time Selection -->
+                        <VBox spacing="8">
+                            <Label text="Start Time" style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
+                            <ComboBox fx:id="startTimeCombo" promptText="Select start time" prefWidth="200"/>
+                        </VBox>
+
+                        <VBox spacing="8">
+                            <Label text="End Time" style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
+                            <ComboBox fx:id="endTimeCombo" promptText="Select end time" prefWidth="200"/>
+                        </VBox>
+
                         <Button text="Add Time Slot" 
                                 styleClass="primary-button"
                                 onAction="#handleAddTimeSlot"

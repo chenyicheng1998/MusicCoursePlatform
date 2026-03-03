@@ -224,8 +224,8 @@ public class TeacherDashboardController {
         
         Label timeLabel = new Label(timeText);
         timeLabel.getStyleClass().add("time-slot");
-        timeLabel.setPrefWidth(120);
-        
+        timeLabel.setPrefWidth(150);  // Increased from 120 to 150 to show full time
+
         Button deleteBtn = new Button("🗑");
         deleteBtn.setStyle("-fx-background-color: transparent; -fx-cursor: hand;");
         deleteBtn.setOnAction(e -> handleDeleteSlot(slot));
@@ -260,6 +260,12 @@ public class TeacherDashboardController {
             return;
         }
         
+        // Validate time range: start time must be before end time
+        if (startStr.compareTo(endStr) >= 0) {
+            showError("End time must be after start time!");
+            return;
+        }
+
         TimeSlot slot = new TimeSlot(teacherProfile.getTeacherProfileId(), selectedDate, startStr, endStr);
         
         boolean created = timeSlotDAO.create(slot);
