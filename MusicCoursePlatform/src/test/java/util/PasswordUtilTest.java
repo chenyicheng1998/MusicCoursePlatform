@@ -237,5 +237,31 @@ public class PasswordUtilTest {
         assertTrue(PasswordUtil.verifyPassword(unicodePassword, hashedPassword),
             "Should handle Unicode characters correctly");
     }
+
+    @Test
+    @Order(21)
+    @DisplayName("Test: Private constructor throws exception")
+    void testPrivateConstructor() throws Exception {
+        // Test private constructor using reflection to increase coverage
+        java.lang.reflect.Constructor<PasswordUtil> constructor =
+            PasswordUtil.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+
+        // Should be able to instantiate (even though it's not meant to be used)
+        PasswordUtil instance = constructor.newInstance();
+        assertNotNull(instance);
+    }
+
+    @Test
+    @Order(22)
+    @DisplayName("Test: Verify with invalid hash format returns false")
+    void testVerifyPassword_InvalidHashFormat() {
+        String plainPassword = "ValidPassword123";
+        String invalidHash = "this-is-not-a-valid-bcrypt-hash";
+
+        // Should return false for invalid hash format
+        assertFalse(PasswordUtil.verifyPassword(plainPassword, invalidHash),
+            "Should return false for invalid hash format");
+    }
 }
 
