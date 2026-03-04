@@ -49,11 +49,6 @@
                             <Circle radius="25" style="-fx-fill: #CBD5E0;"/>
                             <Label fx:id="userNameLabel" text="Name" styleClass="teacher-name"/>
                         </HBox>
-
-                        <Button text="Course Booking"
-                                styleClass="secondary-button"
-                                onAction="#handleBackToDashboard"
-                                prefWidth="180"/>
                     </VBox>
                     
                     <!-- Right Panel - Bookings List -->

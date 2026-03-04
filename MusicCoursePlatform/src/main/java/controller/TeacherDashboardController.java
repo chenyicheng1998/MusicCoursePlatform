@@ -42,12 +42,11 @@ public class TeacherDashboardController {
     @FXML private ComboBox<String> endTimeCombo;
     @FXML private VBox timeSlotsContainer;
     @FXML private ComboBox<String> languageCombo;
-    @FXML private Label errorLabel;
 
     private TeacherProfileDAO teacherProfileDAO;
     private TimeSlotDAO timeSlotDAO;
     private BookingDAO bookingDAO;
-
+    
     private YearMonth currentMonth;
     private LocalDate selectedDate;
     private TeacherProfile teacherProfile;
@@ -58,10 +57,10 @@ public class TeacherDashboardController {
         teacherProfileDAO = new TeacherProfileDAO();
         timeSlotDAO = new TimeSlotDAO();
         bookingDAO = new BookingDAO();
-
+        
         currentMonth = YearMonth.now();
         currentUser = SessionManager.getInstance().getCurrentUser();
-
+        
         setupInstrumentsCombo();
         setupTimeComboBoxes();
         setupLanguageCombo();
@@ -71,7 +70,7 @@ public class TeacherDashboardController {
 
     private void setupInstrumentsCombo() {
         instrumentsCombo.getItems().addAll(
-                "Piano", "Guitar", "Violin", "Drums", "Flute", "Saxophone", "Cello", "Voice"
+            "Piano", "Guitar", "Violin", "Drums", "Flute", "Saxophone", "Cello", "Voice"
         );
     }
 
@@ -94,9 +93,9 @@ public class TeacherDashboardController {
 
     private void loadTeacherProfile() {
         if (currentUser == null) return;
-
+        
         teacherProfile = teacherProfileDAO.findByUserId(currentUser.getUserId());
-
+        
         if (teacherProfile != null) {
             nameLabel.setText(currentUser.getUsername());
             if (teacherProfile.getInstrumentsTaught() != null) {
@@ -117,12 +116,12 @@ public class TeacherDashboardController {
     @FXML
     private void handleSaveProfile(ActionEvent event) {
         if (currentUser == null || teacherProfile == null) return;
-
+        
         String instrument = instrumentsCombo.getValue();
         String experience = experienceField.getText();
         String pricing = pricingField.getText();
         String bio = bioField.getText();
-
+        
         teacherProfile.setInstrumentsTaught(instrument);
 
         if (experience != null && !experience.isEmpty()) {
@@ -143,7 +142,7 @@ public class TeacherDashboardController {
             }
         }
         teacherProfile.setBiography(bio);
-
+        
         boolean updated = teacherProfileDAO.update(teacherProfile);
         if (updated) {
             showSuccess("Profile saved successfully!");
@@ -155,35 +154,35 @@ public class TeacherDashboardController {
     private void updateCalendar() {
         monthLabel.setText(currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")));
         calendarGrid.getChildren().clear();
-
+        
         LocalDate firstOfMonth = currentMonth.atDay(1);
         int dayOfWeek = firstOfMonth.getDayOfWeek().getValue() % 7;
-
+        
         for (int i = 0; i < dayOfWeek; i++) {
             Label emptyLabel = new Label("");
             emptyLabel.setPrefWidth(40);
             emptyLabel.setPrefHeight(40);
             calendarGrid.getChildren().add(emptyLabel);
         }
-
+        
         for (int day = 1; day <= currentMonth.lengthOfMonth(); day++) {
             LocalDate date = currentMonth.atDay(day);
             Button dayBtn = new Button(String.valueOf(day));
             dayBtn.setPrefWidth(40);
             dayBtn.setPrefHeight(40);
             dayBtn.getStyleClass().add("calendar-day");
-
+            
             if (hasTimeSlots(date)) {
                 dayBtn.getStyleClass().add("calendar-day-available");
             }
-
+            
             if (date.equals(selectedDate)) {
                 dayBtn.getStyleClass().add("calendar-day-selected");
             }
-
+            
             final LocalDate clickedDate = date;
             dayBtn.setOnAction(e -> handleDateClick(clickedDate));
-
+            
             calendarGrid.getChildren().add(dayBtn);
         }
     }
@@ -203,16 +202,16 @@ public class TeacherDashboardController {
 
     private void updateTimeSlots() {
         timeSlotsContainer.getChildren().clear();
-
+        
         if (selectedDate == null || teacherProfile == null) return;
-
+        
         List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileIdAndDate(teacherProfile.getTeacherProfileId(), selectedDate);
-
+        
         for (TimeSlot slot : slots) {
             HBox slotBox = createTimeSlotBox(slot);
             timeSlotsContainer.getChildren().add(slotBox);
         }
-
+        
         if (timeSlotsContainer.getChildren().isEmpty()) {
             Label noSlotsLabel = new Label("No time slots set");
             noSlotsLabel.setStyle("-fx-text-fill: #718096;");
@@ -222,22 +221,22 @@ public class TeacherDashboardController {
 
     private HBox createTimeSlotBox(TimeSlot slot) {
         String timeText = slot.getStartTime() + " - " + slot.getEndTime();
-
+        
         Label timeLabel = new Label(timeText);
         timeLabel.getStyleClass().add("time-slot");
-        timeLabel.setPrefWidth(120);
+        timeLabel.setPrefWidth(150);  // Increased from 120 to 150 to show full time
 
         Button deleteBtn = new Button("🗑");
         deleteBtn.setStyle("-fx-background-color: transparent; -fx-cursor: hand;");
         deleteBtn.setOnAction(e -> handleDeleteSlot(slot));
-
+        
         HBox box = new HBox(10, timeLabel, deleteBtn);
         box.setStyle("-fx-alignment: CENTER_LEFT;");
-
+        
         if (slot.isBooked()) {
             timeLabel.getStyleClass().add("time-slot-booked");
         }
-
+        
         return box;
     }
 
@@ -247,22 +246,28 @@ public class TeacherDashboardController {
             showError("Please select a date first!");
             return;
         }
-
+        
         if (teacherProfile == null) {
             showError("Teacher profile not found!");
             return;
         }
-
+        
         String startStr = startTimeCombo.getValue();
         String endStr = endTimeCombo.getValue();
-
+        
         if (startStr == null || endStr == null) {
             showError("Please select start and end time!");
             return;
         }
+        
+        // Validate time range: start time must be before end time
+        if (startStr.compareTo(endStr) >= 0) {
+            showError("End time must be after start time!");
+            return;
+        }
 
         TimeSlot slot = new TimeSlot(teacherProfile.getTeacherProfileId(), selectedDate, startStr, endStr);
-
+        
         boolean created = timeSlotDAO.create(slot);
         if (created) {
             updateTimeSlots();
@@ -278,7 +283,7 @@ public class TeacherDashboardController {
             showError("Cannot delete a booked slot!");
             return;
         }
-
+        
         boolean deleted = timeSlotDAO.delete(slot.getSlotId());
         if (deleted) {
             updateTimeSlots();
@@ -313,19 +318,23 @@ public class TeacherDashboardController {
     }
 
     private void showError(String message) {
-        if (errorLabel != null) {
-            errorLabel.setStyle("-fx-text-fill: #e53e3e;");
-            errorLabel.setText(message);
-            errorLabel.setVisible(true);
-        }
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+            javafx.scene.control.Alert.AlertType.ERROR
+        );
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     private void showSuccess(String message) {
-        if (errorLabel != null) {
-            errorLabel.setStyle("-fx-text-fill: #38a169;");
-            errorLabel.setText(message);
-            errorLabel.setVisible(true);
-        }
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+            javafx.scene.control.Alert.AlertType.INFORMATION
+        );
+        alert.setTitle("Success");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     @FXML
