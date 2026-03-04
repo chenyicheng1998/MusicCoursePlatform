@@ -9,8 +9,8 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 
-# Copy the built JAR file
-COPY --from=build /app/target/*.jar app.jar
+# Copy the built JAR file (explicitly specify the shaded JAR)
+COPY --from=build /app/target/MusicCoursePlatform-1.0-SNAPSHOT.jar app.jar
 
 # Create a non-root user for security
 RUN groupadd -r appuser && useradd -r -g appuser appuser
