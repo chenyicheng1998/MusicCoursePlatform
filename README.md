@@ -259,9 +259,9 @@ docker pull chenyicheng1998/music-course-platform:v1
 | AI and Project Management | [AI and Project Management.pdf](document/AI%20and%20Project%20Management%20in%20Software%20Engineering.pdf) |
 | Use Case Diagram | [Use Case Diagram.pdf](document/diagrams/Music%20Course%20Platform%20-%20Use%20Case%20Diagram.pdf) |
 | Data Modeling | [Data Modeling.pdf](document/diagrams/Music%20Course%20Platform%20Data%20Modeling.pdf) |
-| Sprint 1 Review | [Sprint 1 Review](<document/Sprint Review Reports/Sprint_1_Review_Report.pdf>) |
-| Sprint 2 Review | [Sprint 2 Review](<document/Sprint Review Reports/Sprint_2_Review_Report.pdf>) |
-| Sprint 3 Review | [Sprint 3 Review](<document/Sprint Review Reports/Sprint_3_Review_Report.pdf>) |
+| Sprint 1 Review | [Sprint 1 Review.pdf](document/SprintReviewReports/Sprint_1_Review_Report.pdf) |
+| Sprint 2 Review | [Sprint 2 Review.pdf](document/SprintReviewReports/Sprint_2_Review_Report.pdf) |
+| Sprint 3 Review | [Sprint 3 Review.pdf](document/SprintReviewReports/Sprint_3_Review_Report.pdf) |
 
 ### Diagrams
 
