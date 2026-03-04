@@ -31,19 +31,23 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building project with Maven...'
-                bat 'mvn clean install -DskipTests'
+                dir('MusicCoursePlatform') {
+                    bat 'mvn clean install -DskipTests'
+                }
             }
         }
 
         stage('Run Tests') {
             steps {
                 echo 'Running unit tests...'
-                bat 'mvn test'
+                dir('MusicCoursePlatform') {
+                    bat 'mvn test'
+                }
             }
             post {
                 always {
                     // Publish test results
-                    junit '**/target/surefire-reports/*.xml'
+                    junit 'MusicCoursePlatform/target/surefire-reports/*.xml'
                 }
             }
         }
@@ -51,15 +55,17 @@ pipeline {
         stage('Generate JaCoCo Report') {
             steps {
                 echo 'Generating code coverage report...'
-                bat 'mvn jacoco:report'
+                dir('MusicCoursePlatform') {
+                    bat 'mvn jacoco:report'
+                }
             }
             post {
                 always {
                     // Publish coverage report
                     jacoco(
-                        execPattern: '**/target/jacoco.exec',
-                        classPattern: '**/target/classes',
-                        sourcePattern: '**/src/main/java'
+                        execPattern: 'MusicCoursePlatform/target/jacoco.exec',
+                        classPattern: 'MusicCoursePlatform/target/classes',
+                        sourcePattern: 'MusicCoursePlatform/src/main/java'
                     )
                 }
             }
@@ -68,14 +74,16 @@ pipeline {
         stage('Package Application') {
             steps {
                 echo 'Packaging application...'
-                bat 'mvn package -DskipTests'
+                dir('MusicCoursePlatform') {
+                    bat 'mvn package -DskipTests'
+                }
             }
         }
 
         stage('Archive Artifacts') {
             steps {
                 echo 'Archiving JAR file...'
-                archiveArtifacts artifacts: '**/target/*.jar',
+                archiveArtifacts artifacts: 'MusicCoursePlatform/target/*.jar',
                                 fingerprint: true,
                                 allowEmptyArchive: true
             }
@@ -84,8 +92,10 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo 'Building Docker image...'
-                script {
-                    docker.build("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}")
+                dir('MusicCoursePlatform') {
+                    script {
+                        docker.build("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}")
+                    }
                 }
             }
         }
