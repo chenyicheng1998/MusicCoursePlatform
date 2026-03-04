@@ -1,72 +1,47 @@
-# Software Engineering Project 1
-## Music Course Platform
-## Group 6
+# Music Course Platform
+## Software Engineering Project 1 — Group 5
 
 ## Team Members
-- **Luo Ying** - Frontend Development, Documentation
-- **Chen Yicheng** - Backend Development, DevOps, Technical Documentation
-- **Lu Liu** - Backend Development, Database Design, Technical Documentation
-- **Su Wai Phyoe** - Testing, Frontend Development, Documentation
-
-**Team:** Group 6
+| Name | Role |
+|------|------|
+| **Luo Ying** | Frontend Development, Documentation |
+| **Chen Yicheng** | Backend Development, DevOps, Technical Documentation |
+| **Lu Liu** | Backend Development, Database Design, Technical Documentation |
+| **Su Wai Phyoe** | Testing, Frontend Development, Documentation |
 
 ---
 
 ## Description
 
-The Music Course Platform is a desktop application that connects music teachers with learners, enabling teachers to manage their profiles and availability while allowing learners to search for teachers and book lessons. 
+The Music Course Platform is a JavaFX desktop application that connects music teachers with learners. Teachers can manage their profiles and availability, while learners can search for teachers and book lessons.
 
-The application uses **JavaFX** for the user interface, **MariaDB** for database management, and **JDBC** for database interaction, following a three-tier architecture pattern.
+The application follows a **three-tier architecture** (Presentation → Business Logic → Data Access) using JavaFX for the UI, MariaDB for the database, and JDBC for database connectivity.
 
 ### Key Features
-- User registration and authentication for teachers and learners
-- Teacher profile management (biography, instruments, pricing)
+- User registration and authentication (Teacher / Learner)
+- Teacher profile management (biography, instruments, pricing, location)
 - Time slot scheduling and availability management
-- Multi-criteria teacher search (by instrument and availability)
-- Lesson booking and confirmation
+- Teacher search by instrument and availability
+- Lesson booking and cancellation
 - Booking management for both teachers and learners
 
 ---
 
 ## Technology Stack
 
-- **Language:** Java 17+
-- **UI Framework:** JavaFX 17+
-- **Database:** MariaDB 10.6+
-- **Database Connectivity:** JDBC
-- **Build Tool:** Maven
-- **Version Control:** Git & GitHub
-- **Project Management:** Trello
-- **Testing:** JUnit 5, TestFX
-- **Code Coverage:** JaCoCo
-- **CI/CD:** Jenkins (planned for Sprint 3)
-- **Containerization:** Docker (planned for Sprint 4)
-
----
-
-## Documentation
-
-### Project Planning
-- [Product Vision](document/Product%20Vision.pdf)
-- [Project Plan](document/Software%20Engineering%20Project%20Plan.pdf)
-- [AI and Project Management](document/AI%20and%20Project%20Management%20in%20Software%20Engineering.pdf)
-- [Use Case Diagram](document/Music%20Course%20Platform%20-%20Use%20Case%20Diagram.pdf)
-
-### Design & Architecture
-- [System Architecture](document/Architecture.md) *(Coming in Sprint 2)*
-- [Database Schema](document/DatabaseSchema.md) *(Coming in Sprint 2)*
-- [UI/UX Design](document/UIDesign.md) *(Coming in Sprint 3)*
-
-### Sprint Reviews
-- [Sprint 1 Review](document/Sprint_1_Review_Report.pdf)
-- [Sprint 2 Review](document/Sprint_2_Review_Report.pdf) *(Coming Soon)*
-- [Sprint 3 Review](document/Sprint_3_Review_Report.pdf) *(Coming Soon)*
-- [Sprint 4 Review](document/Sprint_4_Review_Report.pdf) *(Coming Soon)*
-
-### Quality Assurance
-- [Testing Strategy](document/Testing.md) *(Coming in Sprint 3)*
-- [Code Coverage Reports](document/CodeCoverage.md) *(Coming in Sprint 2)*
-- [Code Review Guidelines](document/CodeReview.md) *(Coming in Sprint 3)*
+| Category | Technology |
+|----------|-----------|
+| Language | Java 17+ |
+| UI Framework | JavaFX 17+ |
+| Database | MariaDB 10.6+ |
+| DB Connectivity | JDBC |
+| Build Tool | Maven |
+| Version Control | Git & GitHub |
+| Project Management | Trello |
+| Testing | JUnit 5 |
+| Code Coverage | JaCoCo |
+| CI/CD | Jenkins |
+| Containerization | Docker |
 
 ---
 
@@ -74,70 +49,88 @@ The application uses **JavaFX** for the user interface, **MariaDB** for database
 
 ```
 MusicCoursePlatform/
-├── document/                        # Project documentation
+├── README.md
+├── document/
 │   ├── Product Vision.pdf
 │   ├── Software Engineering Project Plan.pdf
 │   ├── AI and Project Management in Software Engineering.pdf
-│   ├── Music Course Platform - Use Case Diagram.pdf
-│   └── Sprint_1_Review_Report.md
+│   ├── diagrams/
+│   │   ├── Music Course Platform - Use Case Diagram.pdf
+│   │   └── Music Course Platform Data Modeling.pdf
+│   ├── images/
+│   └── Sprint Review Reports/
+│       ├── Sprint_1_Review_Report.pdf
+│       ├── Sprint_2_Review_Report.pdf
+│       └── Sprint_3_Review_Report.pdf
 │
-└── MusicCoursePlatform/             # Main application directory
-    ├── .idea/                       # IntelliJ IDEA configuration
-    ├── .mvn/                        # Maven wrapper files
-    ├── pom.xml                      # Maven configuration
-    │
-    ├── database/                    # Database scripts
-    │   ├── schema.sql               # Database schema (Sprint 2 ✅)
-    │   └── sample_data.sql          # Sample test data
-    │
-    ├── src/
-    │   ├── main/
-    │   │   ├── java/                # Java source files
-    │   │   │   ├── controller/      # JavaFX controllers (Sprint 2 ✅)
-    │   │   │   │   ├── LoginController.java
-    │   │   │   │   └── SignupController.java
-    │   │   │   ├── dao/             # Data Access Objects (Sprint 2 ✅)
-    │   │   │   │   └── UserDAO.java
-    │   │   │   ├── model/           # Entity classes (Sprint 2 ✅)
-    │   │   │   │   └── User.java
-    │   │   │   ├── service/         # Business logic layer (Sprint 2 ✅)
-    │   │   │   │   └── UserService.java
-    │   │   │   ├── util/            # Utility classes (Sprint 2 ✅)
-    │   │   │   │   ├── DatabaseConnection.java
-    │   │   │   │   └── PasswordUtil.java
-    │   │   │   └── Main.java        # Application entry point (Sprint 2 ✅)
-    │   │   │
-    │   │   └── resources/
-    │   │       └── fxml/            # FXML layout files (Sprint 2 ✅)
-    │   │           ├── login.fxml
-    │   │           └── signup.fxml
-    │   │
-    │   └── test/
-    │       └── java/                # JUnit test files (Sprint 2 ✅)
-    │           ├── dao/
-    │           │   └── UserDAOTest.java
-    │           ├── CreateDatabase.java
-    │           └── TestDatabaseConnection.java
-    │
-    └── target/                      # Maven build output (generated)
-        ├── classes/                 # Compiled classes
-        │   ├── controller/
-        │   ├── dao/
-        │   ├── fxml/
-        │   ├── model/
-        │   ├── service/
-        │   └── util/
-        ├── generated-sources/
-        │   └── annotations/
-        └── maven-status/
-            └── maven-compiler-plugin/
-                └── compile/
-                    └── default-compile/
-
-Notes:
-- ✅ indicates completed in Sprint 2
-- target/ folder is auto-generated (not in Git)
-- .idea/ folder is IDE-specific (not in Git)
+└── MusicCoursePlatform/                 # Main application
+    ├── pom.xml
+    ├── Jenkinsfile
+    ├── Dockerfile
+    ├── database/
+    │   └── schema.sql
+    └── src/
+        ├── main/
+        │   ├── java/
+        │   │   ├── com/musiccourse/
+        │   │   │   └── Main.java        # Application entry point
+        │   │   ├── controller/
+        │   │   │   ├── BookingViewController.java
+        │   │   │   ├── LoginController.java
+        │   │   │   ├── SessionManager.java
+        │   │   │   ├── SignupController.java
+        │   │   │   ├── StudentDashboardController.java
+        │   │   │   ├── TeacherDashboardController.java
+        │   │   │   └── TeacherProfileViewController.java
+        │   │   ├── dao/
+        │   │   │   ├── BookingDAO.java
+        │   │   │   ├── DatabaseConnection.java
+        │   │   │   ├── LearnerProfileDAO.java
+        │   │   │   ├── TeacherProfileDAO.java
+        │   │   │   ├── TimeSlotDAO.java
+        │   │   │   └── UserDAO.java
+        │   │   ├── model/
+        │   │   │   ├── Booking.java
+        │   │   │   ├── LearnerProfile.java
+        │   │   │   ├── TeacherProfile.java
+        │   │   │   ├── TimeSlot.java
+        │   │   │   └── User.java
+        │   │   ├── service/
+        │   │   │   ├── BookingService.java
+        │   │   │   ├── TeacherService.java
+        │   │   │   ├── TimeSlotService.java
+        │   │   │   └── UserService.java
+        │   │   └── util/
+        │   │       └── PasswordUtil.java
+        │   └── resources/
+        │       ├── css/
+        │       │   └── styles.css
+        │       └── fxml/
+        │           ├── login.fxml
+        │           ├── signup.fxml
+        │           ├── student_course_booking.fxml
+        │           ├── student_schedule_view.fxml
+        │           ├── teacher_schedule_view.fxml
+        │           └── teacher_set_availability.fxml
+        └── test/
+            └── java/
+                ├── controller/
+                │   └── SessionManagerTest.java
+                ├── dao/
+                │   ├── BookingDAOTest.java
+                │   ├── LearnerProfileDAOTest.java
+                │   ├── TeacherProfileDAOTest.java
+                │   ├── TimeSlotDAOTest.java
+                │   └── UserDAOTest.java
+                ├── model/
+                │   └── ModelTest.java
+                ├── service/
+                │   ├── BookingServiceTest.java
+                │   ├── TeacherServiceTest.java
+                │   ├── TimeSlotServiceTest.java
+                │   └── UserServiceTest.java
+                └── util/
+                    └── PasswordUtilTest.java
 ```
 
 ---
@@ -146,27 +139,10 @@ Notes:
 
 ### Prerequisites
 
-Before you begin, ensure you have the following installed:
-
-- **Java Development Kit (JDK) 17 or later**
-  - Download: https://www.oracle.com/java/technologies/downloads/
-  - Verify: `java -version`
-
-- **Apache Maven 3.6+**
-  - Download: https://maven.apache.org/download.cgi
-  - Verify: `mvn -version`
-
-- **MariaDB 10.6+**
-  - Download: https://mariadb.org/download/
-  - Default port: 3306
-
-- **JavaFX SDK 17+** (if not using Maven)
-  - Download: https://gluonhq.com/products/javafx/
-
+- **JDK 17+** — `java -version`
+- **Apache Maven 3.6+** — `mvn -version`
+- **MariaDB 10.6+** (default port: 3306)
 - **Git**
-  - Download: https://git-scm.com/downloads
-
----
 
 ### Installation & Setup
 
@@ -179,43 +155,21 @@ cd MusicCoursePlatform
 
 #### 2. Configure Database Connection
 
-**IMPORTANT:** Update your MariaDB password before running the application.
-
-**File:** `MusicCoursePlatform/src/main/java/util/DatabaseConnection.java`  
-**Line 18:** Update the password constant:
+Open `MusicCoursePlatform/src/main/java/dao/DatabaseConnection.java` and update lines 17–19 with your MariaDB credentials:
 
 ```java
-private static final String PASSWORD = "your_mariadb_password";
+private static final String URL = "jdbc:mariadb://localhost:3306/music_course_platform";
+private static final String USER = "root";
+private static final String PASSWORD = "your_password_here";
 ```
 
-**Default Configuration:**
-```
-Database: music_course_platform
-Host: localhost:3306
-Username: root
-Password: (update in DatabaseConnection.java)
-```
+#### 3. Create the Database
 
-#### 3. Create Database (First Time Only)
+In your MariaDB client, run:
 
-**Option A: Using Maven (Recommended)**
-```bash
-cd MusicCoursePlatform
-mvn test-compile
-java -cp "target/test-classes;target/classes" CreateDatabase
+```sql
+SOURCE MusicCoursePlatform/database/schema.sql;
 ```
-
-**Option B: Using MySQL Client**
-```bash
-mysql -u root -p
-CREATE DATABASE music_course_platform;
-USE music_course_platform;
-SOURCE database/schema.sql;
-```
-
-**Option C: Using Database Management Tool**
-- Open MySQL Workbench or DBeaver
-- Import `database/schema.sql`
 
 #### 4. Build the Project
 
@@ -224,223 +178,98 @@ cd MusicCoursePlatform
 mvn clean compile
 ```
 
-#### 5. Run Tests
+#### 5. Run the Application
 
 ```bash
-mvn test
-```
-
-All 16 tests should pass if database is configured correctly.
-
-#### 6. Generate Code Coverage Report
-
-```bash
-mvn test jacoco:report
-```
-
-View report at: `target/site/jacoco/index.html`
-
-#### 7. Run the Application
-
-**Sprint 2 Update:** JavaFX UI is now available!
-
-```bash
-cd MusicCoursePlatform
 mvn javafx:run
 ```
 
-Or run directly from IDE (IntelliJ IDEA / Eclipse):
-- Right-click on `Main.java`
-- Select "Run Main.main()"
-
-**What you'll see:**
-- Login screen with email and password fields
-- "Create account" link navigates to signup screen
-- Signup screen with username, email, password fields
-- "Sign up as Student" and "Sign up as Teacher" buttons
-- "Already have an account? Log in" link navigates back
-
-**Note:** Backend integration (UserService) is in progress. Currently shows placeholder alerts.
-
 ---
 
-### Test Accounts (For Development)
+## Testing & Code Coverage
 
-After running `CreateDatabase`, these test accounts are available:
-
-| Username | Password | Type |
-|----------|----------|------|
-| teacher_john | password123 | TEACHER |
-| teacher_mary | password123 | TEACHER |
-| learner_tom | password123 | LEARNER |
-| learner_lucy | password123 | LEARNER |
-
-**Example Usage:**
-```java
-UserService userService = new UserService();
-
-// Register new user
-User newUser = userService.registerUser(
-    "alice123",
-    "password123", 
-    "alice@example.com",
-    "LEARNER"
-);
-
-// Authenticate user
-User user = userService.authenticateUser("teacher_john", "password123");
-if (user.isTeacher()) {
-    // Teacher dashboard (coming in Sprint 3)
-} else {
-    // Learner dashboard (coming in Sprint 3)
-}
-```
-
----
-
-## Development Workflow
-
-### Branch Strategy
-
-- `main` - Production-ready code
-- `develop` - Development branch (Sprint work)
-- `feature/*` - Feature branches (e.g., `feature/user-login`)
-- `bugfix/*` - Bug fix branches
-
-### Coding Standards
-
-- Follow Java naming conventions (CamelCase for classes, camelCase for methods)
-- Write meaningful comments for complex logic
-- All public methods must have JavaDoc comments
-- Maximum line length: 120 characters
-- Use 4 spaces for indentation (no tabs)
-
-### Commit Message Format
-
-```
-<type>(<scope>): <subject>
-
-Examples:
-feat(login): Add user authentication
-fix(booking): Prevent double-booking
-docs(readme): Update installation instructions
-test(user): Add unit tests for UserDAO
-```
-
----
-
-## Testing
-
-### Run Unit Tests
+To run all tests and generate the JaCoCo coverage report:
 
 ```bash
-mvn test
+mvn clean test jacoco:report
 ```
 
-### Generate Code Coverage Report
+The coverage report will be available at `target/site/jacoco/index.html`.
+
+---
+
+## CI/CD Pipeline (Jenkins)
+
+The project uses a Jenkins pipeline defined in `Jenkinsfile`. It triggers automatically on commits to the `dev` branch and runs the following stages:
+
+| Stage | Description |
+|-------|-------------|
+| Checkout | Clone latest code from GitHub |
+| Build | Compile with Maven (`mvn clean compile`) |
+| Run Tests | Execute JUnit tests (`mvn test`) |
+| Generate JaCoCo Report | Produce code coverage report |
+| Package Application | Build shaded JAR (`mvn package`) |
+| Archive Artifacts | Save JAR files as build artifacts |
+| Build Docker Image | Build Docker image from Dockerfile |
+| Push to Docker Hub | Push image to `chenyicheng1998/music-course-platform` |
+
+---
+
+## Docker
+
+The Docker image is available on Docker Hub:
+**[chenyicheng1998/music-course-platform](https://hub.docker.com/repository/docker/chenyicheng1998/music-course-platform)**
 
 ```bash
-mvn jacoco:report
+docker pull chenyicheng1998/music-course-platform:v1
 ```
 
-View report: `target/site/jacoco/index.html`
-
-### Test Coverage Goals
-- **Sprint 2:** 40% code coverage
-- **Sprint 3:** 60% code coverage
-- **Sprint 4:** 70%+ code coverage
+> **Note:** The image builds and pushes successfully via the Jenkins pipeline. Full GUI container execution (JavaFX display environment) is planned for Sprint 4.
 
 ---
 
-## Trello Board
+## Trello Boards
 
-**Project Management:**
+| Sprint | Scrum Master | Board | Status |
+|--------|-------------|-------|--------|
+| Sprint 1 | Chen Yicheng | [Sprint 1](https://trello.com/b/YnjfjBxd/sep1musiccourseplatform) | ✅ Done |
+| Sprint 2 | Luo Ying | [Sprint 2](https://trello.com/b/IMIZmc7K/sep1musiccourseplatform-sprint2) | ✅ Done |
+| Sprint 3 | Su Wai Phyoe | [Sprint 3](https://trello.com/b/B5AJ4wIm/sep1musiccourseplatform-sprint3) | ✅ Done |
+| Sprint 4 | TBD | Sprint 4 Board (to be created) | 📅 Planned |
 
-### Sprint Boards (Each Sprint has its own board)
+### Sprint Boards
 
-| Sprint | Scrum Master | Trello Board | Status |
-|--------|--------------|--------------|--------|
-| **Sprint 1** | Chen Yicheng | [Sprint 1 Board](https://trello.com/b/YnjfjBxd/sep1musiccourseplatform) | ✅ Completed |
-| **Sprint 2** | Luo Ying | [Sprint 2 Board](https://trello.com/b/IMIZmc7K/sep1musiccourseplatform-sprint2) | 🔄 In Progress |
-| **Sprint 3** | TBD | Sprint 3 Board (to be created) | 📅 Planned |
-| **Sprint 4** | TBD | Sprint 4 Board (to be created) | 📅 Planned |
+**Sprint 1**
+![Sprint 1 Trello](document/images/sprint1-trello.jpg)
 
-### Board Structure (Standard for all sprints)
-- **Product Backlog** - All user stories
-- **Sprint X - To Do** - Current sprint tasks
-- **Sprint X - In Progress** - Tasks being worked on
-- **Sprint X - Done** - Completed tasks
-- **Archive** - Completed sprints
+**Sprint 2**
+![Sprint 2 Trello](document/images/sprint2-trello.jpg)
 
-**Current Sprint Board:** [Sprint 2](https://trello.com/b/IMIZmc7K/sep1musiccourseplatform-sprint2)
+**Sprint 3**
+![Sprint 3 Trello](document/images/sprint3-trello.jpg)
 
 ---
 
-## Sprint Timeline
+## Documentation
 
-| Sprint | Weeks | Scrum Master | Status | Focus |
-|--------|-------|--------------|--------|-------|
-| **Sprint 1** | Week 1-2 | Chen Yicheng | ✅ Completed | Project planning, documentation, tool setup |
-| **Sprint 2** | Week 3-4 | Luo Ying | 🔄 In Progress | Database schema, user management, basic UI |
-| **Sprint 3** | Week 5-6 | TBD | 📅 Planned | Booking system, search functionality, CI/CD |
-| **Sprint 4** | Week 7-8 | TBD | 📅 Planned | Testing, Docker, final polish, documentation |
+| Document | Link |
+|----------|------|
+| Product Vision | [Product Vision.pdf](document/Product%20Vision.pdf) |
+| Project Plan | [Software Engineering Project Plan.pdf](document/Software%20Engineering%20Project%20Plan.pdf) |
+| AI and Project Management | [AI and Project Management.pdf](document/AI%20and%20Project%20Management%20in%20Software%20Engineering.pdf) |
+| Use Case Diagram | [Use Case Diagram.pdf](document/diagrams/Music%20Course%20Platform%20-%20Use%20Case%20Diagram.pdf) |
+| Data Modeling | [Data Modeling.pdf](document/diagrams/Music%20Course%20Platform%20Data%20Modeling.pdf) |
+| Sprint 1 Review | [Sprint 1 Review](<document/Sprint Review Reports/Sprint_1_Review_Report.pdf>) |
+| Sprint 2 Review | [Sprint 2 Review](<document/Sprint Review Reports/Sprint_2_Review_Report.pdf>) |
+| Sprint 3 Review | [Sprint 3 Review](<document/Sprint Review Reports/Sprint_3_Review_Report.pdf>) |
 
-**Current Sprint:** Sprint 2  
-**Current Scrum Master:** Luo Ying  
-**Sprint Goal:** Implement user registration, login, and database foundation with JavaFX UI
+### Diagrams
 
----
+**Use Case Diagram**
+![Use Case Diagram](document/images/dia_usecase.jpg)
 
-## Key Deliverables
+**Database Schema**
+![Database Schema](document/images/dia_dbschema.jpg)
 
-### Sprint 1 (Completed)
-**Scrum Master:** Chen Yicheng  
-**Trello Board:** [Sprint 1](https://trello.com/b/YnjfjBxd/sep1musiccourseplatform)
-
-- [x] Product Vision Document
-- [x] Project Plan (12 pages)
-- [x] Trello Board with 28 User Stories
-- [x] Use Case Diagram
-- [x] GitHub Repository Setup
-- [x] Technology Stack Selection
-
-### Sprint 2 (In Progress)
-**Scrum Master:** Luo Ying  
-**Trello Board:** [Sprint 2](https://trello.com/b/IMIZmc7K/sep1musiccourseplatform-sprint2)
-
-- [x] Database schema implementation
-- [x] User registration and login functionality
-- [x] UserDAO with CRUD operations
-- [x] UserService business logic layer
-- [x] Password hashing (BCrypt)
-- [x] Unit tests with JUnit (16 tests, all passing)
-- [x] JaCoCo code coverage report
-- [x] Maven configuration
-- [x] JavaFX UI framework (login and signup screens)
-- [x] Controller integration (LoginController, SignupController)
-- [x] Screen navigation between login and signup
-- [ ] Backend-UI integration (UserService connection)
-- [ ] Complete login/signup functionality
-
-### Sprint 3 (Upcoming)
-**Scrum Master:** TBD  
-**Trello Board:** To be created
-
-- [ ] Teacher profile management
-- [ ] Time slot management
-- [ ] Teacher search functionality
-- [ ] Lesson booking system
-- [ ] Jenkins CI/CD pipeline
-- [ ] Docker image (local testing)
-
-### Sprint 4 (Upcoming)
-**Scrum Master:** TBD  
-**Trello Board:** To be created
-
-- [ ] Integration testing
-- [ ] System testing and bug fixes
-- [ ] Docker image published to Docker Hub
-- [ ] Final UI polish
-- [ ] Complete technical documentation
-- [ ] User manual
-- [ ] Final presentation
+**ER Diagram**
+![ER Diagram](document/images/dia_er.jpg)
