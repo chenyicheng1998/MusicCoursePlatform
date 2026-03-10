@@ -22,7 +22,7 @@ public class DatabaseConnection {
     private static final String DB_USER_ENV = System.getenv("DB_USER") != null
             ? System.getenv("DB_USER") : "root";
     private static final String DB_PASSWORD_ENV = System.getenv("DB_PASSWORD") != null
-            ? System.getenv("DB_PASSWORD") : "123456";
+            ? System.getenv("DB_PASSWORD") : "Lethergo123.";
     private static final String URL = "jdbc:mariadb://" + DB_HOST + ":" + DB_PORT + "/music_course_platform";
     private static final String USER = DB_USER_ENV;
     private static final String PASSWORD = DB_PASSWORD_ENV;

@@ -21,14 +21,16 @@ import javafx.stage.Stage;
 import model.TeacherProfile;
 import model.TimeSlot;
 import model.User;
+import util.LanguageManager;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
-public class TeacherDashboardController {
+public class TeacherDashboardController implements LanguageManager.LanguageChangeListener {
 
     @FXML private Label nameLabel;
     @FXML private ComboBox<String> instrumentsCombo;
@@ -43,10 +45,27 @@ public class TeacherDashboardController {
     @FXML private VBox timeSlotsContainer;
     @FXML private ComboBox<String> languageCombo;
     @FXML private Label errorLabel;
+    @FXML private Button viewScheduleButton;
+    @FXML private Button logoutButton;
+    @FXML private Button addSlotButton;
+    @FXML private Button saveProfileButton;
+    @FXML private Label frameLabel;
+    @FXML private Label setAvailabilityLabel;
+    @FXML private Label startTimeLabel;
+    @FXML private Label endTimeLabel;
+    @FXML private Label daySun;
+    @FXML private Label dayMon;
+    @FXML private Label dayTue;
+    @FXML private Label dayWed;
+    @FXML private Label dayThu;
+    @FXML private Label dayFri;
+    @FXML private Label daySat;
 
     private TeacherProfileDAO teacherProfileDAO;
     private TimeSlotDAO timeSlotDAO;
     private BookingDAO bookingDAO;
+    private LanguageManager langManager;
+    private boolean updatingLanguageCombo = false;
     
     private YearMonth currentMonth;
     private LocalDate selectedDate;
@@ -58,6 +77,8 @@ public class TeacherDashboardController {
         teacherProfileDAO = new TeacherProfileDAO();
         timeSlotDAO = new TimeSlotDAO();
         bookingDAO = new BookingDAO();
+        langManager = LanguageManager.getInstance();
+        langManager.addLanguageChangeListener(this);
         
         currentMonth = YearMonth.now();
         currentUser = SessionManager.getInstance().getCurrentUser();
@@ -67,12 +88,65 @@ public class TeacherDashboardController {
         setupLanguageCombo();
         loadTeacherProfile();
         updateCalendar();
+        updateTexts();
+    }
+
+    @Override
+    public void onLanguageChanged(Locale newLocale) {
+        updateTexts();
+        updateCalendar();
+        updateTimeSlots();
+        updateLanguageComboDisplay();
+        updateInstrumentsCombo();
+    }
+
+    private void updateTexts() {
+        if (viewScheduleButton != null) viewScheduleButton.setText(langManager.getString("nav.viewSchedule"));
+        if (logoutButton != null) logoutButton.setText(langManager.getString("nav.logout"));
+        if (addSlotButton != null) addSlotButton.setText(langManager.getString("teacher.addSlot"));
+        if (saveProfileButton != null) saveProfileButton.setText(langManager.getString("message.save"));
+        if (frameLabel != null) frameLabel.setText(langManager.getString("calendar.frame"));
+        if (setAvailabilityLabel != null) setAvailabilityLabel.setText(langManager.getString("teacher.setAvailability"));
+        if (startTimeLabel != null) startTimeLabel.setText(langManager.getString("teacher.startTime"));
+        if (endTimeLabel != null) endTimeLabel.setText(langManager.getString("teacher.endTime"));
+        if (selectedDateLabel != null && selectedDate == null) {
+            selectedDateLabel.setText(langManager.getString("timeslots.selectDate"));
+        }
+        updateDayHeaders();
+    }
+
+    private void updateDayHeaders() {
+        if (daySun != null) daySun.setText(langManager.getString("calendar.sun"));
+        if (dayMon != null) dayMon.setText(langManager.getString("calendar.mon"));
+        if (dayTue != null) dayTue.setText(langManager.getString("calendar.tue"));
+        if (dayWed != null) dayWed.setText(langManager.getString("calendar.wed"));
+        if (dayThu != null) dayThu.setText(langManager.getString("calendar.thu"));
+        if (dayFri != null) dayFri.setText(langManager.getString("calendar.fri"));
+        if (daySat != null) daySat.setText(langManager.getString("calendar.sat"));
     }
 
     private void setupInstrumentsCombo() {
-        instrumentsCombo.getItems().addAll(
-            "Piano", "Guitar", "Violin", "Drums", "Flute", "Saxophone", "Cello", "Voice"
-        );
+        updateInstrumentsCombo();
+    }
+
+    private void updateInstrumentsCombo() {
+        if (instrumentsCombo != null) {
+            String currentValue = instrumentsCombo.getValue();
+            instrumentsCombo.getItems().clear();
+            instrumentsCombo.getItems().addAll(
+                langManager.getString("instrument.piano"),
+                langManager.getString("instrument.guitar"),
+                langManager.getString("instrument.violin"),
+                langManager.getString("instrument.drums"),
+                langManager.getString("instrument.flute"),
+                langManager.getString("instrument.saxophone"),
+                langManager.getString("instrument.cello"),
+                langManager.getString("instrument.voice")
+            );
+            if (currentValue != null) {
+                instrumentsCombo.setValue(langManager.getString("instrument.piano"));
+            }
+        }
     }
 
     private void setupTimeComboBoxes() {
@@ -87,8 +161,43 @@ public class TeacherDashboardController {
 
     private void setupLanguageCombo() {
         if (languageCombo != null) {
-            languageCombo.getItems().addAll("EN", "DE", "ZH");
-            languageCombo.setValue("EN");
+            updatingLanguageCombo = true;
+            languageCombo.getItems().clear();
+            languageCombo.getItems().addAll(
+                langManager.getString("language.english"),
+                langManager.getString("language.finnish")
+            );
+            languageCombo.setValue(langManager.isEnglish() 
+                ? langManager.getString("language.english") 
+                : langManager.getString("language.finnish"));
+            updatingLanguageCombo = false;
+            
+            languageCombo.setOnAction(e -> {
+                if (updatingLanguageCombo) return;
+                String selected = languageCombo.getValue();
+                if (selected != null) {
+                    if (selected.equals("English") || selected.equals("Englanti")) {
+                        langManager.setLanguage("EN");
+                    } else {
+                        langManager.setLanguage("FI");
+                    }
+                }
+            });
+        }
+    }
+
+    private void updateLanguageComboDisplay() {
+        if (languageCombo != null && !updatingLanguageCombo) {
+            updatingLanguageCombo = true;
+            languageCombo.getItems().clear();
+            languageCombo.getItems().addAll(
+                langManager.getString("language.english"),
+                langManager.getString("language.finnish")
+            );
+            languageCombo.setValue(langManager.isEnglish() 
+                ? langManager.getString("language.english") 
+                : langManager.getString("language.finnish"));
+            updatingLanguageCombo = false;
         }
     }
 
@@ -153,7 +262,7 @@ public class TeacherDashboardController {
     }
 
     private void updateCalendar() {
-        monthLabel.setText(currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")));
+        monthLabel.setText(currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy", langManager.getCurrentLocale())));
         calendarGrid.getChildren().clear();
         
         LocalDate firstOfMonth = currentMonth.atDay(1);
@@ -214,7 +323,7 @@ public class TeacherDashboardController {
         }
         
         if (timeSlotsContainer.getChildren().isEmpty()) {
-            Label noSlotsLabel = new Label("No time slots set");
+            Label noSlotsLabel = new Label(langManager.getString("timeslots.noSlots"));
             noSlotsLabel.setStyle("-fx-text-fill: #718096;");
             timeSlotsContainer.getChildren().add(noSlotsLabel);
         }
@@ -225,10 +334,10 @@ public class TeacherDashboardController {
         
         Label timeLabel = new Label(timeText);
         timeLabel.getStyleClass().add("time-slot");
-        timeLabel.setPrefWidth(150);  // Increased from 120 to 150 to show full time
+        timeLabel.setPrefWidth(150);
 
-        Button deleteBtn = new Button("Del");
-        deleteBtn.setPrefWidth(40);
+        Button deleteBtn = new Button(langManager.getString("message.delete"));
+        deleteBtn.setPrefWidth(60);
         deleteBtn.setStyle("-fx-background-color: transparent; -fx-cursor: hand;");
         deleteBtn.setOnAction(e -> handleDeleteSlot(slot));
         

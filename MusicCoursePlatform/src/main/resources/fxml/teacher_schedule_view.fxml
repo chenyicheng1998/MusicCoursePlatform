@@ -22,9 +22,10 @@
         <HBox styleClass="navbar" alignment="CENTER_LEFT" spacing="20">
             <Label text="MusicCoursePlatform" styleClass="navbar-title"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button text="Set Availability" styleClass="secondary-button" onAction="#handleBack"/>
+            <ComboBox fx:id="languageCombo" promptText="Language" prefWidth="120"/>
+            <Button fx:id="setAvailabilityButton" text="Set Availability" styleClass="secondary-button" onAction="#handleBack"/>
             <Circle radius="20" style="-fx-fill: #E2E8F0;"/>
-            <Button text="Logout" styleClass="secondary-button" onAction="#handleLogout"/>
+            <Button fx:id="logoutButton" text="Logout" styleClass="secondary-button" onAction="#handleLogout"/>
         </HBox>
     </top>
     
@@ -52,7 +53,7 @@
 
                     <!-- Right Panel - Schedule Cards -->
                     <VBox spacing="20" HBox.hgrow="ALWAYS">
-                        <Label text="My Schedule" styleClass="section-title"/>
+                        <Label fx:id="myScheduleLabel" text="My Schedule" styleClass="section-title"/>
 
                         <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
                             <FlowPane fx:id="scheduleContainer" hgap="20" vgap="20">

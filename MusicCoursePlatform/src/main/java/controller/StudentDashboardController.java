@@ -23,14 +23,16 @@ import model.LearnerProfile;
 import model.TeacherProfile;
 import model.TimeSlot;
 import model.User;
+import util.LanguageManager;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
-public class StudentDashboardController {
+public class StudentDashboardController implements LanguageManager.LanguageChangeListener {
 
     @FXML private Label teacherNameLabel;
     @FXML private Label teacherInstrumentLabel;
@@ -47,12 +49,31 @@ public class StudentDashboardController {
     @FXML private ComboBox<String> languageCombo;
     @FXML private Button bookButton;
     @FXML private Label errorLabel;
+    @FXML private Label filterLabel;
+    @FXML private Label selectTeacherLabel;
+    @FXML private Label experienceLabel;
+    @FXML private Label rateLabel;
+    @FXML private Label aboutLabel;
+    @FXML private Label availableTimesLabel;
+    @FXML private Label selectedTimeTitleLabel;
+    @FXML private Button viewScheduleButton;
+    @FXML private Button logoutButton;
+    @FXML private Label frameLabel;
+    @FXML private Label daySun;
+    @FXML private Label dayMon;
+    @FXML private Label dayTue;
+    @FXML private Label dayWed;
+    @FXML private Label dayThu;
+    @FXML private Label dayFri;
+    @FXML private Label daySat;
 
     private TeacherProfileDAO teacherProfileDAO;
     private TimeSlotDAO timeSlotDAO;
     private BookingDAO bookingDAO;
     private LearnerProfileDAO learnerProfileDAO;
     private UserDAO userDAO;
+    private LanguageManager langManager;
+    private boolean updatingLanguageCombo = false;
 
     private YearMonth currentMonth;
     private LocalDate selectedDate;
@@ -68,6 +89,8 @@ public class StudentDashboardController {
         bookingDAO = new BookingDAO();
         learnerProfileDAO = new LearnerProfileDAO();
         userDAO = new UserDAO();
+        langManager = LanguageManager.getInstance();
+        langManager.addLanguageChangeListener(this);
 
         currentMonth = YearMonth.now();
 
@@ -76,6 +99,63 @@ public class StudentDashboardController {
         setupLanguageCombo();
         updateCalendar();
         loadTeachers();
+        updateTexts();
+    }
+
+    @Override
+    public void onLanguageChanged(Locale newLocale) {
+        updateTexts();
+        updateCalendar();
+        updateTimeSlots();
+        updateLanguageComboDisplay();
+        updateInstrumentCombo();
+    }
+
+    private void updateTexts() {
+        if (filterLabel != null) filterLabel.setText(langManager.getString("student.filterInstrument"));
+        if (selectTeacherLabel != null) selectTeacherLabel.setText(langManager.getString("student.selectTeacher"));
+        if (experienceLabel != null) experienceLabel.setText(langManager.getString("student.experience"));
+        if (rateLabel != null) rateLabel.setText(langManager.getString("student.rate"));
+        if (aboutLabel != null) aboutLabel.setText(langManager.getString("student.about"));
+        if (availableTimesLabel != null) availableTimesLabel.setText(langManager.getString("timeslots.available"));
+        if (selectedTimeTitleLabel != null) selectedTimeTitleLabel.setText(langManager.getString("timeslots.selectedTime"));
+        if (bookButton != null) bookButton.setText(langManager.getString("timeslots.bookLesson"));
+        if (viewScheduleButton != null) viewScheduleButton.setText(langManager.getString("nav.viewSchedule"));
+        if (logoutButton != null) logoutButton.setText(langManager.getString("nav.logout"));
+        if (frameLabel != null) frameLabel.setText(langManager.getString("calendar.frame"));
+        if (selectedDateLabel != null && selectedDate == null) {
+            selectedDateLabel.setText(langManager.getString("timeslots.selectDate"));
+        }
+        if (selectedTimeLabel != null && selectedSlot == null) {
+            selectedTimeLabel.setText(langManager.getString("timeslots.noneSelected"));
+        }
+        updateDayHeaders();
+        updateLanguageComboDisplay();
+    }
+
+    private void updateDayHeaders() {
+        if (daySun != null) daySun.setText(langManager.getString("calendar.sun"));
+        if (dayMon != null) dayMon.setText(langManager.getString("calendar.mon"));
+        if (dayTue != null) dayTue.setText(langManager.getString("calendar.tue"));
+        if (dayWed != null) dayWed.setText(langManager.getString("calendar.wed"));
+        if (dayThu != null) dayThu.setText(langManager.getString("calendar.thu"));
+        if (dayFri != null) dayFri.setText(langManager.getString("calendar.fri"));
+        if (daySat != null) daySat.setText(langManager.getString("calendar.sat"));
+    }
+
+    private void updateLanguageComboDisplay() {
+        if (languageCombo != null && !updatingLanguageCombo) {
+            updatingLanguageCombo = true;
+            languageCombo.getItems().clear();
+            languageCombo.getItems().addAll(
+                langManager.getString("language.english"),
+                langManager.getString("language.finnish")
+            );
+            languageCombo.setValue(langManager.isEnglish() 
+                ? langManager.getString("language.english") 
+                : langManager.getString("language.finnish"));
+            updatingLanguageCombo = false;
+        }
     }
 
     private void loadLearnerProfile() {
@@ -90,16 +170,50 @@ public class StudentDashboardController {
     }
 
     private void setupInstrumentCombo() {
-        instrumentCombo.getItems().addAll(
-                "Piano", "Guitar", "Violin", "Drums", "Flute", "Saxophone", "Cello", "Voice"
-        );
-        instrumentCombo.setValue("Piano");
+        updateInstrumentCombo();
+    }
+
+    private void updateInstrumentCombo() {
+        if (instrumentCombo != null) {
+            instrumentCombo.getItems().clear();
+            instrumentCombo.getItems().addAll(
+                langManager.getString("instrument.piano"),
+                langManager.getString("instrument.guitar"),
+                langManager.getString("instrument.violin"),
+                langManager.getString("instrument.drums"),
+                langManager.getString("instrument.flute"),
+                langManager.getString("instrument.saxophone"),
+                langManager.getString("instrument.cello"),
+                langManager.getString("instrument.voice")
+            );
+            instrumentCombo.setValue(langManager.getString("instrument.piano"));
+        }
     }
 
     private void setupLanguageCombo() {
         if (languageCombo != null) {
-            languageCombo.getItems().addAll("EN", "DE", "ZH");
-            languageCombo.setValue("EN");
+            updatingLanguageCombo = true;
+            languageCombo.getItems().clear();
+            languageCombo.getItems().addAll(
+                langManager.getString("language.english"),
+                langManager.getString("language.finnish")
+            );
+            languageCombo.setValue(langManager.isEnglish() 
+                ? langManager.getString("language.english") 
+                : langManager.getString("language.finnish"));
+            updatingLanguageCombo = false;
+            
+            languageCombo.setOnAction(e -> {
+                if (updatingLanguageCombo) return;
+                String selected = languageCombo.getValue();
+                if (selected != null) {
+                    if (selected.equals("English") || selected.equals("Englanti")) {
+                        langManager.setLanguage("EN");
+                    } else {
+                        langManager.setLanguage("FI");
+                    }
+                }
+            });
         }
     }
 
@@ -167,7 +281,7 @@ public class StudentDashboardController {
     }
 
     private void updateCalendar() {
-        monthLabel.setText(currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")));
+        monthLabel.setText(currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy", langManager.getCurrentLocale())));
         calendarGrid.getChildren().clear();
 
         LocalDate firstOfMonth = currentMonth.atDay(1);
@@ -233,7 +347,7 @@ public class StudentDashboardController {
         }
 
         if (timeSlotsContainer.getChildren().isEmpty()) {
-            Label noSlotsLabel = new Label("No available slots");
+            Label noSlotsLabel = new Label(langManager.getString("timeslots.noSlots"));
             noSlotsLabel.setStyle("-fx-text-fill: #718096;");
             timeSlotsContainer.getChildren().add(noSlotsLabel);
         }
@@ -270,11 +384,11 @@ public class StudentDashboardController {
 
     private void confirmBooking() {
         if (learnerProfile == null) {
-            showError("Learner profile not found!");
+            showError(langManager.getString("booking.profileNotFound"));
             return;
         }
         if (selectedSlot == null) {
-            showError("Please select a time slot first!");
+            showError(langManager.getString("booking.selectSlot"));
             return;
         }
 
@@ -285,15 +399,15 @@ public class StudentDashboardController {
             timeSlotDAO.updateStatus(selectedSlot.getSlotId(), TimeSlot.STATUS_BOOKED);
             selectedSlot = null;
             if (selectedTimeLabel != null) {
-                selectedTimeLabel.setText("Select a time");
+                selectedTimeLabel.setText(langManager.getString("timeslots.noneSelected"));
             }
             if (bookButton != null) {
                 bookButton.setDisable(true);
             }
             updateTimeSlots();
-            showSuccessMessage("Booking created successfully!");
+            showSuccessMessage(langManager.getString("booking.success"));
         } else {
-            showError("Failed to create booking");
+            showError(langManager.getString("booking.failed"));
         }
     }
 
@@ -328,11 +442,11 @@ public class StudentDashboardController {
     @FXML
     private void handleBookNow(ActionEvent event) {
         if (selectedTeacher == null) {
-            showError("Please select a teacher first");
+            showError(langManager.getString("booking.selectTeacher"));
             return;
         }
         if (selectedSlot == null) {
-            showError("Please select a time slot first");
+            showError(langManager.getString("booking.selectSlot"));
             return;
         }
         confirmBooking();
