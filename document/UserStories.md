@@ -17,8 +17,7 @@
 - **As a teacher**, I want to specify the instruments I teach (e.g., Piano, Guitar, Violin, Drums, Flute, Saxophone, Cello, Voice) so that learners can search for teachers by instrument.
 - **As a teacher**, I want to set my years of experience so that learners can assess my expertise level.
 - **As a teacher**, I want to set my hourly rate so that learners know the cost of my lessons.
-- **As a teacher**, I want to add my location information so that learners can find teachers in their area.
-- **As a teacher**, I want to update my profile information (biography, instruments, experience, rate, location) so that I can keep my information current.
+- **As a teacher**, I want to update my profile information (biography, instruments, experience, rate) so that I can keep my information current.
 - **As a teacher**, I want to view my complete profile so that I can verify all my information is correct.
 
 ---
