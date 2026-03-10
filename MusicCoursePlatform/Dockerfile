@@ -41,4 +41,5 @@ CMD ["java", \
      "--add-modules", "javafx.controls,javafx.fxml", \
      "-Dprism.order=sw", \
      "-Dprism.verbose=false", \
+     "-Dglass.gtk.uiScale=1", \
      "-jar", "target/MusicCoursePlatform-1.0-SNAPSHOT.jar"]
