@@ -22,10 +22,9 @@
         <HBox styleClass="navbar" alignment="CENTER_LEFT" spacing="20">
             <Label text="MusicCoursePlatform" styleClass="navbar-title"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <ComboBox fx:id="languageCombo" promptText="Language" prefWidth="120"/>
-            <Button fx:id="viewScheduleButton" text="View Schedule" styleClass="secondary-button" onAction="#handleViewSchedule"/>
+            <Button text="View Schedule" styleClass="secondary-button" onAction="#handleViewSchedule"/>
             <Circle fx:id="avatarCircle" radius="20" style="-fx-fill: #E2E8F0;"/>
-            <Button fx:id="logoutButton" text="Logout" styleClass="secondary-button" onAction="#handleLogout"/>
+            <Button text="Logout" styleClass="secondary-button" onAction="#handleLogout"/>
         </HBox>
     </top>
     
@@ -46,14 +45,14 @@
                     <!-- Left Panel - Teacher Selection -->
                     <VBox spacing="16" prefWidth="260">
                         <!-- Filter by Instrument -->
-                        <Label fx:id="filterLabel" text="Filter by Instrument" style="-fx-font-weight: bold; -fx-text-fill: #2D3748;"/>
+                        <Label text="Filter by Instrument" style="-fx-font-weight: bold; -fx-text-fill: #2D3748;"/>
                         <ComboBox fx:id="instrumentCombo" 
                                   promptText="Piano" 
                                   prefWidth="240"
                                   onAction="#handleInstrumentChange"/>
                         
                         <!-- Select Teacher -->
-                        <Label fx:id="selectTeacherLabel" text="Select Teacher" style="-fx-font-weight: bold; -fx-text-fill: #2D3748;"/>
+                        <Label text="Select Teacher" style="-fx-font-weight: bold; -fx-text-fill: #2D3748;"/>
                         <ComboBox fx:id="teacherCombo" 
                                   promptText="Select Teacher" 
                                   prefWidth="240"
@@ -73,18 +72,18 @@
                             <!-- Teacher Details -->
                             <HBox spacing="16">
                                 <VBox spacing="2">
-                                    <Label fx:id="experienceLabel" text="Experience" style="-fx-text-fill: #A0AEC0; -fx-font-size: 10px;"/>
+                                    <Label text="Experience" style="-fx-text-fill: #A0AEC0; -fx-font-size: 10px;"/>
                                     <Label fx:id="teacherExperienceLabel" text="" style="-fx-font-weight: bold; -fx-font-size: 12px;"/>
                                 </VBox>
                                 <VBox spacing="2">
-                                    <Label fx:id="rateLabel" text="Rate" style="-fx-text-fill: #A0AEC0; -fx-font-size: 10px;"/>
+                                    <Label text="Rate" style="-fx-text-fill: #A0AEC0; -fx-font-size: 10px;"/>
                                     <Label fx:id="teacherRateLabel" text="" style="-fx-font-weight: bold; -fx-font-size: 12px; -fx-text-fill: #2D4A47;"/>
                                 </VBox>
                             </HBox>
 
                             <!-- Teacher Bio -->
                             <VBox spacing="4">
-                                <Label fx:id="aboutLabel" text="About" style="-fx-text-fill: #A0AEC0; -fx-font-size: 10px;"/>
+                                <Label text="About" style="-fx-text-fill: #A0AEC0; -fx-font-size: 10px;"/>
                                 <Label fx:id="teacherBioLabel" text="" wrapText="true" style="-fx-font-size: 11px; -fx-text-fill: #4A5568;" prefWidth="220"/>
                             </VBox>
                         </VBox>
@@ -92,7 +91,7 @@
                     
                     <!-- Center Panel - Calendar -->
                     <VBox spacing="16" alignment="TOP_CENTER">
-                        <Label fx:id="frameLabel" text="Frame" style="-fx-text-fill: #A0AEC0; -fx-font-size: 14px;"/>
+                        <Label text="Frame" style="-fx-text-fill: #A0AEC0; -fx-font-size: 14px;"/>
                         
                         <!-- Month Navigation -->
                         <HBox alignment="CENTER" spacing="12">
@@ -105,13 +104,13 @@
                         <VBox fx:id="calendarContainer" spacing="8" alignment="CENTER">
                             <!-- Day headers -->
                             <HBox spacing="8" alignment="CENTER">
-                                <Label fx:id="daySun" text="Sun" prefWidth="40" style="-fx-text-fill: #718096; -fx-alignment: CENTER;"/>
-                                <Label fx:id="dayMon" text="Mon" prefWidth="40" style="-fx-text-fill: #718096; -fx-alignment: CENTER;"/>
-                                <Label fx:id="dayTue" text="Tue" prefWidth="40" style="-fx-text-fill: #718096; -fx-alignment: CENTER;"/>
-                                <Label fx:id="dayWed" text="Wed" prefWidth="40" style="-fx-text-fill: #718096; -fx-alignment: CENTER;"/>
-                                <Label fx:id="dayThu" text="Thu" prefWidth="40" style="-fx-text-fill: #718096; -fx-alignment: CENTER;"/>
-                                <Label fx:id="dayFri" text="Fri" prefWidth="40" style="-fx-text-fill: #718096; -fx-alignment: CENTER;"/>
-                                <Label fx:id="daySat" text="Sat" prefWidth="40" style="-fx-text-fill: #718096; -fx-alignment: CENTER;"/>
+                                <Label text="Sun" prefWidth="40" style="-fx-text-fill: #718096; -fx-alignment: CENTER;"/>
+                                <Label text="Mon" prefWidth="40" style="-fx-text-fill: #718096; -fx-alignment: CENTER;"/>
+                                <Label text="Tue" prefWidth="40" style="-fx-text-fill: #718096; -fx-alignment: CENTER;"/>
+                                <Label text="Wed" prefWidth="40" style="-fx-text-fill: #718096; -fx-alignment: CENTER;"/>
+                                <Label text="Thu" prefWidth="40" style="-fx-text-fill: #718096; -fx-alignment: CENTER;"/>
+                                <Label text="Fri" prefWidth="40" style="-fx-text-fill: #718096; -fx-alignment: CENTER;"/>
+                                <Label text="Sat" prefWidth="40" style="-fx-text-fill: #718096; -fx-alignment: CENTER;"/>
                             </HBox>
                             <!-- Calendar days will be populated dynamically -->
                             <FlowPane fx:id="calendarGrid" hgap="8" vgap="8" prefWidth="336"/>
@@ -120,7 +119,7 @@
                     
                     <!-- Right Panel - Time Slots / View Schedule -->
                     <VBox spacing="16" prefWidth="200">
-                        <Label fx:id="availableTimesLabel" text="Available Times" styleClass="section-title"/>
+                        <Label text="Available Times" styleClass="section-title"/>
                         
                         <Label fx:id="selectedDateLabel" text="Select a date" style="-fx-text-fill: #718096;"/>
                         
@@ -132,7 +131,7 @@
                         
                         <!-- Selected Time Display -->
                         <VBox spacing="8" style="-fx-background-color: #F7FAFC; -fx-background-radius: 8; -fx-padding: 12;">
-                            <Label fx:id="selectedTimeTitleLabel" text="Selected Time:" style="-fx-text-fill: #718096; -fx-font-size: 12px;"/>
+                            <Label text="Selected Time:" style="-fx-text-fill: #718096; -fx-font-size: 12px;"/>
                             <Label fx:id="selectedTimeLabel" text="None selected" style="-fx-font-weight: bold;"/>
                         </VBox>
                         

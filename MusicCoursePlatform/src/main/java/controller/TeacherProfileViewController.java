@@ -21,96 +21,39 @@ import model.Booking;
 import model.TeacherProfile;
 import model.TimeSlot;
 import model.User;
-import util.LanguageManager;
 
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Locale;
 
-public class TeacherProfileViewController implements LanguageManager.LanguageChangeListener {
+public class TeacherProfileViewController {
 
     @FXML private Label teacherNameLabel;
     @FXML private FlowPane scheduleContainer;
     @FXML private ComboBox<String> languageCombo;
-    @FXML private Label myScheduleLabel;
-    @FXML private Button setAvailabilityButton;
-    @FXML private Button logoutButton;
 
     private TeacherProfileDAO teacherProfileDAO;
     private TimeSlotDAO timeSlotDAO;
     private BookingDAO bookingDAO;
-    private LanguageManager langManager;
-    private boolean updatingLanguageCombo = false;
 
     private TeacherProfile teacherProfile;
+    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM d");
 
     @FXML
     public void initialize() {
         teacherProfileDAO = new TeacherProfileDAO();
         timeSlotDAO = new TimeSlotDAO();
         bookingDAO = new BookingDAO();
-        langManager = LanguageManager.getInstance();
-        langManager.addLanguageChangeListener(this);
 
         setupLanguageCombo();
         loadTeacherInfo();
         loadSchedule();
-        updateTexts();
-    }
-
-    @Override
-    public void onLanguageChanged(Locale newLocale) {
-        updateTexts();
-        updateLanguageComboDisplay();
-        loadSchedule();
-    }
-
-    private void updateTexts() {
-        if (myScheduleLabel != null) myScheduleLabel.setText(langManager.getString("teacher.mySchedule"));
-        if (setAvailabilityButton != null) setAvailabilityButton.setText(langManager.getString("teacher.setAvailability"));
-        if (logoutButton != null) logoutButton.setText(langManager.getString("nav.logout"));
     }
 
     private void setupLanguageCombo() {
         if (languageCombo != null) {
-            updatingLanguageCombo = true;
-            languageCombo.getItems().clear();
-            languageCombo.getItems().addAll(
-                langManager.getString("language.english"),
-                langManager.getString("language.finnish")
-            );
-            languageCombo.setValue(langManager.isEnglish() 
-                ? langManager.getString("language.english") 
-                : langManager.getString("language.finnish"));
-            updatingLanguageCombo = false;
-            
-            languageCombo.setOnAction(e -> {
-                if (updatingLanguageCombo) return;
-                String selected = languageCombo.getValue();
-                if (selected != null) {
-                    if (selected.equals("English") || selected.equals("Englanti")) {
-                        langManager.setLanguage("EN");
-                    } else {
-                        langManager.setLanguage("FI");
-                    }
-                }
-            });
-        }
-    }
-
-    private void updateLanguageComboDisplay() {
-        if (languageCombo != null && !updatingLanguageCombo) {
-            updatingLanguageCombo = true;
-            languageCombo.getItems().clear();
-            languageCombo.getItems().addAll(
-                langManager.getString("language.english"),
-                langManager.getString("language.finnish")
-            );
-            languageCombo.setValue(langManager.isEnglish() 
-                ? langManager.getString("language.english") 
-                : langManager.getString("language.finnish"));
-            updatingLanguageCombo = false;
+            languageCombo.getItems().addAll("EN", "DE", "ZH");
+            languageCombo.setValue("EN");
         }
     }
 
@@ -131,7 +74,7 @@ public class TeacherProfileViewController implements LanguageManager.LanguageCha
         scheduleContainer.getChildren().clear();
 
         if (teacherProfile == null) {
-            Label noSchedule = new Label(langManager.getString("timeslots.noSlots"));
+            Label noSchedule = new Label("No schedule found");
             noSchedule.setStyle("-fx-text-fill: #718096;");
             scheduleContainer.getChildren().add(noSchedule);
             return;
@@ -140,7 +83,7 @@ public class TeacherProfileViewController implements LanguageManager.LanguageCha
         List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileId(teacherProfile.getTeacherProfileId());
 
         if (slots.isEmpty()) {
-            Label noSchedule = new Label(langManager.getString("timeslots.noSlots"));
+            Label noSchedule = new Label("No time slots scheduled");
             noSchedule.setStyle("-fx-text-fill: #718096;");
             scheduleContainer.getChildren().add(noSchedule);
             return;
@@ -158,14 +101,11 @@ public class TeacherProfileViewController implements LanguageManager.LanguageCha
         card.setPrefWidth(200);
         card.setAlignment(Pos.TOP_LEFT);
 
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM d", langManager.getCurrentLocale());
         Label dateLabel = new Label(slot.getLessonDate().format(dateFormatter));
         dateLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #718096;");
 
         String timeText = slot.getStartTime() + " - " + slot.getEndTime();
-        String statusText = slot.isAvailable() 
-            ? langManager.getString("booking.status.available")
-            : langManager.getString("booking.status.booked");
+        String statusText = slot.isAvailable() ? "Available" : "Booked";
 
         HBox timeBox = new HBox(8);
         timeBox.setAlignment(Pos.CENTER_LEFT);
@@ -179,8 +119,8 @@ public class TeacherProfileViewController implements LanguageManager.LanguageCha
         }
         timeBtn.setPrefWidth(100);
 
-        Button deleteBtn = new Button(langManager.getString("message.delete"));
-        deleteBtn.setPrefWidth(60);
+        Button deleteBtn = new Button("Del");
+        deleteBtn.setPrefWidth(40);
         deleteBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #718096; -fx-cursor: hand;");
 
         // Disable delete button if slot is booked
