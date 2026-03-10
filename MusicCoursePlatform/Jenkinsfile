@@ -12,7 +12,7 @@ pipeline {
         // Docker Hub credentials (you need to configure this in Jenkins)
         DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
         DOCKERHUB_REPO = 'chenyicheng1998/music-course-platform'
-        DOCKER_IMAGE_TAG = 'v1'
+        DOCKER_IMAGE_TAG = 'latest'
 
         // Database configuration
         DB_NAME = 'music_course_platform'
@@ -23,7 +23,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo 'Checking out source code from GitHub...'
-                git branch: 'dev',
+                git branch: 'main',
                     url: 'https://github.com/chenyicheng1998/MusicCoursePlatform.git'
             }
         }
