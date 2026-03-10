@@ -113,10 +113,8 @@ The Docker image is available on Docker Hub:
 **[chenyicheng1998/music-course-platform](https://hub.docker.com/repository/docker/chenyicheng1998/music-course-platform)**
 
 ```bash
-docker pull chenyicheng1998/music-course-platform:v1
+docker pull chenyicheng1998/music-course-platform:latest
 ```
-
-> **Note:** The image builds and pushes successfully via the Jenkins pipeline. Full GUI container execution (JavaFX display environment) is planned for Sprint 4.
 
 ---
 
@@ -136,6 +134,7 @@ docker pull chenyicheng1998/music-course-platform:v1
 - [Sprint 1 Review](document/SprintReviewReports/Sprint_1_Review_Report.pdf)
 - [Sprint 2 Review](document/SprintReviewReports/Sprint_2_Review_Report.pdf)
 - [Sprint 3 Review](document/SprintReviewReports/Sprint_3_Review_Report.pdf)
+- [Sprint 4 Review](document/SprintReviewReports/Sprint_4_Review_Report.pdf)
 
 ### Diagrams
 
