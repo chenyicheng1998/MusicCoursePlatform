@@ -227,7 +227,8 @@ public class TeacherDashboardController {
         timeLabel.getStyleClass().add("time-slot");
         timeLabel.setPrefWidth(150);  // Increased from 120 to 150 to show full time
 
-        Button deleteBtn = new Button("🗑");
+        Button deleteBtn = new Button("Del");
+        deleteBtn.setPrefWidth(40);
         deleteBtn.setStyle("-fx-background-color: transparent; -fx-cursor: hand;");
         deleteBtn.setOnAction(e -> handleDeleteSlot(slot));
         

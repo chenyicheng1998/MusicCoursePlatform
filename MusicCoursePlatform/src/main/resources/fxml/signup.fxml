@@ -53,14 +53,16 @@
                     styleClass="primary-button"
                     onAction="#handleStudentSignup"
                     prefHeight="56"
-                    prefWidth="150"/>
+                    prefWidth="150"
+                    style="-fx-font-size: 11px;"/>
             
             <Button fx:id="teacherButton" 
                     text="AS Teacher" 
                     styleClass="primary-button"
                     onAction="#handleTeacherSignup"
                     prefHeight="56"
-                    prefWidth="150"/>
+                    prefWidth="150"
+                    style="-fx-font-size: 11px;"/>
         </HBox>
         
         <!-- Login Link -->

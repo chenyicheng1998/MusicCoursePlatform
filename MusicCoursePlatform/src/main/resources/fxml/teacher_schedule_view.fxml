@@ -23,7 +23,6 @@
             <Label text="MusicCoursePlatform" styleClass="navbar-title"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="Set Availability" styleClass="secondary-button" onAction="#handleBack"/>
-            <ComboBox fx:id="languageCombo" promptText="EN" prefWidth="80"/>
             <Circle radius="20" style="-fx-fill: #E2E8F0;"/>
             <Button text="Logout" styleClass="secondary-button" onAction="#handleLogout"/>
         </HBox>

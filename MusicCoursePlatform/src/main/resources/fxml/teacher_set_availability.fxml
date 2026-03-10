@@ -25,7 +25,6 @@
             <Label text="MusicCoursePlatform" styleClass="navbar-title"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="View Schedule" styleClass="secondary-button" onAction="#handleViewSchedule"/>
-            <ComboBox fx:id="languageCombo" promptText="EN" prefWidth="80"/>
             <Circle fx:id="avatarCircle" radius="20" style="-fx-fill: #E2E8F0;"/>
             <Button text="Logout" styleClass="secondary-button" onAction="#handleLogout"/>
         </HBox>

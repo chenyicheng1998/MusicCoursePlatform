@@ -131,9 +131,10 @@ public class BookingViewController {
 
         Button timeBtn = new Button(timeText);
         timeBtn.setStyle("-fx-background-color: #2D4A47; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 16;");
-        timeBtn.setPrefWidth(120);
+        timeBtn.setPrefWidth(100);
 
-        Button deleteBtn = new Button("🗑");
+        Button deleteBtn = new Button("Del");
+        deleteBtn.setPrefWidth(40);
         deleteBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #718096; -fx-cursor: hand;");
         deleteBtn.setOnAction(e -> handleDeleteBooking(booking, slot));
 

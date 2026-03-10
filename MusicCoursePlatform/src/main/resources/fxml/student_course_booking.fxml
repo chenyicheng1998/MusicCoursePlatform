@@ -23,7 +23,6 @@
             <Label text="MusicCoursePlatform" styleClass="navbar-title"/>
             <Region HBox.hgrow="ALWAYS"/>
             <Button text="View Schedule" styleClass="secondary-button" onAction="#handleViewSchedule"/>
-            <ComboBox fx:id="languageCombo" promptText="EN" prefWidth="80"/>
             <Circle fx:id="avatarCircle" radius="20" style="-fx-fill: #E2E8F0;"/>
             <Button text="Logout" styleClass="secondary-button" onAction="#handleLogout"/>
         </HBox>
@@ -65,7 +64,7 @@
                             <HBox spacing="12" alignment="CENTER_LEFT">
                                 <Circle radius="30" style="-fx-fill: #CBD5E0;"/>
                                 <VBox spacing="2">
-                                    <Label fx:id="teacherNameLabel" text="Select a teacher" styleClass="teacher-name"/>
+                                    <Label fx:id="teacherNameLabel" text="Select a teacher" style="-fx-font-size: 12px;"/>
                                     <Label fx:id="teacherInstrumentLabel" text="" style="-fx-text-fill: #718096; -fx-font-size: 12px;"/>
                                 </VBox>
                             </HBox>
