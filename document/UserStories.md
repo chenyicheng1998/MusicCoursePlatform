@@ -59,10 +59,6 @@
 - **As a learner**, I want to select a specific date to view all available time slots for that day so that I can choose the most convenient time.
 - **As a learner**, I want to see available time slots displayed with their start and end times so that I know the lesson duration.
 - **As a learner**, I want to click on an available time slot to select it for booking so that I can reserve that time.
-- **As a learner**, I want to add optional notes to my booking so that I can communicate special requests or information to the teacher.
-- **As a learner**, I want to confirm my booking so that I can secure the lesson time with the teacher.
-- **As a learner**, I want to receive confirmation that my booking was successful so that I know the lesson is scheduled.
-- **As a learner**, I want booked time slots to automatically change to "BOOKED" status so that other learners cannot book the same slot.
 
 ---
 
