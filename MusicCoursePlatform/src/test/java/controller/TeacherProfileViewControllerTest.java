@@ -6,7 +6,7 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 import model.TeacherProfile;
 import model.TimeSlot;
 import model.User;
@@ -19,8 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -55,18 +53,11 @@ class TeacherProfileViewControllerTest {
                 controller = new TeacherProfileViewController();
 
                 setField(controller, "teacherNameLabel", new Label());
-                setField(controller, "weekLabel", new Label());
-                setField(controller, "availabilityGrid", new HBox());
+                setField(controller, "scheduleContainer", new FlowPane());
                 setField(controller, "languageCombo", new ComboBox<>());
-                setField(controller, "dayCombo", new ComboBox<>());
-                setField(controller, "startTimeCombo", new ComboBox<>());
-                setField(controller, "endTimeCombo", new ComboBox<>());
-                setField(controller, "errorLabel", new Label());
 
                 setField(controller, "teacherProfileDAO", mockTeacherProfileDAO);
                 setField(controller, "timeSlotDAO", mockTimeSlotDAO);
-
-                setField(controller, "weekStart", LocalDate.now().with(DayOfWeek.MONDAY));
 
             } catch (Exception e) {
                 fail("Setup failed: " + e.getMessage());
@@ -79,187 +70,55 @@ class TeacherProfileViewControllerTest {
         SessionManager.getInstance().logout();
     }
 
-    // --- handleAddTimeSlot: missing fields ---
+    // --- loadSchedule: no teacher profile ---
 
     @Test
-    void testHandleAddTimeSlot_NoSelection_ShowsError() throws Exception {
-        runOnFX(() -> {
-            // leave dayCombo, startTimeCombo, endTimeCombo empty
-
-            invokeMethod("handleAddTimeSlot");
-
-            Label errorLabel = getField(controller, "errorLabel", Label.class);
-            assertEquals("Please select day, start time, and end time", errorLabel.getText());
-            verifyNoInteractions(mockTimeSlotDAO);
-        });
-    }
-
-    // --- handleAddTimeSlot: end time before start time ---
-
-    @Test
-    void testHandleAddTimeSlot_EndTimeBeforeStartTime_ShowsError() throws Exception {
-        runOnFX(() -> {
-            setField(controller, "teacherProfile", createTeacherProfile());
-
-            ComboBox<String> dayCombo = getField(controller, "dayCombo", ComboBox.class);
-            ComboBox<String> startCombo = getField(controller, "startTimeCombo", ComboBox.class);
-            ComboBox<String> endCombo = getField(controller, "endTimeCombo", ComboBox.class);
-
-            dayCombo.getItems().add("Monday");
-            dayCombo.setValue("Monday");
-            startCombo.getItems().add("14:00");
-            startCombo.setValue("14:00");
-            endCombo.getItems().add("10:00");
-            endCombo.setValue("10:00");
-
-            invokeMethod("handleAddTimeSlot");
-
-            Label errorLabel = getField(controller, "errorLabel", Label.class);
-            assertEquals("End time must be after start time", errorLabel.getText());
-            verifyNoInteractions(mockTimeSlotDAO);
-        });
-    }
-
-    // --- handleAddTimeSlot: no teacher profile ---
-
-    @Test
-    void testHandleAddTimeSlot_NoTeacherProfile_ShowsError() throws Exception {
+    void testLoadSchedule_NoTeacherProfile_ShowsNoScheduleLabel() throws Exception {
         runOnFX(() -> {
             setField(controller, "teacherProfile", null);
 
-            ComboBox<String> dayCombo = getField(controller, "dayCombo", ComboBox.class);
-            ComboBox<String> startCombo = getField(controller, "startTimeCombo", ComboBox.class);
-            ComboBox<String> endCombo = getField(controller, "endTimeCombo", ComboBox.class);
+            invokeMethod("loadSchedule");
 
-            dayCombo.getItems().add("Monday");
-            dayCombo.setValue("Monday");
-            startCombo.getItems().add("10:00");
-            startCombo.setValue("10:00");
-            endCombo.getItems().add("11:00");
-            endCombo.setValue("11:00");
-
-            invokeMethod("handleAddTimeSlot");
-
-            Label errorLabel = getField(controller, "errorLabel", Label.class);
-            assertEquals("Teacher profile not found", errorLabel.getText());
-            verifyNoInteractions(mockTimeSlotDAO);
+            FlowPane container = getField(controller, "scheduleContainer", FlowPane.class);
+            assertEquals(1, container.getChildren().size());
+            assertTrue(container.getChildren().get(0) instanceof Label);
+            assertEquals("No schedule found", ((Label) container.getChildren().get(0)).getText());
         });
     }
 
-    // --- handleAddTimeSlot: success ---
+    // --- loadSchedule: no slots ---
 
     @Test
-    void testHandleAddTimeSlot_ValidInput_CreatesSlot() throws Exception {
+    void testLoadSchedule_NoSlots_ShowsNoSlotsLabel() throws Exception {
         runOnFX(() -> {
             setField(controller, "teacherProfile", createTeacherProfile());
 
-            ComboBox<String> dayCombo = getField(controller, "dayCombo", ComboBox.class);
-            ComboBox<String> startCombo = getField(controller, "startTimeCombo", ComboBox.class);
-            ComboBox<String> endCombo = getField(controller, "endTimeCombo", ComboBox.class);
-
-            dayCombo.getItems().add("Monday");
-            dayCombo.setValue("Monday");
-            startCombo.getItems().add("10:00");
-            startCombo.setValue("10:00");
-            endCombo.getItems().add("11:00");
-            endCombo.setValue("11:00");
-
-            when(mockTimeSlotDAO.create(any(TimeSlot.class))).thenReturn(true);
-            when(mockTimeSlotDAO.findByTeacherProfileIdAndDate(anyInt(), any()))
+            when(mockTimeSlotDAO.findByTeacherProfileId(anyInt()))
                     .thenReturn(Collections.emptyList());
 
-            invokeMethod("handleAddTimeSlot");
+            invokeMethod("loadSchedule");
 
-            verify(mockTimeSlotDAO).create(any(TimeSlot.class));
+            FlowPane container = getField(controller, "scheduleContainer", FlowPane.class);
+            assertEquals(1, container.getChildren().size());
+            assertTrue(container.getChildren().get(0) instanceof Label);
+            assertEquals("No time slots scheduled", ((Label) container.getChildren().get(0)).getText());
         });
     }
 
-    // --- handleAddTimeSlot: create fails ---
+    // --- loadSchedule: with slots ---
 
     @Test
-    void testHandleAddTimeSlot_CreateFails_ShowsError() throws Exception {
+    void testLoadSchedule_WithSlots_ShowsCards() throws Exception {
         runOnFX(() -> {
             setField(controller, "teacherProfile", createTeacherProfile());
 
-            ComboBox<String> dayCombo = getField(controller, "dayCombo", ComboBox.class);
-            ComboBox<String> startCombo = getField(controller, "startTimeCombo", ComboBox.class);
-            ComboBox<String> endCombo = getField(controller, "endTimeCombo", ComboBox.class);
-
-            dayCombo.getItems().add("Monday");
-            dayCombo.setValue("Monday");
-            startCombo.getItems().add("10:00");
-            startCombo.setValue("10:00");
-            endCombo.getItems().add("11:00");
-            endCombo.setValue("11:00");
-
-            when(mockTimeSlotDAO.create(any(TimeSlot.class))).thenReturn(false);
-
-            invokeMethod("handleAddTimeSlot");
-
-            Label errorLabel = getField(controller, "errorLabel", Label.class);
-            assertEquals("Failed to create time slot", errorLabel.getText());
-        });
-    }
-
-    // --- handlePrevPage ---
-
-    @Test
-    void testHandlePrevPage_DecrementsWeek() throws Exception {
-        runOnFX(() -> {
-            LocalDate before = LocalDate.now().with(DayOfWeek.MONDAY);
-            setField(controller, "weekStart", before);
-
-            invokeMethod("handlePrevPage");
-
-            LocalDate after = getField(controller, "weekStart", LocalDate.class);
-            assertEquals(before.minusWeeks(1), after);
-        });
-    }
-
-    @Test
-    void testHandleNextPage_IncrementsWeek() throws Exception {
-        runOnFX(() -> {
-            LocalDate before = LocalDate.now().with(DayOfWeek.MONDAY);
-            setField(controller, "weekStart", before);
-
-            invokeMethod("handleNextPage");
-
-            LocalDate after = getField(controller, "weekStart", LocalDate.class);
-            assertEquals(before.plusWeeks(1), after);
-        });
-    }
-
-    // --- updateAvailabilityGrid ---
-
-    @Test
-    void testUpdateAvailabilityGrid_ShowsSevenDayColumns() throws Exception {
-        runOnFX(() -> {
-            setField(controller, "teacherProfile", createTeacherProfile());
-
-            when(mockTimeSlotDAO.findByTeacherProfileIdAndDate(anyInt(), any()))
-                    .thenReturn(Collections.emptyList());
-
-            invokeMethod("updateAvailabilityGrid");
-
-            HBox grid = getField(controller, "availabilityGrid", HBox.class);
-            assertEquals(7, grid.getChildren().size());
-        });
-    }
-
-    // --- updateAvailabilityGrid: with slots ---
-
-    @Test
-    void testUpdateAvailabilityGrid_WithSlots_ShowsSlotsInColumn() throws Exception {
-        runOnFX(() -> {
-            setField(controller, "teacherProfile", createTeacherProfile());
-
-            when(mockTimeSlotDAO.findByTeacherProfileIdAndDate(anyInt(), any()))
+            when(mockTimeSlotDAO.findByTeacherProfileId(anyInt()))
                     .thenReturn(List.of(createTimeSlot()));
 
-            invokeMethod("updateAvailabilityGrid");
+            invokeMethod("loadSchedule");
 
-            HBox grid = getField(controller, "availabilityGrid", HBox.class);
-            assertEquals(7, grid.getChildren().size());
+            FlowPane container = getField(controller, "scheduleContainer", FlowPane.class);
+            assertFalse(container.getChildren().isEmpty());
         });
     }
 
@@ -302,6 +161,7 @@ class TeacherProfileViewControllerTest {
         slot.setStartTime("10:00");
         slot.setEndTime("11:00");
         slot.setSlotStatus(TimeSlot.STATUS_AVAILABLE);
+        slot.setLessonDate(java.time.LocalDate.now());
         return slot;
     }
 
