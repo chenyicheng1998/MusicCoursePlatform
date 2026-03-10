@@ -13,10 +13,19 @@ import java.sql.SQLException;
  */
 public class DatabaseConnection {
     
-    // Database configuration (change yours)
-    private static final String URL = "jdbc:mariadb://localhost:3306/music_course_platform";
-    private static final String USER = "root";
-    private static final String PASSWORD = "123456";
+    // Database configuration - supports environment variable override for Docker
+    // Set DB_HOST env var to "host.docker.internal" when running in Docker
+    private static final String DB_HOST = System.getenv("DB_HOST") != null
+            ? System.getenv("DB_HOST") : "localhost";
+    private static final String DB_PORT = System.getenv("DB_PORT") != null
+            ? System.getenv("DB_PORT") : "3306";
+    private static final String DB_USER_ENV = System.getenv("DB_USER") != null
+            ? System.getenv("DB_USER") : "root";
+    private static final String DB_PASSWORD_ENV = System.getenv("DB_PASSWORD") != null
+            ? System.getenv("DB_PASSWORD") : "123456";
+    private static final String URL = "jdbc:mariadb://" + DB_HOST + ":" + DB_PORT + "/music_course_platform";
+    private static final String USER = DB_USER_ENV;
+    private static final String PASSWORD = DB_PASSWORD_ENV;
 
     // Connection instance for connection pooling (simple implementation)
     private static Connection connection = null;

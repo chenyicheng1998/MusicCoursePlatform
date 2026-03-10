@@ -1,7 +1,7 @@
 package controller;
 
 import dao.*;
-import javafx.embed.swing.JFXPanel;
+import javafx.application.Platform;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
@@ -14,6 +14,7 @@ import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -30,8 +31,14 @@ class BookingViewControllerTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        // Initialize JavaFX toolkit
-        new JFXPanel();
+        // Initialize JavaFX toolkit (compatible with modular JavaFX, no swing dependency)
+        try {
+            CountDownLatch latch = new CountDownLatch(1);
+            Platform.startup(() -> latch.countDown());
+            latch.await();
+        } catch (IllegalStateException e) {
+            // Already initialized, ignore
+        }
 
         controller = new BookingViewController();
 

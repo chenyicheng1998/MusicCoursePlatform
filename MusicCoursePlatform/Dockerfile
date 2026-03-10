@@ -1,23 +1,44 @@
-# Build stage
-FROM maven:3.9-eclipse-temurin-17 AS build
+# Use a known-good OpenJDK base image with JDK (needed for Maven build inside container)
+FROM eclipse-temurin:21-jdk
+
+# Set DISPLAY for Windows (Xming) - forward GUI to host
+ENV DISPLAY=host.docker.internal:0.0
+
+# Database connection via host machine (override with -e flags or docker-compose)
+ENV DB_HOST=host.docker.internal
+ENV DB_PORT=3306
+ENV DB_USER=root
+ENV DB_PASSWORD=123456
+
+# Install GUI/X11 libraries + Maven + wget/unzip for JavaFX SDK download
+RUN apt-get update && \
+    apt-get install -y maven wget unzip \
+    libx11-6 libxext6 libxrender1 libxtst6 libxi6 \
+    libgtk-3-0 libgbm1 mesa-utils && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Download JavaFX SDK 21 (Linux x64)
+RUN wget https://download2.gluonhq.com/openjfx/21/openjfx-21_linux-x64_bin-sdk.zip -O /tmp/openjfx.zip && \
+    unzip /tmp/openjfx.zip -d /opt && \
+    rm /tmp/openjfx.zip
+
 WORKDIR /app
+
+# Copy project files
 COPY pom.xml .
 COPY src ./src
-RUN mvn clean package -DskipTests
 
-# Run stage
-FROM eclipse-temurin:17-jre
-WORKDIR /app
+# Build the shaded JAR (skip test compilation AND execution to avoid GUI test issues)
+RUN mvn clean package -Dmaven.test.skip=true
 
-# Copy the built JAR file (explicitly specify the shaded JAR)
-COPY --from=build /app/target/MusicCoursePlatform-1.0-SNAPSHOT.jar app.jar
+# List target to verify JAR was created
+RUN ls -l target/
 
-# Create a non-root user for security
-RUN groupadd -r appuser && useradd -r -g appuser appuser
-USER appuser
-
-# Expose port (if needed for future web interface)
-EXPOSE 8080
-
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Run the JavaFX app using the JavaFX SDK module path
+# -Dprism.order=sw forces software rendering, eliminating GLX version warnings in Docker
+CMD ["java", \
+     "--module-path", "/opt/javafx-sdk-21/lib", \
+     "--add-modules", "javafx.controls,javafx.fxml", \
+     "-Dprism.order=sw", \
+     "-Dprism.verbose=false", \
+     "-jar", "target/MusicCoursePlatform-1.0-SNAPSHOT.jar"]
