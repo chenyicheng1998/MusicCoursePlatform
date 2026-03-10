@@ -70,12 +70,6 @@
 - **As a learner**, I want cancelled bookings to be removed from my active bookings list so that I only see relevant upcoming lessons.
 - **As a learner**, I want the time slot to become available again after cancellation so that other learners can book it.
 
-- **As a teacher**, I want to view all bookings made by learners for my time slots so that I can prepare for upcoming lessons.
-- **As a teacher**, I want to see which learners have booked my time slots so that I know who to expect.
-- **As a teacher**, I want to see booking status (PENDING, CONFIRMED, CANCELLED) so that I can track the state of each lesson.
-- **As a teacher**, I want to confirm pending bookings so that learners know their lesson is approved.
-- **As a teacher**, I want to view booking notes left by learners so that I can prepare according to their requests.
-
 ---
 
 ## **Session Management**
