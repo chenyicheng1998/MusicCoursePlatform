@@ -26,8 +26,6 @@
 
 - **As a learner**, I want to create a learner profile so that I can book lessons with teachers.
 - **As a learner**, I want to specify the instrument I want to learn so that the system can recommend appropriate teachers.
-- **As a learner**, I want to update my preferred instrument so that I can explore learning different instruments.
-- **As a learner**, I want to view my profile information so that I can verify my learning preferences.
 
 ---
 
