@@ -11,9 +11,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -23,28 +22,49 @@ import model.LearnerProfile;
 import model.TeacherProfile;
 import model.TimeSlot;
 import model.User;
+import util.LocalizationManager;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 public class StudentDashboardController {
 
+    @FXML private BorderPane rootPane;
+    @FXML private Label appNameLabel;
+    @FXML private ComboBox<String> languageCombo;
+    @FXML private Button viewScheduleButton;
+    @FXML private Button logoutButton;
+    @FXML private Label filterInstrumentLabel;
+    @FXML private Label selectTeacherLabel;
     @FXML private Label teacherNameLabel;
     @FXML private Label teacherInstrumentLabel;
     @FXML private Label teacherExperienceLabel;
     @FXML private Label teacherRateLabel;
     @FXML private Label teacherBioLabel;
+    @FXML private Label experienceTitleLabel;
+    @FXML private Label rateTitleLabel;
+    @FXML private Label aboutTitleLabel;
     @FXML private ComboBox<String> instrumentCombo;
     @FXML private ComboBox<String> teacherCombo;
+    @FXML private Label calendarFrameLabel;
     @FXML private Label monthLabel;
     @FXML private FlowPane calendarGrid;
+    @FXML private Label sunLabel;
+    @FXML private Label monLabel;
+    @FXML private Label tueLabel;
+    @FXML private Label wedLabel;
+    @FXML private Label thuLabel;
+    @FXML private Label friLabel;
+    @FXML private Label satLabel;
+    @FXML private Label availableTimesLabel;
     @FXML private Label selectedDateLabel;
     @FXML private Label selectedTimeLabel;
+    @FXML private Label selectedTimeTitleLabel;
     @FXML private VBox timeSlotsContainer;
-    @FXML private ComboBox<String> languageCombo;
     @FXML private Button bookButton;
     @FXML private Label errorLabel;
 
@@ -53,6 +73,7 @@ public class StudentDashboardController {
     private BookingDAO bookingDAO;
     private LearnerProfileDAO learnerProfileDAO;
     private UserDAO userDAO;
+    private LocalizationManager localizationManager;
 
     private YearMonth currentMonth;
     private LocalDate selectedDate;
@@ -68,14 +89,89 @@ public class StudentDashboardController {
         bookingDAO = new BookingDAO();
         learnerProfileDAO = new LearnerProfileDAO();
         userDAO = new UserDAO();
+        localizationManager = LocalizationManager.getInstance();
 
         currentMonth = YearMonth.now();
 
         loadLearnerProfile();
         setupInstrumentCombo();
-        setupLanguageCombo();
+        setupLanguageSelector();
+        updateTexts();
         updateCalendar();
         loadTeachers();
+
+        // Listen for locale changes
+        localizationManager.localeProperty().addListener((obs, oldLocale, newLocale) -> {
+            updateTexts();
+            applyDirection();
+        });
+
+        // Apply initial direction
+        applyDirection();
+    }
+
+    private void setupLanguageSelector() {
+        languageCombo.getItems().addAll("English", "中文", "العربية");
+        languageCombo.setValue("English");
+    }
+
+    @FXML
+    private void handleLanguageChange(ActionEvent event) {
+        String selected = languageCombo.getValue();
+        Locale newLocale;
+
+        switch (selected) {
+            case "中文":
+                newLocale = LocalizationManager.CHINESE;
+                break;
+            case "العربية":
+                newLocale = LocalizationManager.ARABIC;
+                break;
+            default:
+                newLocale = LocalizationManager.ENGLISH;
+                break;
+        }
+
+        localizationManager.setLocale(newLocale);
+    }
+
+    private void updateTexts() {
+        appNameLabel.setText(localizationManager.getString("app.name"));
+        viewScheduleButton.setText(localizationManager.getString("nav.view.schedule"));
+        logoutButton.setText(localizationManager.getString("nav.logout"));
+        filterInstrumentLabel.setText(localizationManager.getString("student.filter.instrument"));
+        selectTeacherLabel.setText(localizationManager.getString("student.select.teacher"));
+        experienceTitleLabel.setText(localizationManager.getString("student.experience"));
+        rateTitleLabel.setText(localizationManager.getString("student.rate"));
+        aboutTitleLabel.setText(localizationManager.getString("student.about"));
+        calendarFrameLabel.setText(localizationManager.getString("calendar.frame"));
+        availableTimesLabel.setText(localizationManager.getString("student.available.times"));
+        selectedTimeTitleLabel.setText(localizationManager.getString("student.selected.time"));
+        bookButton.setText(localizationManager.getString("student.book.lesson"));
+
+        // Update day of week labels
+        sunLabel.setText(localizationManager.getString("calendar.day.sun"));
+        monLabel.setText(localizationManager.getString("calendar.day.mon"));
+        tueLabel.setText(localizationManager.getString("calendar.day.tue"));
+        wedLabel.setText(localizationManager.getString("calendar.day.wed"));
+        thuLabel.setText(localizationManager.getString("calendar.day.thu"));
+        friLabel.setText(localizationManager.getString("calendar.day.fri"));
+        satLabel.setText(localizationManager.getString("calendar.day.sat"));
+
+        // Update other dynamic text if needed
+        if (teacherCombo != null) {
+            teacherCombo.setPromptText(localizationManager.getString("student.teacher.prompt"));
+        }
+        if (selectedDateLabel != null && selectedDate == null) {
+            selectedDateLabel.setText(localizationManager.getString("student.select.date"));
+        }
+        if (selectedTimeLabel != null && selectedSlot == null) {
+            selectedTimeLabel.setText(localizationManager.getString("student.none.selected"));
+        }
+    }
+
+    private void applyDirection() {
+        localizationManager.applyDirection(rootPane);
     }
 
     private void loadLearnerProfile() {
@@ -94,13 +190,6 @@ public class StudentDashboardController {
                 "Piano", "Guitar", "Violin", "Drums", "Flute", "Saxophone", "Cello", "Voice"
         );
         instrumentCombo.setValue("Piano");
-    }
-
-    private void setupLanguageCombo() {
-        if (languageCombo != null) {
-            languageCombo.getItems().addAll("EN", "DE", "ZH");
-            languageCombo.setValue("EN");
-        }
     }
 
     private void loadTeachers() {
@@ -270,11 +359,11 @@ public class StudentDashboardController {
 
     private void confirmBooking() {
         if (learnerProfile == null) {
-            showError("Learner profile not found!");
+            showError(localizationManager.getString("error.fill.fields"));
             return;
         }
         if (selectedSlot == null) {
-            showError("Please select a time slot first!");
+            showError(localizationManager.getString("error.fill.fields"));
             return;
         }
 
@@ -285,15 +374,15 @@ public class StudentDashboardController {
             timeSlotDAO.updateStatus(selectedSlot.getSlotId(), TimeSlot.STATUS_BOOKED);
             selectedSlot = null;
             if (selectedTimeLabel != null) {
-                selectedTimeLabel.setText("Select a time");
+                selectedTimeLabel.setText(localizationManager.getString("student.none.selected"));
             }
             if (bookButton != null) {
                 bookButton.setDisable(true);
             }
             updateTimeSlots();
-            showSuccessMessage("Booking created successfully!");
+            showSuccessMessage(localizationManager.getString("success.booking.created"));
         } else {
-            showError("Failed to create booking");
+            showError(localizationManager.getString("error.signup.failed").replace("{0}", ""));
         }
     }
 
@@ -328,11 +417,11 @@ public class StudentDashboardController {
     @FXML
     private void handleBookNow(ActionEvent event) {
         if (selectedTeacher == null) {
-            showError("Please select a teacher first");
+            showError(localizationManager.getString("error.fill.fields"));
             return;
         }
         if (selectedSlot == null) {
-            showError("Please select a time slot first");
+            showError(localizationManager.getString("error.fill.fields"));
             return;
         }
         confirmBooking();
@@ -345,10 +434,10 @@ public class StudentDashboardController {
             Scene scheduleScene = new Scene(scheduleRoot);
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(scheduleScene);
-            stage.setTitle("Music Course Platform - My Schedule");
+            stage.setTitle(localizationManager.getString("app.title.student.dashboard"));
         } catch (IOException e) {
             e.printStackTrace();
-            showError("Failed to load schedule view");
+            showError(localizationManager.getString("error.load.dashboard"));
         }
     }
 
@@ -360,7 +449,7 @@ public class StudentDashboardController {
             Scene loginScene = new Scene(loginRoot);
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(loginScene);
-            stage.setTitle("Music Course Platform - Login");
+            stage.setTitle(localizationManager.getString("app.title.login"));
         } catch (IOException e) {
             e.printStackTrace();
         }

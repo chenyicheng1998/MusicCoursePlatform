@@ -6,16 +6,32 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import model.User;
 import service.UserService;
+import util.LocalizationManager;
 
 import java.io.IOException;
+import java.util.Locale;
 
 public class LoginController {
+
+    @FXML
+    private StackPane rootPane;
+
+    @FXML
+    private ComboBox<String> languageCombo;
+
+    @FXML
+    private Label languageLabel;
+
+    @FXML
+    private Button backButton;
+
+    @FXML
+    private Label titleLabel;
 
     @FXML
     private TextField emailField;
@@ -24,13 +40,78 @@ public class LoginController {
     private PasswordField passwordField;
 
     @FXML
+    private Button loginButton;
+
+    @FXML
+    private Label noAccountLabel;
+
+    @FXML
+    private Hyperlink createAccountLink;
+
+    @FXML
     private Label errorLabel;
 
     private UserService userService;
+    private LocalizationManager localizationManager;
 
     @FXML
     public void initialize() {
         userService = new UserService();
+        localizationManager = LocalizationManager.getInstance();
+
+        // Setup language combo box
+        setupLanguageSelector();
+
+        // Initialize texts
+        updateTexts();
+
+        // Listen for locale changes
+        localizationManager.localeProperty().addListener((obs, oldLocale, newLocale) -> {
+            updateTexts();
+            applyDirection();
+        });
+
+        // Apply initial direction
+        applyDirection();
+    }
+
+    private void setupLanguageSelector() {
+        languageCombo.getItems().addAll("English", "中文", "العربية");
+        languageCombo.setValue("English");
+    }
+
+    @FXML
+    private void handleLanguageChange(ActionEvent event) {
+        String selected = languageCombo.getValue();
+        Locale newLocale;
+
+        switch (selected) {
+            case "中文":
+                newLocale = LocalizationManager.CHINESE;
+                break;
+            case "العربية":
+                newLocale = LocalizationManager.ARABIC;
+                break;
+            default:
+                newLocale = LocalizationManager.ENGLISH;
+                break;
+        }
+
+        localizationManager.setLocale(newLocale);
+    }
+
+    private void updateTexts() {
+        languageLabel.setText(localizationManager.getString("language.selector"));
+        titleLabel.setText(localizationManager.getString("login.title"));
+        emailField.setPromptText(localizationManager.getString("login.email"));
+        passwordField.setPromptText(localizationManager.getString("login.password"));
+        loginButton.setText(localizationManager.getString("login.button"));
+        noAccountLabel.setText(localizationManager.getString("login.no.account"));
+        createAccountLink.setText(localizationManager.getString("login.create.account"));
+    }
+
+    private void applyDirection() {
+        localizationManager.applyDirection(rootPane);
     }
 
     @FXML
@@ -39,7 +120,7 @@ public class LoginController {
         String password = passwordField.getText();
 
         if (email.isEmpty() || password.isEmpty()) {
-            showError("Please fill in all fields!");
+            showError(localizationManager.getString("error.fill.fields"));
             return;
         }
 
@@ -49,12 +130,12 @@ public class LoginController {
                 SessionManager.getInstance().setCurrentUser(user);
                 navigateToDashboard(event, user);
             } else {
-                showError("Invalid email or password!");
+                showError(localizationManager.getString("error.invalid.credentials"));
             }
         } catch (IllegalArgumentException e) {
             showError(e.getMessage());
         } catch (Exception e) {
-            showError("Login failed: " + e.getMessage());
+            showError(localizationManager.getString("error.login.failed").replace("{0}", e.getMessage()));
         }
     }
 
@@ -62,25 +143,25 @@ public class LoginController {
         try {
             String fxmlPath;
             String title;
-            
+
             if (user.isTeacher()) {
                 fxmlPath = "/fxml/teacher_set_availability.fxml";
-                title = "Music Course Platform - Teacher Dashboard";
+                title = localizationManager.getString("app.title.teacher.dashboard");
             } else {
                 fxmlPath = "/fxml/student_course_booking.fxml";
-                title = "Music Course Platform - Student Dashboard";
+                title = localizationManager.getString("app.title.student.dashboard");
             }
-            
+
             Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
             Scene scene = new Scene(root);
             scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
-            
+
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(scene);
             stage.setTitle(title);
         } catch (IOException e) {
             e.printStackTrace();
-            showError("Could not load dashboard!");
+            showError(localizationManager.getString("error.load.dashboard"));
         }
     }
 
@@ -89,13 +170,13 @@ public class LoginController {
         try {
             Parent signupRoot = FXMLLoader.load(getClass().getResource("/fxml/signup.fxml"));
             Scene signupScene = new Scene(signupRoot);
-            
+
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(signupScene);
-            stage.setTitle("Music Course Platform - Sign Up");
+            stage.setTitle(localizationManager.getString("app.title.signup"));
         } catch (IOException e) {
             e.printStackTrace();
-            showError("Could not load signup screen!");
+            showError(localizationManager.getString("error.load.signup"));
         }
     }
 

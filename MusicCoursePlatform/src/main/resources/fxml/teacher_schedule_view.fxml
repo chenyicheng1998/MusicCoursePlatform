@@ -12,22 +12,24 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Circle?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" 
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:id="rootPane"
             fx:controller="controller.TeacherProfileViewController"
             stylesheets="@../css/styles.css"
             prefHeight="700.0" prefWidth="1000.0">
-    
+
     <!-- Top Navbar -->
     <top>
         <HBox styleClass="navbar" alignment="CENTER_LEFT" spacing="20">
-            <Label text="MusicCoursePlatform" styleClass="navbar-title"/>
+            <Label fx:id="appNameLabel" text="MusicCoursePlatform" styleClass="navbar-title"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button text="Set Availability" styleClass="secondary-button" onAction="#handleBack"/>
+            <ComboBox fx:id="languageCombo" prefWidth="100" styleClass="combo-box" onAction="#handleLanguageChange"/>
+            <Button fx:id="setAvailabilityButton" text="Set Availability" styleClass="secondary-button" onAction="#handleBack"/>
             <Circle radius="20" style="-fx-fill: #E2E8F0;"/>
-            <Button text="Logout" styleClass="secondary-button" onAction="#handleLogout"/>
+            <Button fx:id="logoutButton" text="Logout" styleClass="secondary-button" onAction="#handleLogout"/>
         </HBox>
     </top>
-    
+
     <!-- Main Content -->
     <center>
         <HBox style="-fx-background-color: #F5F5F5;" spacing="0">
@@ -52,7 +54,7 @@
 
                     <!-- Right Panel - Schedule Cards -->
                     <VBox spacing="20" HBox.hgrow="ALWAYS">
-                        <Label text="My Schedule" styleClass="section-title"/>
+                        <Label fx:id="myScheduleLabel" text="My Schedule" styleClass="section-title"/>
 
                         <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
                             <FlowPane fx:id="scheduleContainer" hgap="20" vgap="20">

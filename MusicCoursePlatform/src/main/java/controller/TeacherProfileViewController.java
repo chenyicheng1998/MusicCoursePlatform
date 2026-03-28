@@ -13,6 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -21,20 +22,28 @@ import model.Booking;
 import model.TeacherProfile;
 import model.TimeSlot;
 import model.User;
+import util.LocalizationManager;
 
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 public class TeacherProfileViewController {
 
-    @FXML private Label teacherNameLabel;
-    @FXML private FlowPane scheduleContainer;
+    @FXML private BorderPane rootPane;
+    @FXML private Label appNameLabel;
     @FXML private ComboBox<String> languageCombo;
+    @FXML private Button setAvailabilityButton;
+    @FXML private Button logoutButton;
+    @FXML private Label teacherNameLabel;
+    @FXML private Label myScheduleLabel;
+    @FXML private FlowPane scheduleContainer;
 
     private TeacherProfileDAO teacherProfileDAO;
     private TimeSlotDAO timeSlotDAO;
     private BookingDAO bookingDAO;
+    private LocalizationManager localizationManager;
 
     private TeacherProfile teacherProfile;
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM d");
@@ -44,17 +53,57 @@ public class TeacherProfileViewController {
         teacherProfileDAO = new TeacherProfileDAO();
         timeSlotDAO = new TimeSlotDAO();
         bookingDAO = new BookingDAO();
+        localizationManager = LocalizationManager.getInstance();
 
-        setupLanguageCombo();
+        setupLanguageSelector();
         loadTeacherInfo();
+        updateTexts();
         loadSchedule();
+
+        // Listen for locale changes
+        localizationManager.localeProperty().addListener((obs, oldLocale, newLocale) -> {
+            updateTexts();
+            applyDirection();
+        });
+
+        // Apply initial direction
+        applyDirection();
     }
 
-    private void setupLanguageCombo() {
-        if (languageCombo != null) {
-            languageCombo.getItems().addAll("EN", "DE", "ZH");
-            languageCombo.setValue("EN");
+    private void setupLanguageSelector() {
+        languageCombo.getItems().addAll("English", "中文", "العربية");
+        languageCombo.setValue("English");
+    }
+
+    @FXML
+    private void handleLanguageChange(ActionEvent event) {
+        String selected = languageCombo.getValue();
+        Locale newLocale;
+
+        switch (selected) {
+            case "中文":
+                newLocale = LocalizationManager.CHINESE;
+                break;
+            case "العربية":
+                newLocale = LocalizationManager.ARABIC;
+                break;
+            default:
+                newLocale = LocalizationManager.ENGLISH;
+                break;
         }
+
+        localizationManager.setLocale(newLocale);
+    }
+
+    private void updateTexts() {
+        appNameLabel.setText(localizationManager.getString("app.name"));
+        setAvailabilityButton.setText(localizationManager.getString("nav.set.availability"));
+        logoutButton.setText(localizationManager.getString("nav.logout"));
+        myScheduleLabel.setText(localizationManager.getString("schedule.my.schedule"));
+    }
+
+    private void applyDirection() {
+        localizationManager.applyDirection(rootPane);
     }
 
     private void loadTeacherInfo() {
@@ -165,6 +214,7 @@ public class TeacherProfileViewController {
             Scene scene = new Scene(root);
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(scene);
+            stage.setTitle(localizationManager.getString("app.title.teacher.dashboard"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -178,6 +228,7 @@ public class TeacherProfileViewController {
             Scene scene = new Scene(root);
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(scene);
+            stage.setTitle(localizationManager.getString("app.title.login"));
         } catch (IOException e) {
             e.printStackTrace();
         }
