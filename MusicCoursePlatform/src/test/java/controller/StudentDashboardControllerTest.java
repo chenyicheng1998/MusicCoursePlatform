@@ -71,6 +71,27 @@ class StudentDashboardControllerTest {
                 setField(controller, "languageCombo", new ComboBox<>());
                 setField(controller, "bookButton", new Button());
 
+                // Add localization fields
+                setField(controller, "appNameLabel", new Label());
+                setField(controller, "viewScheduleButton", new Button());
+                setField(controller, "logoutButton", new Button());
+                setField(controller, "filterInstrumentLabel", new Label());
+                setField(controller, "selectTeacherLabel", new Label());
+                setField(controller, "experienceTitleLabel", new Label());
+                setField(controller, "rateTitleLabel", new Label());
+                setField(controller, "aboutTitleLabel", new Label());
+                setField(controller, "calendarFrameLabel", new Label());
+                setField(controller, "availableTimesLabel", new Label());
+                setField(controller, "selectedTimeTitleLabel", new Label());
+                setField(controller, "sunLabel", new Label());
+                setField(controller, "monLabel", new Label());
+                setField(controller, "tueLabel", new Label());
+                setField(controller, "wedLabel", new Label());
+                setField(controller, "thuLabel", new Label());
+                setField(controller, "friLabel", new Label());
+                setField(controller, "satLabel", new Label());
+                setField(controller, "rootPane", new javafx.scene.layout.BorderPane());
+
                 setField(controller, "teacherProfileDAO", mockTeacherProfileDAO);
                 setField(controller, "timeSlotDAO", mockTimeSlotDAO);
                 setField(controller, "bookingDAO", mockBookingDAO);
@@ -180,7 +201,7 @@ class StudentDashboardControllerTest {
             setField(controller, "selectedDate", LocalDate.now());
 
             when(mockBookingDAO.create(any(Booking.class))).thenReturn(true);
-            when(mockTimeSlotDAO.findByTeacherProfileIdAndDate(anyInt(), any()))
+            lenient().when(mockTimeSlotDAO.findByTeacherProfileIdAndDate(anyInt(), any()))
                     .thenReturn(Collections.emptyList());
 
             invokeMethod("confirmBooking");

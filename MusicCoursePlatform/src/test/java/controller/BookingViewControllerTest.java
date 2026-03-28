@@ -59,6 +59,13 @@ class BookingViewControllerTest {
         injectPrivateField("userNameLabel", new Label());
         injectPrivateField("bookingsContainer", new FlowPane());
         injectPrivateField("languageCombo", new ComboBox<>());
+
+        // Inject new localization fields
+        injectPrivateField("appNameLabel", new Label());
+        injectPrivateField("courseBookingButton", new javafx.scene.control.Button());
+        injectPrivateField("logoutButton", new javafx.scene.control.Button());
+        injectPrivateField("myBookingsLabel", new Label());
+        injectPrivateField("rootPane", new javafx.scene.layout.BorderPane());
     }
 
     private void injectPrivateField(String fieldName, Object value) throws Exception {
@@ -74,9 +81,9 @@ class BookingViewControllerTest {
         ComboBox<String> combo =
                 (ComboBox<String>) getPrivateField("languageCombo");
 
-        assertEquals("EN", combo.getValue());
-        assertTrue(combo.getItems().contains("DE"));
-        assertTrue(combo.getItems().contains("ZH"));
+        assertEquals("English", combo.getValue());
+        assertTrue(combo.getItems().contains("中文"));
+        assertTrue(combo.getItems().contains("العربية"));
     }
 
     @Test
