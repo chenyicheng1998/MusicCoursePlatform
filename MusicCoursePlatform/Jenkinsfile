@@ -91,10 +91,10 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                echo 'Building Docker image...'
+                echo 'Building Docker image with --no-cache to ensure Chinese fonts are properly installed...'
                 dir('MusicCoursePlatform') {
                     script {
-                        docker.build("${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG}")
+                        bat "docker build --no-cache -t ${DOCKERHUB_REPO}:${DOCKER_IMAGE_TAG} ."
                     }
                 }
             }
