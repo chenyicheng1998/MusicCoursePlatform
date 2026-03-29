@@ -9,6 +9,7 @@ import model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import util.LocalizationManager;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
@@ -28,6 +29,7 @@ class BookingViewControllerTest {
     private TeacherProfileDAO teacherProfileDAO;
     private LearnerProfileDAO learnerProfileDAO;
     private UserDAO userDAO;
+    private LocalizationManager localizationManager;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -47,6 +49,7 @@ class BookingViewControllerTest {
         teacherProfileDAO = mock(TeacherProfileDAO.class);
         learnerProfileDAO = mock(LearnerProfileDAO.class);
         userDAO = mock(UserDAO.class);
+        localizationManager = mock(LocalizationManager.class);
 
         // Inject mocks
         injectPrivateField("bookingDAO", bookingDAO);
@@ -54,6 +57,7 @@ class BookingViewControllerTest {
         injectPrivateField("teacherProfileDAO", teacherProfileDAO);
         injectPrivateField("learnerProfileDAO", learnerProfileDAO);
         injectPrivateField("userDAO", userDAO);
+        injectPrivateField("localizationManager", localizationManager);
 
         // Inject UI components
         injectPrivateField("userNameLabel", new Label());
@@ -76,6 +80,14 @@ class BookingViewControllerTest {
 
     @Test
     void testSetupLanguageCombo() throws Exception {
+        // Add localization mocks for initialize method calls
+        when(localizationManager.getCurrentLanguageDisplayName()).thenReturn("English");
+        when(localizationManager.getString("app.name")).thenReturn("MusicCoursePlatform");
+        when(localizationManager.getString("nav.course.booking")).thenReturn("Course Booking");
+        when(localizationManager.getString("nav.logout")).thenReturn("Logout");
+        when(localizationManager.getString("schedule.my.bookings")).thenReturn("My Bookings");
+        when(localizationManager.getString("message.no.bookings")).thenReturn("No bookings found");
+
         controller.initialize();
 
         ComboBox<String> combo =
@@ -89,6 +101,14 @@ class BookingViewControllerTest {
     @Test
     void testLoadBookings_NoLearnerProfile() throws Exception {
         injectPrivateField("learnerProfile", null);
+
+        // Add localization mocks
+        when(localizationManager.getString("message.no.bookings")).thenReturn("No bookings found");
+        when(localizationManager.getString("app.name")).thenReturn("MusicCoursePlatform");
+        when(localizationManager.getString("nav.course.booking")).thenReturn("Course Booking");
+        when(localizationManager.getString("nav.logout")).thenReturn("Logout");
+        when(localizationManager.getString("schedule.my.bookings")).thenReturn("My Bookings");
+        when(localizationManager.getCurrentLanguageDisplayName()).thenReturn("English");
 
         controller.initialize();
 
@@ -135,6 +155,16 @@ class BookingViewControllerTest {
 
         when(userDAO.findById(2)).thenReturn(teacherUser);
 
+        // Add localization mocks
+        when(localizationManager.getString("instrument.piano")).thenReturn("Piano");
+        when(localizationManager.getString("action.delete")).thenReturn("Delete");
+        when(localizationManager.getString("message.unknown")).thenReturn("Unknown");
+        when(localizationManager.getString("app.name")).thenReturn("MusicCoursePlatform");
+        when(localizationManager.getString("nav.course.booking")).thenReturn("Course Booking");
+        when(localizationManager.getString("nav.logout")).thenReturn("Logout");
+        when(localizationManager.getString("schedule.my.bookings")).thenReturn("My Bookings");
+        when(localizationManager.getCurrentLanguageDisplayName()).thenReturn("English");
+
         controller.initialize();
 
         FlowPane container =
@@ -154,6 +184,7 @@ class BookingViewControllerTest {
         slot.setSlotId(10);
 
         when(bookingDAO.update(any())).thenReturn(true);
+        when(localizationManager.getString(anyString())).thenReturn("Test String");
 
         controller.handleDeleteBooking(booking, slot);
 

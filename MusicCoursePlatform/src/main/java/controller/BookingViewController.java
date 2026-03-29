@@ -51,7 +51,7 @@ public class BookingViewController {
     private LocalizationManager localizationManager;
 
     private LearnerProfile learnerProfile;
-    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM d");
+    private DateTimeFormatter dateFormatter;
 
     @FXML
     public void initialize() {
@@ -62,6 +62,7 @@ public class BookingViewController {
         userDAO = new UserDAO();
         localizationManager = LocalizationManager.getInstance();
 
+        setupDateFormatter();
         setupLanguageSelector();
         loadUserInfo();
         updateTexts();
@@ -69,35 +70,36 @@ public class BookingViewController {
 
         // Listen for locale changes
         localizationManager.localeProperty().addListener((obs, oldLocale, newLocale) -> {
+            setupDateFormatter();
             updateTexts();
             applyDirection();
+            loadBookings(); // Reload bookings with new locale
         });
 
         // Apply initial direction
         applyDirection();
     }
 
+    private void setupDateFormatter() {
+        Locale currentLocale = localizationManager.getCurrentLocale();
+        if (LocalizationManager.ARABIC.equals(currentLocale)) {
+            dateFormatter = DateTimeFormatter.ofPattern("EEEE، d MMMM", currentLocale);
+        } else if (LocalizationManager.CHINESE.equals(currentLocale)) {
+            dateFormatter = DateTimeFormatter.ofPattern("M月d日 EEEE", currentLocale);
+        } else {
+            dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM d", currentLocale);
+        }
+    }
+
     private void setupLanguageSelector() {
         languageCombo.getItems().addAll("English", "中文", "العربية");
-        languageCombo.setValue("English");
+        languageCombo.setValue(localizationManager.getCurrentLanguageDisplayName());
     }
 
     @FXML
     private void handleLanguageChange(ActionEvent event) {
         String selected = languageCombo.getValue();
-        Locale newLocale;
-
-        switch (selected) {
-            case "中文":
-                newLocale = LocalizationManager.CHINESE;
-                break;
-            case "العربية":
-                newLocale = LocalizationManager.ARABIC;
-                break;
-            default:
-                newLocale = LocalizationManager.ENGLISH;
-                break;
-        }
+        Locale newLocale = LocalizationManager.getLocaleFromDisplayName(selected);
 
         localizationManager.setLocale(newLocale);
     }
@@ -125,7 +127,7 @@ public class BookingViewController {
         bookingsContainer.getChildren().clear();
 
         if (learnerProfile == null) {
-            Label noBookings = new Label("No bookings found");
+            Label noBookings = new Label(localizationManager.getString("message.no.bookings"));
             noBookings.setStyle("-fx-text-fill: #718096;");
             bookingsContainer.getChildren().add(noBookings);
             return;
@@ -134,7 +136,7 @@ public class BookingViewController {
         List<Booking> bookings = bookingDAO.findByLearnerProfileId(learnerProfile.getLearnerProfileId());
 
         if (bookings.isEmpty()) {
-            Label noBookings = new Label("No bookings found");
+            Label noBookings = new Label(localizationManager.getString("message.no.bookings"));
             noBookings.setStyle("-fx-text-fill: #718096;");
             bookingsContainer.getChildren().add(noBookings);
             return;
@@ -158,13 +160,16 @@ public class BookingViewController {
         if (slot == null) return card;
 
         TeacherProfile teacher = teacherProfileDAO.findById(slot.getTeacherProfileId());
-        String teacherName = "Unknown";
-        String instrument = "Unknown";
+        String teacherName = localizationManager.getString("message.unknown");
+        String instrument = localizationManager.getString("message.unknown");
 
         if (teacher != null) {
             User teacherUser = userDAO.findById(teacher.getUserId());
-            teacherName = (teacherUser != null) ? teacherUser.getUsername() : "Teacher";
-            instrument = teacher.getInstrumentsTaught();
+            teacherName = (teacherUser != null) ? teacherUser.getUsername() : localizationManager.getString("message.teacher");
+
+            // Localize instrument name
+            String rawInstrument = teacher.getInstrumentsTaught();
+            instrument = localizeInstrumentName(rawInstrument);
         }
 
         Label instrumentLabel = new Label(instrument + ", " + teacherName);
@@ -182,8 +187,8 @@ public class BookingViewController {
         timeBtn.setStyle("-fx-background-color: #2D4A47; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 16;");
         timeBtn.setPrefWidth(100);
 
-        Button deleteBtn = new Button("Del");
-        deleteBtn.setPrefWidth(40);
+        Button deleteBtn = new Button(localizationManager.getString("action.delete"));
+        deleteBtn.setPrefWidth(60);
         deleteBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #718096; -fx-cursor: hand;");
         deleteBtn.setOnAction(e -> handleDeleteBooking(booking, slot));
 
@@ -192,6 +197,37 @@ public class BookingViewController {
         card.getChildren().addAll(instrumentLabel, dateLabel, timeBox);
 
         return card;
+    }
+
+    private String localizeInstrumentName(String instrumentName) {
+        if (instrumentName == null) return localizationManager.getString("message.unknown");
+
+        // Try to match common instruments and localize them
+        String lowerName = instrumentName.toLowerCase().trim();
+        if (lowerName.contains("piano")) {
+            return localizationManager.getString("instrument.piano");
+        } else if (lowerName.contains("guitar")) {
+            return localizationManager.getString("instrument.guitar");
+        } else if (lowerName.contains("violin")) {
+            return localizationManager.getString("instrument.violin");
+        } else if (lowerName.contains("drum")) {
+            return localizationManager.getString("instrument.drums");
+        } else if (lowerName.contains("flute")) {
+            return localizationManager.getString("instrument.flute");
+        } else if (lowerName.contains("saxophone") || lowerName.contains("sax")) {
+            return localizationManager.getString("instrument.saxophone");
+        } else if (lowerName.contains("cello")) {
+            return localizationManager.getString("instrument.cello");
+        } else if (lowerName.contains("trumpet")) {
+            return localizationManager.getString("instrument.trumpet");
+        } else if (lowerName.contains("clarinet")) {
+            return localizationManager.getString("instrument.clarinet");
+        } else if (lowerName.contains("harp")) {
+            return localizationManager.getString("instrument.harp");
+        }
+
+        // If no match found, return original name
+        return instrumentName;
     }
 
     void handleDeleteBooking(Booking booking, TimeSlot slot) {

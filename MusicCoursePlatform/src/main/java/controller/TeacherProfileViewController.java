@@ -46,7 +46,7 @@ public class TeacherProfileViewController {
     private LocalizationManager localizationManager;
 
     private TeacherProfile teacherProfile;
-    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM d");
+    private DateTimeFormatter dateFormatter;
 
     @FXML
     public void initialize() {
@@ -55,6 +55,7 @@ public class TeacherProfileViewController {
         bookingDAO = new BookingDAO();
         localizationManager = LocalizationManager.getInstance();
 
+        setupDateFormatter();
         setupLanguageSelector();
         loadTeacherInfo();
         updateTexts();
@@ -62,35 +63,36 @@ public class TeacherProfileViewController {
 
         // Listen for locale changes
         localizationManager.localeProperty().addListener((obs, oldLocale, newLocale) -> {
+            setupDateFormatter();
             updateTexts();
             applyDirection();
+            loadSchedule(); // Reload schedule with new locale
         });
 
         // Apply initial direction
         applyDirection();
     }
 
+    private void setupDateFormatter() {
+        Locale currentLocale = localizationManager.getCurrentLocale();
+        if (LocalizationManager.ARABIC.equals(currentLocale)) {
+            dateFormatter = DateTimeFormatter.ofPattern("EEEE، d MMMM", currentLocale);
+        } else if (LocalizationManager.CHINESE.equals(currentLocale)) {
+            dateFormatter = DateTimeFormatter.ofPattern("M月d日 EEEE", currentLocale);
+        } else {
+            dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM d", currentLocale);
+        }
+    }
+
     private void setupLanguageSelector() {
         languageCombo.getItems().addAll("English", "中文", "العربية");
-        languageCombo.setValue("English");
+        languageCombo.setValue(localizationManager.getCurrentLanguageDisplayName());
     }
 
     @FXML
     private void handleLanguageChange(ActionEvent event) {
         String selected = languageCombo.getValue();
-        Locale newLocale;
-
-        switch (selected) {
-            case "中文":
-                newLocale = LocalizationManager.CHINESE;
-                break;
-            case "العربية":
-                newLocale = LocalizationManager.ARABIC;
-                break;
-            default:
-                newLocale = LocalizationManager.ENGLISH;
-                break;
-        }
+        Locale newLocale = LocalizationManager.getLocaleFromDisplayName(selected);
 
         localizationManager.setLocale(newLocale);
     }
@@ -123,7 +125,7 @@ public class TeacherProfileViewController {
         scheduleContainer.getChildren().clear();
 
         if (teacherProfile == null) {
-            Label noSchedule = new Label("No schedule found");
+            Label noSchedule = new Label(localizationManager.getString("message.no.schedule"));
             noSchedule.setStyle("-fx-text-fill: #718096;");
             scheduleContainer.getChildren().add(noSchedule);
             return;
@@ -132,7 +134,7 @@ public class TeacherProfileViewController {
         List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileId(teacherProfile.getTeacherProfileId());
 
         if (slots.isEmpty()) {
-            Label noSchedule = new Label("No time slots scheduled");
+            Label noSchedule = new Label(localizationManager.getString("message.no.time.slots"));
             noSchedule.setStyle("-fx-text-fill: #718096;");
             scheduleContainer.getChildren().add(noSchedule);
             return;
@@ -154,7 +156,9 @@ public class TeacherProfileViewController {
         dateLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #718096;");
 
         String timeText = slot.getStartTime() + " - " + slot.getEndTime();
-        String statusText = slot.isAvailable() ? "Available" : "Booked";
+        String statusText = slot.isAvailable() ?
+            localizationManager.getString("schedule.status.available") :
+            localizationManager.getString("schedule.status.booked");
 
         HBox timeBox = new HBox(8);
         timeBox.setAlignment(Pos.CENTER_LEFT);
@@ -168,8 +172,8 @@ public class TeacherProfileViewController {
         }
         timeBtn.setPrefWidth(100);
 
-        Button deleteBtn = new Button("Del");
-        deleteBtn.setPrefWidth(40);
+        Button deleteBtn = new Button(localizationManager.getString("action.delete"));
+        deleteBtn.setPrefWidth(60);
         deleteBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #718096; -fx-cursor: hand;");
 
         // Disable delete button if slot is booked
@@ -197,7 +201,7 @@ public class TeacherProfileViewController {
     private void handleDeleteSlot(TimeSlot slot) {
         // Double check if slot is booked
         if (!slot.isAvailable()) {
-            showError("Cannot delete a booked slot!");
+            showError(localizationManager.getString("message.cannot.delete.booked"));
             return;
         }
 

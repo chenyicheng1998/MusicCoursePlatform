@@ -16,11 +16,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import util.LocalizationManager;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,6 +35,7 @@ class TeacherProfileViewControllerTest {
 
     @Mock private TeacherProfileDAO mockTeacherProfileDAO;
     @Mock private TimeSlotDAO mockTimeSlotDAO;
+    @Mock private LocalizationManager mockLocalizationManager;
 
     @BeforeAll
     static void initJavaFX() throws InterruptedException {
@@ -56,8 +59,29 @@ class TeacherProfileViewControllerTest {
                 setField(controller, "scheduleContainer", new FlowPane());
                 setField(controller, "languageCombo", new ComboBox<>());
 
+                // Inject new localization fields
+                setField(controller, "appNameLabel", new Label());
+                setField(controller, "setAvailabilityButton", new javafx.scene.control.Button());
+                setField(controller, "logoutButton", new javafx.scene.control.Button());
+                setField(controller, "myScheduleLabel", new Label());
+                setField(controller, "rootPane", new javafx.scene.layout.BorderPane());
+
                 setField(controller, "teacherProfileDAO", mockTeacherProfileDAO);
                 setField(controller, "timeSlotDAO", mockTimeSlotDAO);
+                setField(controller, "localizationManager", mockLocalizationManager);
+
+                // Setup common localization mocks with lenient() to avoid UnnecessaryStubbingException
+                lenient().when(mockLocalizationManager.getString("app.name")).thenReturn("MusicCoursePlatform");
+                lenient().when(mockLocalizationManager.getString("nav.set.availability")).thenReturn("Set Availability");
+                lenient().when(mockLocalizationManager.getString("nav.logout")).thenReturn("Logout");
+                lenient().when(mockLocalizationManager.getString("schedule.my.schedule")).thenReturn("My Schedule");
+                lenient().when(mockLocalizationManager.getString("message.no.schedule")).thenReturn("No schedule found");
+                lenient().when(mockLocalizationManager.getString("message.no.time.slots")).thenReturn("No time slots scheduled");
+                lenient().when(mockLocalizationManager.getString("schedule.status.available")).thenReturn("Available");
+                lenient().when(mockLocalizationManager.getString("schedule.status.booked")).thenReturn("Booked");
+                lenient().when(mockLocalizationManager.getString("action.delete")).thenReturn("Delete");
+                lenient().when(mockLocalizationManager.getCurrentLanguageDisplayName()).thenReturn("English");
+                lenient().when(mockLocalizationManager.getCurrentLocale()).thenReturn(Locale.ENGLISH);
 
             } catch (Exception e) {
                 fail("Setup failed: " + e.getMessage());

@@ -112,25 +112,13 @@ public class StudentDashboardController {
 
     private void setupLanguageSelector() {
         languageCombo.getItems().addAll("English", "中文", "العربية");
-        languageCombo.setValue("English");
+        languageCombo.setValue(localizationManager.getCurrentLanguageDisplayName());
     }
 
     @FXML
     private void handleLanguageChange(ActionEvent event) {
         String selected = languageCombo.getValue();
-        Locale newLocale;
-
-        switch (selected) {
-            case "中文":
-                newLocale = LocalizationManager.CHINESE;
-                break;
-            case "العربية":
-                newLocale = LocalizationManager.ARABIC;
-                break;
-            default:
-                newLocale = LocalizationManager.ENGLISH;
-                break;
-        }
+        Locale newLocale = LocalizationManager.getLocaleFromDisplayName(selected);
 
         localizationManager.setLocale(newLocale);
     }

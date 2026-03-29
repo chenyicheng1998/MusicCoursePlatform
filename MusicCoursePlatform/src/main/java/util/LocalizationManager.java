@@ -113,6 +113,27 @@ public class LocalizationManager {
     }
 
     /**
+     * Get current language display name for locale
+     */
+    public String getCurrentLanguageDisplayName() {
+        return getLanguageDisplayName(getCurrentLocale());
+    }
+
+    /**
+     * Get locale from display name
+     */
+    public static Locale getLocaleFromDisplayName(String displayName) {
+        switch (displayName) {
+            case "中文":
+                return CHINESE;
+            case "العربية":
+                return ARABIC;
+            default:
+                return ENGLISH;
+        }
+    }
+
+    /**
      * Get language display name for locale
      */
     public static String getLanguageDisplayName(Locale locale) {
