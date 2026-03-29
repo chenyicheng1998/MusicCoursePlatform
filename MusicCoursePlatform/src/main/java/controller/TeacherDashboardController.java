@@ -121,6 +121,9 @@ public class TeacherDashboardController {
         endTimeLabel.setText(localizationManager.getString("teacher.end.time"));
         addTimeSlotButton.setText(localizationManager.getString("teacher.add.slot"));
 
+        // Update instrument combo box with localized names
+        updateInstrumentsCombo();
+
         // Update day of week labels
         sunLabel.setText(localizationManager.getString("calendar.day.sun"));
         monLabel.setText(localizationManager.getString("calendar.day.mon"));
@@ -159,9 +162,56 @@ public class TeacherDashboardController {
     }
 
     private void setupInstrumentsCombo() {
+        updateInstrumentsCombo();
+    }
+
+    private void updateInstrumentsCombo() {
+        String currentSelection = instrumentsCombo.getValue();
+        String currentInstrumentKey = getInstrumentKeyFromDisplayName(currentSelection);
+
+        instrumentsCombo.getItems().clear();
         instrumentsCombo.getItems().addAll(
-            "Piano", "Guitar", "Violin", "Drums", "Flute", "Saxophone", "Cello", "Voice"
+                localizationManager.getString("instrument.piano"),
+                localizationManager.getString("instrument.guitar"),
+                localizationManager.getString("instrument.violin"),
+                localizationManager.getString("instrument.drums"),
+                localizationManager.getString("instrument.flute"),
+                localizationManager.getString("instrument.saxophone"),
+                localizationManager.getString("instrument.cello"),
+                localizationManager.getString("instrument.voice")
         );
+
+        // Restore selection based on the instrument key, not display name
+        if (currentInstrumentKey != null) {
+            instrumentsCombo.setValue(localizationManager.getString("instrument." + currentInstrumentKey));
+        }
+    }
+
+    private String getInstrumentKeyFromDisplayName(String displayName) {
+        if (displayName == null) return null;
+
+        // Check against current localized names
+        if (displayName.equals(localizationManager.getString("instrument.piano"))) return "piano";
+        if (displayName.equals(localizationManager.getString("instrument.guitar"))) return "guitar";
+        if (displayName.equals(localizationManager.getString("instrument.violin"))) return "violin";
+        if (displayName.equals(localizationManager.getString("instrument.drums"))) return "drums";
+        if (displayName.equals(localizationManager.getString("instrument.flute"))) return "flute";
+        if (displayName.equals(localizationManager.getString("instrument.saxophone"))) return "saxophone";
+        if (displayName.equals(localizationManager.getString("instrument.cello"))) return "cello";
+        if (displayName.equals(localizationManager.getString("instrument.voice"))) return "voice";
+
+        // Fallback: check against English names for backward compatibility
+        switch (displayName.toLowerCase()) {
+            case "piano": return "piano";
+            case "guitar": return "guitar";
+            case "violin": return "violin";
+            case "drums": return "drums";
+            case "flute": return "flute";
+            case "saxophone": return "saxophone";
+            case "cello": return "cello";
+            case "voice": return "voice";
+            default: return null;
+        }
     }
 
     private void setupTimeComboBoxes() {
@@ -190,7 +240,7 @@ public class TeacherDashboardController {
                 bioField.setText(teacherProfile.getBiography());
             }
         } else {
-            nameLabel.setText(currentUser != null ? currentUser.getUsername() : "Name");
+            nameLabel.setText(currentUser != null ? currentUser.getUsername() : localizationManager.getString("common.name"));
             teacherProfile = new TeacherProfile(currentUser.getUserId(), "Piano");
             teacherProfileDAO.create(teacherProfile);
         }
@@ -309,7 +359,7 @@ public class TeacherDashboardController {
         timeLabel.getStyleClass().add("time-slot");
         timeLabel.setPrefWidth(150);  // Increased from 120 to 150 to show full time
 
-        Button deleteBtn = new Button("Del");
+        Button deleteBtn = new Button(localizationManager.getString("action.delete"));
         deleteBtn.setPrefWidth(40);
         deleteBtn.setStyle("-fx-background-color: transparent; -fx-cursor: hand;");
         deleteBtn.setOnAction(e -> handleDeleteSlot(slot));

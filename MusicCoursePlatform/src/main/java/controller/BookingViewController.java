@@ -42,6 +42,8 @@ public class BookingViewController {
     @FXML private Label userNameLabel;
     @FXML private Label myBookingsLabel;
     @FXML private FlowPane bookingsContainer;
+    @FXML private Button prevPageBtn;
+    @FXML private Button nextPageBtn;
 
     private BookingDAO bookingDAO;
     private TimeSlotDAO timeSlotDAO;
@@ -109,6 +111,19 @@ public class BookingViewController {
         courseBookingButton.setText(localizationManager.getString("nav.course.booking"));
         logoutButton.setText(localizationManager.getString("nav.logout"));
         myBookingsLabel.setText(localizationManager.getString("schedule.my.bookings"));
+
+        // Update navigation buttons for RTL languages
+        if (prevPageBtn != null && nextPageBtn != null) {
+            if (localizationManager.isRTL()) {
+                // In RTL languages, reverse the direction
+                prevPageBtn.setText("›");
+                nextPageBtn.setText("‹");
+            } else {
+                // LTR languages use normal direction
+                prevPageBtn.setText("‹");
+                nextPageBtn.setText("›");
+            }
+        }
     }
 
     private void applyDirection() {

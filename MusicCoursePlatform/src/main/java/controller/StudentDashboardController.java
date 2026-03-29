@@ -146,6 +146,9 @@ public class StudentDashboardController {
         friLabel.setText(localizationManager.getString("calendar.day.fri"));
         satLabel.setText(localizationManager.getString("calendar.day.sat"));
 
+        // Update instrument combo box with localized names
+        updateInstrumentCombo();
+
         // Update other dynamic text if needed
         if (teacherCombo != null) {
             teacherCombo.setPromptText(localizationManager.getString("student.teacher.prompt"));
@@ -174,16 +177,72 @@ public class StudentDashboardController {
     }
 
     private void setupInstrumentCombo() {
+        updateInstrumentCombo();
+    }
+
+    private void updateInstrumentCombo() {
+        String currentSelection = instrumentCombo.getValue();
+        String currentInstrumentKey = getInstrumentKeyFromDisplayName(currentSelection);
+
+        instrumentCombo.getItems().clear();
         instrumentCombo.getItems().addAll(
-                "Piano", "Guitar", "Violin", "Drums", "Flute", "Saxophone", "Cello", "Voice"
+                localizationManager.getString("instrument.piano"),
+                localizationManager.getString("instrument.guitar"),
+                localizationManager.getString("instrument.violin"),
+                localizationManager.getString("instrument.drums"),
+                localizationManager.getString("instrument.flute"),
+                localizationManager.getString("instrument.saxophone"),
+                localizationManager.getString("instrument.cello"),
+                localizationManager.getString("instrument.voice")
         );
-        instrumentCombo.setValue("Piano");
+
+        // Restore selection based on the instrument key, not display name
+        if (currentInstrumentKey != null) {
+            instrumentCombo.setValue(localizationManager.getString("instrument." + currentInstrumentKey));
+        } else {
+            instrumentCombo.setValue(localizationManager.getString("instrument.piano"));
+        }
+    }
+
+    private String getInstrumentKeyFromDisplayName(String displayName) {
+        if (displayName == null) return null;
+
+        // Check against current localized names
+        if (displayName.equals(localizationManager.getString("instrument.piano"))) return "piano";
+        if (displayName.equals(localizationManager.getString("instrument.guitar"))) return "guitar";
+        if (displayName.equals(localizationManager.getString("instrument.violin"))) return "violin";
+        if (displayName.equals(localizationManager.getString("instrument.drums"))) return "drums";
+        if (displayName.equals(localizationManager.getString("instrument.flute"))) return "flute";
+        if (displayName.equals(localizationManager.getString("instrument.saxophone"))) return "saxophone";
+        if (displayName.equals(localizationManager.getString("instrument.cello"))) return "cello";
+        if (displayName.equals(localizationManager.getString("instrument.voice"))) return "voice";
+
+        // Fallback: check against English names for backward compatibility
+        switch (displayName.toLowerCase()) {
+            case "piano": return "piano";
+            case "guitar": return "guitar";
+            case "violin": return "violin";
+            case "drums": return "drums";
+            case "flute": return "flute";
+            case "saxophone": return "saxophone";
+            case "cello": return "cello";
+            case "voice": return "voice";
+            default: return null;
+        }
+    }
+
+    private String getInstrumentKeyFromLocalizedName(String localizedName) {
+        return getInstrumentKeyFromDisplayName(localizedName);
     }
 
     private void loadTeachers() {
-        String instrument = instrumentCombo.getValue();
-        if (instrument != null) {
-            teacherProfiles = teacherProfileDAO.findByInstrument(instrument);
+        String selectedLocalizedInstrument = instrumentCombo.getValue();
+        if (selectedLocalizedInstrument != null) {
+            // Convert localized instrument name back to English for database query
+            String instrumentKey = getInstrumentKeyFromDisplayName(selectedLocalizedInstrument);
+            String englishInstrument = instrumentKey != null ? capitalizeFirstLetter(instrumentKey) : "Piano";
+
+            teacherProfiles = teacherProfileDAO.findByInstrument(englishInstrument);
             teacherCombo.getItems().clear();
             for (TeacherProfile profile : teacherProfiles) {
                 User user = userDAO.findById(profile.getUserId());
@@ -196,12 +255,17 @@ public class StudentDashboardController {
                 updateTeacherDisplay();
                 updateCalendar();
             } else {
-                teacherNameLabel.setText("No teachers available");
+                teacherNameLabel.setText(localizationManager.getString("message.no.teachers.available"));
                 if (teacherInstrumentLabel != null) teacherInstrumentLabel.setText("");
                 if (teacherExperienceLabel != null) teacherExperienceLabel.setText("");
                 if (teacherRateLabel != null) teacherRateLabel.setText("");
             }
         }
+    }
+
+    private String capitalizeFirstLetter(String str) {
+        if (str == null || str.isEmpty()) return str;
+        return str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
     }
 
     @FXML
@@ -228,18 +292,36 @@ public class StudentDashboardController {
             teacherNameLabel.setText(name);
 
             if (teacherInstrumentLabel != null) {
-                teacherInstrumentLabel.setText(selectedTeacher.getInstrumentsTaught());
+                // Localize the instrument name for display
+                String instrument = selectedTeacher.getInstrumentsTaught();
+                String localizedInstrument = localizeInstrumentName(instrument);
+                teacherInstrumentLabel.setText(localizedInstrument);
             }
             if (teacherExperienceLabel != null) {
-                teacherExperienceLabel.setText(selectedTeacher.getYearsExperience() + " years exp.");
+                teacherExperienceLabel.setText(selectedTeacher.getYearsExperience() + " " + localizationManager.getString("student.years.experience"));
             }
             if (teacherRateLabel != null) {
-                teacherRateLabel.setText("$" + selectedTeacher.getHourlyRate() + "/hr");
+                teacherRateLabel.setText("$" + selectedTeacher.getHourlyRate() + "/" + localizationManager.getString("student.hour"));
             }
             if (teacherBioLabel != null) {
                 String bio = selectedTeacher.getBiography();
-                teacherBioLabel.setText((bio != null && !bio.isEmpty()) ? bio : "No biography available.");
+                String noBioText = localizationManager.getString("student.no.biography");
+                teacherBioLabel.setText((bio != null && !bio.isEmpty()) ? bio : noBioText);
             }
+        }
+    }
+
+    private String localizeInstrumentName(String instrumentName) {
+        if (instrumentName == null) {
+            return localizationManager.getString("message.unknown");
+        }
+
+        String lowerInstrument = instrumentName.toLowerCase();
+        try {
+            return localizationManager.getString("instrument." + lowerInstrument);
+        } catch (Exception e) {
+            // If localization key not found, return original name
+            return instrumentName;
         }
     }
 
@@ -310,7 +392,7 @@ public class StudentDashboardController {
         }
 
         if (timeSlotsContainer.getChildren().isEmpty()) {
-            Label noSlotsLabel = new Label("No available slots");
+            Label noSlotsLabel = new Label(localizationManager.getString("message.no.time.slots"));
             noSlotsLabel.setStyle("-fx-text-fill: #718096;");
             timeSlotsContainer.getChildren().add(noSlotsLabel);
         }

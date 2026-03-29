@@ -89,7 +89,7 @@ public class LocalizationManager {
         try {
             return resourceBundle.getString(key);
         } catch (Exception e) {
-            System.err.println("Missing translation key: " + key);
+            System.err.println("Missing translation key: " + key + " for locale: " + getCurrentLocale());
             return "!" + key + "!";
         }
     }
