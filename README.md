@@ -78,6 +78,50 @@ mvn javafx:run
 
 ---
 
+## Language Selection & Localization
+
+The Music Course Platform supports **multilingual user interface** with the following languages:
+
+| Language | Code | Text Direction |
+|----------|------|----------------|
+| English | `en` | LTR (Left-to-Right) |
+| Chinese (中文) | `zh` | LTR |
+| Arabic (العربية) | `ar` | RTL (Right-to-Left) |
+
+### Switching Languages
+
+1. Launch the application using `mvn javafx:run`
+2. Look for the **language selector dropdown** in the navigation bar (top-right corner)
+3. Select your preferred language from the dropdown menu
+4. The UI will automatically update to display text in the selected language
+
+### Running Localized Versions
+
+The application automatically detects and applies the selected language. All UI elements including:
+- Navigation menus
+- Form labels and buttons
+- Calendar and date formats
+- Error and success messages
+- Instrument names
+
+...are dynamically localized based on your selection.
+
+### Localization Architecture
+
+The localization system uses Java's `ResourceBundle` framework with a singleton `LocalizationManager` class:
+
+```
+src/main/resources/i18n/
+├── messages_en.properties    # English (default)
+├── messages_zh.properties    # Chinese
+└── messages_ar.properties    # Arabic
+```
+
+For detailed documentation on the localization framework, see:
+- [Localization Framework Documentation](document/LOCALIZATION_FRAMEWORK.md)
+
+---
+
 ## Testing & Code Coverage
 
 To run all tests and generate the JaCoCo coverage report:
@@ -126,6 +170,7 @@ docker pull chenyicheng1998/music-course-platform:latest
 | Sprint 2 | Luo Ying | [Sprint 2](https://trello.com/b/IMIZmc7K/sep1musiccourseplatform-sprint2) | ✅ Done |
 | Sprint 3 | Su Wai Phyoe | [Sprint 3](https://trello.com/b/B5AJ4wIm/sep1musiccourseplatform-sprint3) | ✅ Done |
 | Sprint 4 | Liu Lu | [Sprint 4](https://trello.com/b/Rx627kZj/sep1musiccourseplatform-sprint4) | ✅ Done |
+| Sprint 5 | Luo Ying | [Sprint 5](https://trello.com/b/gQ18ryeD/sep1musiccourseplatform-sprint5) | ✅ Done |
 
 ---
 
@@ -135,11 +180,15 @@ docker pull chenyicheng1998/music-course-platform:latest
 - [Sprint 2 Review](document/SprintReviewReports/Sprint_2_Review_Report.pdf)
 - [Sprint 3 Review](document/SprintReviewReports/Sprint_3_Review_Report.pdf)
 - [Sprint 4 Review](document/SprintReviewReports/Sprint_4_Review_Report.pdf)
+- [Sprint 5 Review](document/SprintReviewReports/Sprint_5_Review_Report.pdf)
 
 ### Diagrams
 
-**Use Case Diagram**
-![Use Case Diagram](document/images/dia_usecase.jpg)
+**Use Case Diagram (with Localization)**
+![Use Case Diagram](document/images/dia_usecase_localization.png)
+
+**Localization Architecture Diagram**
+![Localization Architecture](document/images/dia_localization_architecture.png)
 
 **Database Schema**
 ![Database Schema](document/images/dia_dbschema.jpg)
