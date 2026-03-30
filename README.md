@@ -184,11 +184,7 @@ docker pull chenyicheng1998/music-course-platform:latest
 
 ### Diagrams
 
-**Use Case Diagram (with Localization)**
-![Use Case Diagram](document/images/dia_usecase_localization.png)
-
-**Localization Architecture Diagram**
-![Localization Architecture](document/images/dia_localization_architecture.png)
+**Use Case Diagram (with Localization)** — [Music Course Platform – Use Case Diagram (PDF)](document/diagrams/Music%20Course%20Platform-Use%20Case%20Diagram.pdf)
 
 **Database Schema**
 ![Database Schema](document/images/dia_dbschema.jpg)
