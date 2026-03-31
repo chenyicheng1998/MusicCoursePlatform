@@ -209,3 +209,9 @@ docker pull chenyicheng1998/music-course-platform:latest
 
 **ER Diagram**
 ![ER Diagram](document/images/dia_er.jpg)
+
+**Activity Diagram**
+![Activity Diagram](document/images/dia_activity.jpg)
+
+**Class Diagram**
+![Class Diagram](document/images/dia_class.jpg)
