@@ -1,5 +1,5 @@
 # Music Course Platform
-## Software Engineering Project 1 — Group 5
+## Software Engineering Project 2 — Group 5
 
 ## Team Members
 | Name | Role |
@@ -47,13 +47,29 @@ cd MusicCoursePlatform
 
 #### 2. Configure Database Connection
 
-Open `MusicCoursePlatform/src/main/java/dao/DatabaseConnection.java` and update lines 17–19 with your MariaDB credentials:
+Connection settings are read from **`MusicCoursePlatform/src/main/java/dao/DatabaseConnection.java`**. The app builds the JDBC URL from host, port, and database name, and uses **environment variables when set**, otherwise **defaults in code** (see roughly lines 18–28).
 
-```java
-private static final String URL = "jdbc:mariadb://localhost:3306/music_course_platform";
-private static final String USER = "root";
-private static final String PASSWORD = "your_password_here";
+| Variable | Purpose | Default (if unset) |
+|----------|---------|---------------------|
+| `DB_HOST` | MariaDB host | `localhost` |
+| `DB_PORT` | MariaDB port | `3306` |
+| `DB_USER` | Database user | `root` |
+| `DB_PASSWORD` | Database password | `123456` |
+
+**Option A — environment variables (recommended for Docker or shared machines)**
+
+```bash
+export DB_HOST=localhost
+export DB_PORT=3306
+export DB_USER=root
+export DB_PASSWORD=your_password_here
 ```
+
+When running in Docker and MariaDB is on the host, you may need `DB_HOST=host.docker.internal` (see comments in `DatabaseConnection.java`).
+
+**Option B — edit defaults in code**
+
+Change the fallback values in the `?:` expressions (e.g. the default password after `DB_PASSWORD`) so your local MariaDB user/password match without exporting variables.
 
 #### 3. Create the Database
 
@@ -184,7 +200,9 @@ docker pull chenyicheng1998/music-course-platform:latest
 
 ### Diagrams
 
-**Use Case Diagram (with Localization)** — [Music Course Platform – Use Case Diagram (PDF)](document/diagrams/Music%20Course%20Platform-Use%20Case%20Diagram.pdf)
+**Use Case Diagram (with Localization)**
+
+![Use Case Diagram](document/images/dia_usecase.jpg)
 
 **Database Schema**
 ![Database Schema](document/images/dia_dbschema.jpg)
