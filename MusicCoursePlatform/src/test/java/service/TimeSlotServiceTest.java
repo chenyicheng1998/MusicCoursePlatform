@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Unit tests for TimeSlotService class.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class TimeSlotServiceTest {
+class TimeSlotServiceTest {
 
     private static TimeSlotService timeSlotService;
     private static TimeSlotDAO timeSlotDAO;
@@ -35,7 +35,7 @@ public class TimeSlotServiceTest {
 
         // Create test teacher
         testTeacher = new User("tsstest" + System.currentTimeMillis(), "hash",
-                              "tss@test.com", "TEACHER");
+                "tss@test.com", "TEACHER");
         userDAO.create(testTeacher);
 
         testProfile = new TeacherProfile(testTeacher.getUserId(), "Piano");
@@ -64,11 +64,10 @@ public class TimeSlotServiceTest {
     @DisplayName("Test: Create time slot successfully")
     void testCreateTimeSlot_Success() {
         TimeSlot slot = timeSlotService.createTimeSlot(
-            testProfile.getTeacherProfileId(),
-            LocalDate.now().plusDays(1),
-            "10:00",
-            "11:00"
-        );
+                testProfile.getTeacherProfileId(),
+                LocalDate.now().plusDays(1),
+                "10:00",
+                "11:00");
 
         assertNotNull(slot);
         assertTrue(slot.getSlotId() > 0);
@@ -83,7 +82,7 @@ public class TimeSlotServiceTest {
     void testCreateTimeSlot_TeacherNotFound() {
         assertThrows(IllegalArgumentException.class, () -> {
             timeSlotService.createTimeSlot(99999, LocalDate.now().plusDays(1),
-                                          "10:00", "11:00");
+                    "10:00", "11:00");
         });
     }
 
@@ -93,7 +92,7 @@ public class TimeSlotServiceTest {
     void testCreateTimeSlot_NullDate() {
         assertThrows(IllegalArgumentException.class, () -> {
             timeSlotService.createTimeSlot(testProfile.getTeacherProfileId(),
-                                          null, "10:00", "11:00");
+                    null, "10:00", "11:00");
         });
     }
 
@@ -103,12 +102,12 @@ public class TimeSlotServiceTest {
     void testCreateTimeSlot_EmptyTime() {
         assertThrows(IllegalArgumentException.class, () -> {
             timeSlotService.createTimeSlot(testProfile.getTeacherProfileId(),
-                                          LocalDate.now().plusDays(1), "", "11:00");
+                    LocalDate.now().plusDays(1), "", "11:00");
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
             timeSlotService.createTimeSlot(testProfile.getTeacherProfileId(),
-                                          LocalDate.now().plusDays(1), "10:00", null);
+                    LocalDate.now().plusDays(1), "10:00", null);
         });
     }
 
@@ -117,18 +116,16 @@ public class TimeSlotServiceTest {
     @DisplayName("Test: Update time slot successfully")
     void testUpdateTimeSlot_Success() {
         TimeSlot slot = timeSlotService.createTimeSlot(
-            testProfile.getTeacherProfileId(),
-            LocalDate.now().plusDays(2),
-            "14:00",
-            "15:00"
-        );
+                testProfile.getTeacherProfileId(),
+                LocalDate.now().plusDays(2),
+                "14:00",
+                "15:00");
 
         TimeSlot updated = timeSlotService.updateTimeSlot(
-            slot.getSlotId(),
-            LocalDate.now().plusDays(2),
-            "15:00",
-            "16:00"
-        );
+                slot.getSlotId(),
+                LocalDate.now().plusDays(2),
+                "15:00",
+                "16:00");
 
         assertNotNull(updated);
         assertEquals("15:00", updated.getStartTime());
@@ -142,7 +139,7 @@ public class TimeSlotServiceTest {
     void testUpdateTimeSlot_NotFound() {
         assertThrows(IllegalArgumentException.class, () -> {
             timeSlotService.updateTimeSlot(99999, LocalDate.now().plusDays(1),
-                                          "10:00", "11:00");
+                    "10:00", "11:00");
         });
     }
 
@@ -151,11 +148,10 @@ public class TimeSlotServiceTest {
     @DisplayName("Test: Get time slot by ID")
     void testGetTimeSlotById() {
         TimeSlot slot = timeSlotService.createTimeSlot(
-            testProfile.getTeacherProfileId(),
-            LocalDate.now().plusDays(3),
-            "09:00",
-            "10:00"
-        );
+                testProfile.getTeacherProfileId(),
+                LocalDate.now().plusDays(3),
+                "09:00",
+                "10:00");
 
         TimeSlot found = timeSlotService.getTimeSlotById(slot.getSlotId());
         assertNotNull(found);
@@ -168,8 +164,7 @@ public class TimeSlotServiceTest {
     @DisplayName("Test: Get time slots by teacher profile")
     void testGetTimeSlotsByTeacherProfile() {
         List<TimeSlot> slots = timeSlotService.getTimeSlotsByTeacherProfile(
-            testProfile.getTeacherProfileId()
-        );
+                testProfile.getTeacherProfileId());
         assertNotNull(slots);
     }
 
@@ -179,11 +174,10 @@ public class TimeSlotServiceTest {
     void testGetTimeSlotsByTeacherProfileAndDate() {
         LocalDate date = LocalDate.now().plusDays(5);
         timeSlotService.createTimeSlot(testProfile.getTeacherProfileId(),
-                                      date, "11:00", "12:00");
+                date, "11:00", "12:00");
 
         List<TimeSlot> slots = timeSlotService.getTimeSlotsByTeacherProfileAndDate(
-            testProfile.getTeacherProfileId(), date
-        );
+                testProfile.getTeacherProfileId(), date);
 
         assertNotNull(slots);
         assertFalse(slots.isEmpty());
@@ -201,8 +195,7 @@ public class TimeSlotServiceTest {
     @DisplayName("Test: Get available slots by teacher profile")
     void testGetAvailableSlotsByTeacherProfile() {
         List<TimeSlot> slots = timeSlotService.getAvailableSlotsByTeacherProfile(
-            testProfile.getTeacherProfileId()
-        );
+                testProfile.getTeacherProfileId());
         assertNotNull(slots);
     }
 
@@ -211,8 +204,7 @@ public class TimeSlotServiceTest {
     @DisplayName("Test: Get available slots by date")
     void testGetAvailableSlotsByDate() {
         List<TimeSlot> slots = timeSlotService.getAvailableSlotsByDate(
-            LocalDate.now().plusDays(1)
-        );
+                LocalDate.now().plusDays(1));
         assertNotNull(slots);
     }
 
@@ -238,11 +230,10 @@ public class TimeSlotServiceTest {
     @DisplayName("Test: Mark as booked")
     void testMarkAsBooked() {
         TimeSlot slot = timeSlotService.createTimeSlot(
-            testProfile.getTeacherProfileId(),
-            LocalDate.now().plusDays(7),
-            "13:00",
-            "14:00"
-        );
+                testProfile.getTeacherProfileId(),
+                LocalDate.now().plusDays(7),
+                "13:00",
+                "14:00");
 
         boolean marked = timeSlotService.markAsBooked(slot.getSlotId());
         assertTrue(marked);
@@ -257,11 +248,10 @@ public class TimeSlotServiceTest {
     @DisplayName("Test: Mark as available")
     void testMarkAsAvailable() {
         TimeSlot slot = timeSlotService.createTimeSlot(
-            testProfile.getTeacherProfileId(),
-            LocalDate.now().plusDays(8),
-            "16:00",
-            "17:00"
-        );
+                testProfile.getTeacherProfileId(),
+                LocalDate.now().plusDays(8),
+                "16:00",
+                "17:00");
 
         timeSlotDAO.updateStatus(slot.getSlotId(), TimeSlot.STATUS_BOOKED);
         boolean marked = timeSlotService.markAsAvailable(slot.getSlotId());
@@ -275,11 +265,10 @@ public class TimeSlotServiceTest {
     @DisplayName("Test: Delete time slot")
     void testDeleteTimeSlot() {
         TimeSlot slot = timeSlotService.createTimeSlot(
-            testProfile.getTeacherProfileId(),
-            LocalDate.now().plusDays(10),
-            "18:00",
-            "19:00"
-        );
+                testProfile.getTeacherProfileId(),
+                LocalDate.now().plusDays(10),
+                "18:00",
+                "19:00");
 
         boolean deleted = timeSlotService.deleteTimeSlot(slot.getSlotId());
         assertTrue(deleted);
@@ -294,4 +283,3 @@ public class TimeSlotServiceTest {
         });
     }
 }
-

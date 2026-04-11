@@ -177,6 +177,14 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <!-- SonarQube Scanner – Sprint 6 Static Code Review -->
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>4.0.0.4121</version>
+            </plugin>
+
         </plugins>
     </build>
 </project>

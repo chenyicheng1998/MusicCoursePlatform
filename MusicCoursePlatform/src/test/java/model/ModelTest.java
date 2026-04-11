@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Unit tests for all Model classes.
  * Tests getters, setters, equals, hashCode, and toString methods.
  */
-public class ModelTest {
+class ModelTest {
 
     // ==================== User Model Tests ====================
 
@@ -289,4 +289,3 @@ public class ModelTest {
         assertNotNull(str);
     }
 }
-

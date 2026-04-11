@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class TimeSlotDAOTest {
+class TimeSlotDAOTest {
 
     private static TimeSlotDAO timeSlotDAO;
     private static TeacherProfileDAO teacherProfileDAO;
@@ -24,13 +24,13 @@ public class TimeSlotDAOTest {
         timeSlotDAO = new TimeSlotDAO();
         teacherProfileDAO = new TeacherProfileDAO();
         userDAO = new UserDAO();
-        
-        testUser = new User("test_slot_teacher_" + System.currentTimeMillis(), 
-                           "hashedpassword", 
-                           "test_slot_teacher_" + System.currentTimeMillis() + "@test.com", 
-                           "TEACHER");
+
+        testUser = new User("test_slot_teacher_" + System.currentTimeMillis(),
+                "hashedpassword",
+                "test_slot_teacher_" + System.currentTimeMillis() + "@test.com",
+                "TEACHER");
         userDAO.create(testUser);
-        
+
         testTeacherProfile = new TeacherProfile(testUser.getUserId(), "Piano");
         teacherProfileDAO.create(testTeacherProfile);
     }
@@ -51,13 +51,13 @@ public class TimeSlotDAOTest {
     @Test
     @Order(1)
     void testCreate() {
-        testSlot = new TimeSlot(testTeacherProfile.getTeacherProfileId(), 
-                               LocalDate.now().plusDays(1), 
-                               "10:00", 
-                               "11:00");
-        
+        testSlot = new TimeSlot(testTeacherProfile.getTeacherProfileId(),
+                LocalDate.now().plusDays(1),
+                "10:00",
+                "11:00");
+
         boolean result = timeSlotDAO.create(testSlot);
-        
+
         assertTrue(result);
         assertTrue(testSlot.getSlotId() > 0);
     }
@@ -66,7 +66,7 @@ public class TimeSlotDAOTest {
     @Order(2)
     void testFindById() {
         TimeSlot found = timeSlotDAO.findById(testSlot.getSlotId());
-        
+
         assertNotNull(found);
         assertEquals(testSlot.getSlotId(), found.getSlotId());
         assertEquals("10:00", found.getStartTime());
@@ -76,7 +76,7 @@ public class TimeSlotDAOTest {
     @Order(3)
     void testFindByTeacherProfileId() {
         List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileId(testTeacherProfile.getTeacherProfileId());
-        
+
         assertNotNull(slots);
         assertTrue(slots.stream().anyMatch(s -> s.getSlotId() == testSlot.getSlotId()));
     }
@@ -85,10 +85,9 @@ public class TimeSlotDAOTest {
     @Order(4)
     void testFindByTeacherProfileIdAndDate() {
         List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileIdAndDate(
-            testTeacherProfile.getTeacherProfileId(), 
-            LocalDate.now().plusDays(1)
-        );
-        
+                testTeacherProfile.getTeacherProfileId(),
+                LocalDate.now().plusDays(1));
+
         assertNotNull(slots);
         assertTrue(slots.stream().anyMatch(s -> s.getSlotId() == testSlot.getSlotId()));
     }
@@ -97,7 +96,7 @@ public class TimeSlotDAOTest {
     @Order(5)
     void testFindAvailableByTeacherProfileId() {
         List<TimeSlot> slots = timeSlotDAO.findAvailableByTeacherProfileId(testTeacherProfile.getTeacherProfileId());
-        
+
         assertNotNull(slots);
         assertTrue(slots.stream().anyMatch(s -> s.getSlotId() == testSlot.getSlotId()));
     }
@@ -106,7 +105,7 @@ public class TimeSlotDAOTest {
     @Order(6)
     void testFindAll() {
         List<TimeSlot> slots = timeSlotDAO.findAll();
-        
+
         assertNotNull(slots);
         assertTrue(slots.size() >= 1);
     }
@@ -116,11 +115,11 @@ public class TimeSlotDAOTest {
     void testUpdate() {
         testSlot.setStartTime("11:00");
         testSlot.setEndTime("12:00");
-        
+
         boolean result = timeSlotDAO.update(testSlot);
-        
+
         assertTrue(result);
-        
+
         TimeSlot updated = timeSlotDAO.findById(testSlot.getSlotId());
         assertEquals("11:00", updated.getStartTime());
         assertEquals("12:00", updated.getEndTime());
@@ -130,9 +129,9 @@ public class TimeSlotDAOTest {
     @Order(8)
     void testUpdateStatus() {
         boolean result = timeSlotDAO.updateStatus(testSlot.getSlotId(), TimeSlot.STATUS_BOOKED);
-        
+
         assertTrue(result);
-        
+
         TimeSlot updated = timeSlotDAO.findById(testSlot.getSlotId());
         assertEquals(TimeSlot.STATUS_BOOKED, updated.getSlotStatus());
     }
@@ -140,14 +139,14 @@ public class TimeSlotDAOTest {
     @Test
     @Order(9)
     void testDelete() {
-        TimeSlot toDelete = new TimeSlot(testTeacherProfile.getTeacherProfileId(), 
-                                        LocalDate.now().plusDays(2), 
-                                        "14:00", 
-                                        "15:00");
+        TimeSlot toDelete = new TimeSlot(testTeacherProfile.getTeacherProfileId(),
+                LocalDate.now().plusDays(2),
+                "14:00",
+                "15:00");
         timeSlotDAO.create(toDelete);
-        
+
         boolean result = timeSlotDAO.delete(toDelete.getSlotId());
-        
+
         assertTrue(result);
         assertNull(timeSlotDAO.findById(toDelete.getSlotId()));
     }

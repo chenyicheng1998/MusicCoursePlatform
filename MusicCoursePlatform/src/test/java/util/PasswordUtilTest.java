@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @version 1.0 (Sprint 2)
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class PasswordUtilTest {
+class PasswordUtilTest {
 
     // ==================== Password Hashing Tests ====================
 
@@ -131,7 +131,8 @@ public class PasswordUtilTest {
     void testIsPasswordStrong_Valid() {
         assertTrue(PasswordUtil.isPasswordStrong("12345678"), "8 characters should be strong");
         assertTrue(PasswordUtil.isPasswordStrong("MyPassword123"), "Long password should be strong");
-        assertTrue(PasswordUtil.isPasswordStrong("VeryLongPasswordWithManyCharacters"), "Very long password should be strong");
+        assertTrue(PasswordUtil.isPasswordStrong("VeryLongPasswordWithManyCharacters"),
+                "Very long password should be strong");
     }
 
     @Test
@@ -177,11 +178,11 @@ public class PasswordUtilTest {
 
         // Verify with correct password
         assertTrue(PasswordUtil.verifyPassword(plainPassword, hashedPassword),
-            "Should verify successfully with correct password");
+                "Should verify successfully with correct password");
 
         // Verify with wrong password
         assertFalse(PasswordUtil.verifyPassword("WrongPassword", hashedPassword),
-            "Should fail with wrong password");
+                "Should fail with wrong password");
     }
 
     @Test
@@ -213,7 +214,7 @@ public class PasswordUtilTest {
         String hashedPassword = PasswordUtil.hashPassword(complexPassword);
 
         assertTrue(PasswordUtil.verifyPassword(complexPassword, hashedPassword),
-            "Should handle special characters correctly");
+                "Should handle special characters correctly");
     }
 
     @Test
@@ -224,7 +225,7 @@ public class PasswordUtilTest {
         String hashedPassword = PasswordUtil.hashPassword(passwordWithSpaces);
 
         assertTrue(PasswordUtil.verifyPassword(passwordWithSpaces, hashedPassword),
-            "Should handle spaces correctly");
+                "Should handle spaces correctly");
     }
 
     @Test
@@ -235,7 +236,7 @@ public class PasswordUtilTest {
         String hashedPassword = PasswordUtil.hashPassword(unicodePassword);
 
         assertTrue(PasswordUtil.verifyPassword(unicodePassword, hashedPassword),
-            "Should handle Unicode characters correctly");
+                "Should handle Unicode characters correctly");
     }
 
     @Test
@@ -243,8 +244,7 @@ public class PasswordUtilTest {
     @DisplayName("Test: Private constructor throws exception")
     void testPrivateConstructor() throws Exception {
         // Test private constructor using reflection to increase coverage
-        java.lang.reflect.Constructor<PasswordUtil> constructor =
-            PasswordUtil.class.getDeclaredConstructor();
+        java.lang.reflect.Constructor<PasswordUtil> constructor = PasswordUtil.class.getDeclaredConstructor();
         constructor.setAccessible(true);
 
         // Should be able to instantiate (even though it's not meant to be used)
@@ -261,7 +261,6 @@ public class PasswordUtilTest {
 
         // Should return false for invalid hash format
         assertFalse(PasswordUtil.verifyPassword(plainPassword, invalidHash),
-            "Should return false for invalid hash format");
+                "Should return false for invalid hash format");
     }
 }
-

@@ -2,7 +2,6 @@ package controller;
 
 import dao.TeacherProfileDAO;
 import dao.TimeSlotDAO;
-import dao.BookingDAO;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -18,10 +17,11 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import model.Booking;
 import model.TeacherProfile;
 import model.TimeSlot;
 import model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import util.LocalizationManager;
 
 import java.io.IOException;
@@ -31,18 +31,27 @@ import java.util.Locale;
 
 public class TeacherProfileViewController {
 
-    @FXML private BorderPane rootPane;
-    @FXML private Label appNameLabel;
-    @FXML private ComboBox<String> languageCombo;
-    @FXML private Button setAvailabilityButton;
-    @FXML private Button logoutButton;
-    @FXML private Label teacherNameLabel;
-    @FXML private Label myScheduleLabel;
-    @FXML private FlowPane scheduleContainer;
+    private static final Logger logger = LoggerFactory.getLogger(TeacherProfileViewController.class);
+
+    @FXML
+    private BorderPane rootPane;
+    @FXML
+    private Label appNameLabel;
+    @FXML
+    private ComboBox<String> languageCombo;
+    @FXML
+    private Button setAvailabilityButton;
+    @FXML
+    private Button logoutButton;
+    @FXML
+    private Label teacherNameLabel;
+    @FXML
+    private Label myScheduleLabel;
+    @FXML
+    private FlowPane scheduleContainer;
 
     private TeacherProfileDAO teacherProfileDAO;
     private TimeSlotDAO timeSlotDAO;
-    private BookingDAO bookingDAO;
     private LocalizationManager localizationManager;
 
     private TeacherProfile teacherProfile;
@@ -52,7 +61,6 @@ public class TeacherProfileViewController {
     public void initialize() {
         teacherProfileDAO = new TeacherProfileDAO();
         timeSlotDAO = new TimeSlotDAO();
-        bookingDAO = new BookingDAO();
         localizationManager = LocalizationManager.getInstance();
 
         setupDateFormatter();
@@ -115,7 +123,7 @@ public class TeacherProfileViewController {
             teacherProfile = teacherProfileDAO.findByUserId(currentUser.getUserId());
 
             if (teacherProfile == null) {
-                teacherProfile = new TeacherProfile(currentUser.getUserId(), "Piano");
+                teacherProfile = new TeacherProfile(currentUser.getUserId(), "piano");
                 teacherProfileDAO.create(teacherProfile);
             }
         }
@@ -148,7 +156,8 @@ public class TeacherProfileViewController {
 
     private VBox createScheduleCard(TimeSlot slot) {
         VBox card = new VBox(8);
-        card.setStyle("-fx-background-color: white; -fx-border-color: #E2E8F0; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 16;");
+        card.setStyle(
+                "-fx-background-color: white; -fx-border-color: #E2E8F0; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 16;");
         card.setPrefWidth(200);
         card.setAlignment(Pos.TOP_LEFT);
 
@@ -156,19 +165,20 @@ public class TeacherProfileViewController {
         dateLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #718096;");
 
         String timeText = slot.getStartTime() + " - " + slot.getEndTime();
-        String statusText = slot.isAvailable() ?
-            localizationManager.getString("schedule.status.available") :
-            localizationManager.getString("schedule.status.booked");
+        String statusText = slot.isAvailable() ? localizationManager.getString("schedule.status.available")
+                : localizationManager.getString("schedule.status.booked");
 
         HBox timeBox = new HBox(8);
         timeBox.setAlignment(Pos.CENTER_LEFT);
 
         Button timeBtn = new Button(timeText);
         if (slot.isAvailable()) {
-            timeBtn.setStyle("-fx-background-color: #E8F5E9; -fx-text-fill: #2D4A47; -fx-background-radius: 8; -fx-padding: 8 16;");
+            timeBtn.setStyle(
+                    "-fx-background-color: #E8F5E9; -fx-text-fill: #2D4A47; -fx-background-radius: 8; -fx-padding: 8 16;");
         } else {
             // Booked slots display in red
-            timeBtn.setStyle("-fx-background-color: #FFEBEE; -fx-text-fill: #C62828; -fx-background-radius: 8; -fx-padding: 8 16;");
+            timeBtn.setStyle(
+                    "-fx-background-color: #FFEBEE; -fx-text-fill: #C62828; -fx-background-radius: 8; -fx-padding: 8 16;");
         }
         timeBtn.setPrefWidth(100);
 
@@ -220,7 +230,7 @@ public class TeacherProfileViewController {
             stage.setScene(scene);
             stage.setTitle(localizationManager.getString("app.title.teacher.dashboard"));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Failed to load availability screen", e);
         }
     }
 
@@ -234,13 +244,11 @@ public class TeacherProfileViewController {
             stage.setScene(scene);
             stage.setTitle(localizationManager.getString("app.title.login"));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Failed to load login screen", e);
         }
     }
 
     private void showError(String message) {
-        // headless-safe, no Alert popup
-        System.err.println("Error: " + message);
+        logger.warn("Schedule view error: {}", message);
     }
 }
-

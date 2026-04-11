@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.List;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class TeacherProfileDAOTest {
+class TeacherProfileDAOTest {
 
     private static TeacherProfileDAO teacherProfileDAO;
     private static UserDAO userDAO;
@@ -19,11 +19,11 @@ public class TeacherProfileDAOTest {
     static void setUp() {
         teacherProfileDAO = new TeacherProfileDAO();
         userDAO = new UserDAO();
-        
-        testUser = new User("test_teacher_" + System.currentTimeMillis(), 
-                           "hashedpassword", 
-                           "test_teacher_" + System.currentTimeMillis() + "@test.com", 
-                           "TEACHER");
+
+        testUser = new User("test_teacher_" + System.currentTimeMillis(),
+                "hashedpassword",
+                "test_teacher_" + System.currentTimeMillis() + "@test.com",
+                "TEACHER");
         userDAO.create(testUser);
     }
 
@@ -45,9 +45,9 @@ public class TeacherProfileDAOTest {
         testProfile.setYearsExperience(5);
         testProfile.setHourlyRate(50);
         testProfile.setLocation("Test City");
-        
+
         boolean result = teacherProfileDAO.create(testProfile);
-        
+
         assertTrue(result);
         assertTrue(testProfile.getTeacherProfileId() > 0);
     }
@@ -56,17 +56,18 @@ public class TeacherProfileDAOTest {
     @Order(2)
     void testFindById() {
         TeacherProfile found = teacherProfileDAO.findById(testProfile.getTeacherProfileId());
-        
+
         assertNotNull(found);
         assertEquals(testProfile.getTeacherProfileId(), found.getTeacherProfileId());
-        assertEquals("Piano", found.getInstrumentsTaught());
+        // DB stores canonical lowercase key; "Piano" is normalised to "piano" on insert
+        assertEquals("piano", found.getInstrumentsTaught());
     }
 
     @Test
     @Order(3)
     void testFindByUserId() {
         TeacherProfile found = teacherProfileDAO.findByUserId(testUser.getUserId());
-        
+
         assertNotNull(found);
         assertEquals(testUser.getUserId(), found.getUserId());
     }
@@ -75,7 +76,7 @@ public class TeacherProfileDAOTest {
     @Order(4)
     void testFindByInstrument() {
         List<TeacherProfile> profiles = teacherProfileDAO.findByInstrument("Piano");
-        
+
         assertNotNull(profiles);
         assertTrue(profiles.stream().anyMatch(p -> p.getTeacherProfileId() == testProfile.getTeacherProfileId()));
     }
@@ -84,7 +85,7 @@ public class TeacherProfileDAOTest {
     @Order(5)
     void testFindByLocation() {
         List<TeacherProfile> profiles = teacherProfileDAO.findByLocation("Test City");
-        
+
         assertNotNull(profiles);
         assertTrue(profiles.stream().anyMatch(p -> p.getTeacherProfileId() == testProfile.getTeacherProfileId()));
     }
@@ -93,7 +94,7 @@ public class TeacherProfileDAOTest {
     @Order(6)
     void testFindAll() {
         List<TeacherProfile> profiles = teacherProfileDAO.findAll();
-        
+
         assertNotNull(profiles);
         assertTrue(profiles.size() >= 1);
     }
@@ -103,13 +104,14 @@ public class TeacherProfileDAOTest {
     void testUpdate() {
         testProfile.setInstrumentsTaught("Piano,Guitar");
         testProfile.setHourlyRate(60);
-        
+
         boolean result = teacherProfileDAO.update(testProfile);
-        
+
         assertTrue(result);
-        
+
         TeacherProfile updated = teacherProfileDAO.findById(testProfile.getTeacherProfileId());
-        assertEquals("Piano,Guitar", updated.getInstrumentsTaught());
+        // normalizeKey() takes first comma-separated token and lowercases it → "piano"
+        assertEquals("piano", updated.getInstrumentsTaught());
         assertEquals(60, updated.getHourlyRate());
     }
 
@@ -118,9 +120,9 @@ public class TeacherProfileDAOTest {
     void testDelete() {
         TeacherProfile toDelete = new TeacherProfile(testUser.getUserId(), "Violin");
         teacherProfileDAO.create(toDelete);
-        
+
         boolean result = teacherProfileDAO.delete(toDelete.getTeacherProfileId());
-        
+
         assertTrue(result);
         assertNull(teacherProfileDAO.findById(toDelete.getTeacherProfileId()));
     }

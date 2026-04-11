@@ -2,7 +2,6 @@ package controller;
 
 import dao.TeacherProfileDAO;
 import dao.TimeSlotDAO;
-import dao.BookingDAO;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -18,6 +17,8 @@ import javafx.stage.Stage;
 import model.TeacherProfile;
 import model.TimeSlot;
 import model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import util.LocalizationManager;
 
 import java.io.IOException;
@@ -29,40 +30,72 @@ import java.util.Locale;
 
 public class TeacherDashboardController {
 
-    @FXML private BorderPane rootPane;
-    @FXML private Label appNameLabel;
-    @FXML private ComboBox<String> languageCombo;
-    @FXML private Button viewScheduleButton;
-    @FXML private Button logoutButton;
-    @FXML private Label nameLabel;
-    @FXML private ComboBox<String> instrumentsCombo;
-    @FXML private TextField experienceField;
-    @FXML private TextField pricingField;
-    @FXML private TextArea bioField;
-    @FXML private Button saveProfileButton;
-    @FXML private Label calendarFrameLabel;
-    @FXML private Label monthLabel;
-    @FXML private FlowPane calendarGrid;
-    @FXML private Label sunLabel;
-    @FXML private Label monLabel;
-    @FXML private Label tueLabel;
-    @FXML private Label wedLabel;
-    @FXML private Label thuLabel;
-    @FXML private Label friLabel;
-    @FXML private Label satLabel;
-    @FXML private Label setAvailabilityLabel;
-    @FXML private Label selectedDateLabel;
-    @FXML private Label startTimeLabel;
-    @FXML private Label endTimeLabel;
-    @FXML private ComboBox<String> startTimeCombo;
-    @FXML private ComboBox<String> endTimeCombo;
-    @FXML private Button addTimeSlotButton;
-    @FXML private VBox timeSlotsContainer;
-    @FXML private Label errorLabel;
+    private static final Logger logger = LoggerFactory.getLogger(TeacherDashboardController.class);
+    private static final String ERROR_FILL_FIELDS = "error.fill.fields";
+
+    @FXML
+    private BorderPane rootPane;
+    @FXML
+    private Label appNameLabel;
+    @FXML
+    private ComboBox<String> languageCombo;
+    @FXML
+    private Button viewScheduleButton;
+    @FXML
+    private Button logoutButton;
+    @FXML
+    private Label nameLabel;
+    @FXML
+    private ComboBox<String> instrumentsCombo;
+    @FXML
+    private TextField experienceField;
+    @FXML
+    private TextField pricingField;
+    @FXML
+    private TextArea bioField;
+    @FXML
+    private Button saveProfileButton;
+    @FXML
+    private Label calendarFrameLabel;
+    @FXML
+    private Label monthLabel;
+    @FXML
+    private FlowPane calendarGrid;
+    @FXML
+    private Label sunLabel;
+    @FXML
+    private Label monLabel;
+    @FXML
+    private Label tueLabel;
+    @FXML
+    private Label wedLabel;
+    @FXML
+    private Label thuLabel;
+    @FXML
+    private Label friLabel;
+    @FXML
+    private Label satLabel;
+    @FXML
+    private Label setAvailabilityLabel;
+    @FXML
+    private Label selectedDateLabel;
+    @FXML
+    private Label startTimeLabel;
+    @FXML
+    private Label endTimeLabel;
+    @FXML
+    private ComboBox<String> startTimeCombo;
+    @FXML
+    private ComboBox<String> endTimeCombo;
+    @FXML
+    private Button addTimeSlotButton;
+    @FXML
+    private VBox timeSlotsContainer;
+    @FXML
+    private Label errorLabel;
 
     private TeacherProfileDAO teacherProfileDAO;
     private TimeSlotDAO timeSlotDAO;
-    private BookingDAO bookingDAO;
     private LocalizationManager localizationManager;
 
     private YearMonth currentMonth;
@@ -74,7 +107,6 @@ public class TeacherDashboardController {
     public void initialize() {
         teacherProfileDAO = new TeacherProfileDAO();
         timeSlotDAO = new TimeSlotDAO();
-        bookingDAO = new BookingDAO();
         localizationManager = LocalizationManager.getInstance();
 
         currentMonth = YearMonth.now();
@@ -87,13 +119,12 @@ public class TeacherDashboardController {
         updateTexts();
         updateCalendar();
 
-        // Listen for locale changes
+        // Refresh UI labels and combo whenever the locale changes
         localizationManager.localeProperty().addListener((obs, oldLocale, newLocale) -> {
             updateTexts();
             applyDirection();
         });
 
-        // Apply initial direction
         applyDirection();
     }
 
@@ -106,7 +137,6 @@ public class TeacherDashboardController {
     private void handleLanguageChange(ActionEvent event) {
         String selected = languageCombo.getValue();
         Locale newLocale = LocalizationManager.getLocaleFromDisplayName(selected);
-
         localizationManager.setLocale(newLocale);
     }
 
@@ -121,10 +151,8 @@ public class TeacherDashboardController {
         endTimeLabel.setText(localizationManager.getString("teacher.end.time"));
         addTimeSlotButton.setText(localizationManager.getString("teacher.add.slot"));
 
-        // Update instrument combo box with localized names
         updateInstrumentsCombo();
 
-        // Update day of week labels
         sunLabel.setText(localizationManager.getString("calendar.day.sun"));
         monLabel.setText(localizationManager.getString("calendar.day.mon"));
         tueLabel.setText(localizationManager.getString("calendar.day.tue"));
@@ -133,7 +161,6 @@ public class TeacherDashboardController {
         friLabel.setText(localizationManager.getString("calendar.day.fri"));
         satLabel.setText(localizationManager.getString("calendar.day.sat"));
 
-        // Update combo box prompts
         if (instrumentsCombo != null) {
             instrumentsCombo.setPromptText(localizationManager.getString("teacher.instruments"));
         }
@@ -165,9 +192,13 @@ public class TeacherDashboardController {
         updateInstrumentsCombo();
     }
 
+    /**
+     * Repopulate the instruments combo with names for the current locale,
+     * preserving the current selection by tracking its canonical key.
+     */
     private void updateInstrumentsCombo() {
-        String currentSelection = instrumentsCombo.getValue();
-        String currentInstrumentKey = getInstrumentKeyFromDisplayName(currentSelection);
+        // Remember which instrument was selected (by canonical key)
+        String currentKey = localizationManager.getInstrumentKey(instrumentsCombo.getValue());
 
         instrumentsCombo.getItems().clear();
         instrumentsCombo.getItems().addAll(
@@ -178,39 +209,11 @@ public class TeacherDashboardController {
                 localizationManager.getString("instrument.flute"),
                 localizationManager.getString("instrument.saxophone"),
                 localizationManager.getString("instrument.cello"),
-                localizationManager.getString("instrument.voice")
-        );
+                localizationManager.getString("instrument.voice"));
 
-        // Restore selection based on the instrument key, not display name
-        if (currentInstrumentKey != null) {
-            instrumentsCombo.setValue(localizationManager.getString("instrument." + currentInstrumentKey));
-        }
-    }
-
-    private String getInstrumentKeyFromDisplayName(String displayName) {
-        if (displayName == null) return null;
-
-        // Check against current localized names
-        if (displayName.equals(localizationManager.getString("instrument.piano"))) return "piano";
-        if (displayName.equals(localizationManager.getString("instrument.guitar"))) return "guitar";
-        if (displayName.equals(localizationManager.getString("instrument.violin"))) return "violin";
-        if (displayName.equals(localizationManager.getString("instrument.drums"))) return "drums";
-        if (displayName.equals(localizationManager.getString("instrument.flute"))) return "flute";
-        if (displayName.equals(localizationManager.getString("instrument.saxophone"))) return "saxophone";
-        if (displayName.equals(localizationManager.getString("instrument.cello"))) return "cello";
-        if (displayName.equals(localizationManager.getString("instrument.voice"))) return "voice";
-
-        // Fallback: check against English names for backward compatibility
-        switch (displayName.toLowerCase()) {
-            case "piano": return "piano";
-            case "guitar": return "guitar";
-            case "violin": return "violin";
-            case "drums": return "drums";
-            case "flute": return "flute";
-            case "saxophone": return "saxophone";
-            case "cello": return "cello";
-            case "voice": return "voice";
-            default: return null;
+        // Restore selection in the new locale
+        if (currentKey != null) {
+            instrumentsCombo.setValue(localizationManager.getString("instrument." + currentKey));
         }
     }
 
@@ -225,43 +228,62 @@ public class TeacherDashboardController {
     }
 
     private void loadTeacherProfile() {
-        if (currentUser == null) return;
-        
+        if (currentUser == null)
+            return;
+
         teacherProfile = teacherProfileDAO.findByUserId(currentUser.getUserId());
-        
+
         if (teacherProfile != null) {
             nameLabel.setText(currentUser.getUsername());
+
             if (teacherProfile.getInstrumentsTaught() != null) {
-                instrumentsCombo.setValue(teacherProfile.getInstrumentsTaught().split(",")[0].trim());
+                // instrument_key is stored as a canonical lowercase key (e.g. "piano").
+                // Translate to the current locale's display name for the combo.
+                String localizedName = localizationManager.getLocalizedInstrumentName(
+                        teacherProfile.getInstrumentsTaught().trim());
+                instrumentsCombo.setValue(localizedName);
             }
+
             experienceField.setText(String.valueOf(teacherProfile.getYearsExperience()));
             pricingField.setText(String.valueOf(teacherProfile.getHourlyRate()));
             if (teacherProfile.getBiography() != null) {
                 bioField.setText(teacherProfile.getBiography());
             }
         } else {
-            nameLabel.setText(currentUser != null ? currentUser.getUsername() : localizationManager.getString("common.name"));
-            teacherProfile = new TeacherProfile(currentUser.getUserId(), "Piano");
+            nameLabel.setText(currentUser.getUsername());
+            // Create a default profile with canonical key "piano"
+            teacherProfile = new TeacherProfile(currentUser.getUserId(), "piano");
             teacherProfileDAO.create(teacherProfile);
         }
     }
 
+    /**
+     * Save profile: convert the localised combo selection to a canonical
+     * lowercase key before persisting to the database. This means a teacher
+     * who saves in Chinese stores "piano", not "钢琴", so students browsing
+     * in any language can still find them.
+     */
     @FXML
     private void handleSaveProfile(ActionEvent event) {
-        if (currentUser == null || teacherProfile == null) return;
+        if (currentUser == null || teacherProfile == null)
+            return;
 
-        String instrument = instrumentsCombo.getValue();
+        // Convert the displayed (localised) name to the canonical DB key
+        String selectedDisplay = instrumentsCombo.getValue();
+        String instrumentKey = localizationManager.getInstrumentKey(selectedDisplay);
+        String canonicalInstrument = (instrumentKey != null) ? instrumentKey : "piano";
+
         String experience = experienceField.getText();
         String pricing = pricingField.getText();
         String bio = bioField.getText();
 
-        teacherProfile.setInstrumentsTaught(instrument);
+        teacherProfile.setInstrumentsTaught(canonicalInstrument);
 
         if (experience != null && !experience.isEmpty()) {
             try {
                 teacherProfile.setYearsExperience(Integer.parseInt(experience));
             } catch (NumberFormatException e) {
-                showError(localizationManager.getString("error.fill.fields"));
+                showError(localizationManager.getString(ERROR_FILL_FIELDS));
                 return;
             }
         }
@@ -270,7 +292,7 @@ public class TeacherDashboardController {
             try {
                 teacherProfile.setHourlyRate(Integer.parseInt(pricing));
             } catch (NumberFormatException e) {
-                showError(localizationManager.getString("error.fill.fields"));
+                showError(localizationManager.getString(ERROR_FILL_FIELDS));
                 return;
             }
         }
@@ -287,42 +309,44 @@ public class TeacherDashboardController {
     private void updateCalendar() {
         monthLabel.setText(currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")));
         calendarGrid.getChildren().clear();
-        
+
         LocalDate firstOfMonth = currentMonth.atDay(1);
         int dayOfWeek = firstOfMonth.getDayOfWeek().getValue() % 7;
-        
+
         for (int i = 0; i < dayOfWeek; i++) {
             Label emptyLabel = new Label("");
             emptyLabel.setPrefWidth(40);
             emptyLabel.setPrefHeight(40);
             calendarGrid.getChildren().add(emptyLabel);
         }
-        
+
         for (int day = 1; day <= currentMonth.lengthOfMonth(); day++) {
             LocalDate date = currentMonth.atDay(day);
             Button dayBtn = new Button(String.valueOf(day));
             dayBtn.setPrefWidth(40);
             dayBtn.setPrefHeight(40);
             dayBtn.getStyleClass().add("calendar-day");
-            
+
             if (hasTimeSlots(date)) {
                 dayBtn.getStyleClass().add("calendar-day-available");
             }
-            
+
             if (date.equals(selectedDate)) {
                 dayBtn.getStyleClass().add("calendar-day-selected");
             }
-            
+
             final LocalDate clickedDate = date;
             dayBtn.setOnAction(e -> handleDateClick(clickedDate));
-            
+
             calendarGrid.getChildren().add(dayBtn);
         }
     }
 
     private boolean hasTimeSlots(LocalDate date) {
-        if (teacherProfile == null) return false;
-        List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileIdAndDate(teacherProfile.getTeacherProfileId(), date);
+        if (teacherProfile == null)
+            return false;
+        List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileIdAndDate(
+                teacherProfile.getTeacherProfileId(), date);
         return !slots.isEmpty();
     }
 
@@ -335,18 +359,19 @@ public class TeacherDashboardController {
 
     private void updateTimeSlots() {
         timeSlotsContainer.getChildren().clear();
-        
-        if (selectedDate == null || teacherProfile == null) return;
-        
-        List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileIdAndDate(teacherProfile.getTeacherProfileId(), selectedDate);
-        
+
+        if (selectedDate == null || teacherProfile == null)
+            return;
+
+        List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileIdAndDate(
+                teacherProfile.getTeacherProfileId(), selectedDate);
+
         for (TimeSlot slot : slots) {
-            HBox slotBox = createTimeSlotBox(slot);
-            timeSlotsContainer.getChildren().add(slotBox);
+            timeSlotsContainer.getChildren().add(createTimeSlotBox(slot));
         }
-        
+
         if (timeSlotsContainer.getChildren().isEmpty()) {
-            Label noSlotsLabel = new Label("No time slots set");
+            Label noSlotsLabel = new Label(localizationManager.getString("message.no.slots.set"));
             noSlotsLabel.setStyle("-fx-text-fill: #718096;");
             timeSlotsContainer.getChildren().add(noSlotsLabel);
         }
@@ -354,35 +379,30 @@ public class TeacherDashboardController {
 
     private HBox createTimeSlotBox(TimeSlot slot) {
         String timeText = slot.getStartTime() + " - " + slot.getEndTime();
-        
+
         Label timeLabel = new Label(timeText);
         timeLabel.getStyleClass().add("time-slot");
-        timeLabel.setPrefWidth(150);  // Increased from 120 to 150 to show full time
+        timeLabel.setPrefWidth(150);
 
         Button deleteBtn = new Button(localizationManager.getString("action.delete"));
         deleteBtn.setPrefWidth(40);
         deleteBtn.setStyle("-fx-background-color: transparent; -fx-cursor: hand;");
         deleteBtn.setOnAction(e -> handleDeleteSlot(slot));
-        
+
         HBox box = new HBox(10, timeLabel, deleteBtn);
         box.setStyle("-fx-alignment: CENTER_LEFT;");
-        
+
         if (slot.isBooked()) {
             timeLabel.getStyleClass().add("time-slot-booked");
         }
-        
+
         return box;
     }
 
     @FXML
     private void handleAddTimeSlot(ActionEvent event) {
-        if (selectedDate == null) {
-            showError(localizationManager.getString("error.fill.fields"));
-            return;
-        }
-
-        if (teacherProfile == null) {
-            showError(localizationManager.getString("error.fill.fields"));
+        if (selectedDate == null || teacherProfile == null) {
+            showError(localizationManager.getString(ERROR_FILL_FIELDS));
             return;
         }
 
@@ -390,13 +410,12 @@ public class TeacherDashboardController {
         String endStr = endTimeCombo.getValue();
 
         if (startStr == null || endStr == null) {
-            showError(localizationManager.getString("error.fill.fields"));
+            showError(localizationManager.getString(ERROR_FILL_FIELDS));
             return;
         }
 
-        // Validate time range: start time must be before end time
         if (startStr.compareTo(endStr) >= 0) {
-            showError(localizationManager.getString("error.fill.fields"));
+            showError(localizationManager.getString("error.time.order"));
             return;
         }
 
@@ -414,7 +433,7 @@ public class TeacherDashboardController {
 
     private void handleDeleteSlot(TimeSlot slot) {
         if (slot.isBooked()) {
-            showError(localizationManager.getString("error.fill.fields"));
+            showError(localizationManager.getString("message.cannot.delete.booked"));
             return;
         }
 
@@ -440,13 +459,14 @@ public class TeacherDashboardController {
     @FXML
     private void handleViewSchedule(ActionEvent event) {
         try {
-            Parent scheduleRoot = FXMLLoader.load(getClass().getResource("/fxml/teacher_schedule_view.fxml"));
+            Parent scheduleRoot = FXMLLoader.load(
+                    getClass().getResource("/fxml/teacher_schedule_view.fxml"));
             Scene scheduleScene = new Scene(scheduleRoot);
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(scheduleScene);
             stage.setTitle(localizationManager.getString("app.title.teacher.dashboard"));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Failed to load schedule view", e);
             showError(localizationManager.getString("error.load.dashboard"));
         }
     }
@@ -473,7 +493,7 @@ public class TeacherDashboardController {
             stage.setScene(loginScene);
             stage.setTitle(localizationManager.getString("app.title.login"));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Failed to load login screen", e);
         }
     }
 }

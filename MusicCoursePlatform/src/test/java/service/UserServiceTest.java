@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @version 1.0 (Sprint 2)
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class UserServiceTest {
+class UserServiceTest {
 
     private static UserService userService;
     private static UserDAO userDAO;
@@ -86,7 +86,8 @@ public class UserServiceTest {
 
         // Cleanup
         User user1 = userDAO.findByUsername(username1);
-        if (user1 != null) userDAO.delete(user1.getUserId());
+        if (user1 != null)
+            userDAO.delete(user1.getUserId());
     }
 
     // ==================== Authentication Tests ====================
@@ -283,7 +284,8 @@ public class UserServiceTest {
         assertTrue(userService.isUsernameAvailable(username));
 
         // Create user
-        userService.registerUser(username, "ValidPass123", "avl" + (System.currentTimeMillis() % 100000) + "@test.com", "LEARNER");
+        userService.registerUser(username, "ValidPass123", "avl" + (System.currentTimeMillis() % 100000) + "@test.com",
+                "LEARNER");
 
         // Should not be available after creation
         assertFalse(userService.isUsernameAvailable(username));
@@ -305,10 +307,3 @@ public class UserServiceTest {
         assertFalse(userService.isEmailAvailable(email));
     }
 }
-
-
-
-
-
-
-

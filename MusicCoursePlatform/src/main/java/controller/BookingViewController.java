@@ -25,6 +25,8 @@ import model.LearnerProfile;
 import model.TeacherProfile;
 import model.TimeSlot;
 import model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import util.LocalizationManager;
 
 import java.io.IOException;
@@ -34,16 +36,28 @@ import java.util.Locale;
 
 public class BookingViewController {
 
-    @FXML private BorderPane rootPane;
-    @FXML private Label appNameLabel;
-    @FXML private ComboBox<String> languageCombo;
-    @FXML private Button courseBookingButton;
-    @FXML private Button logoutButton;
-    @FXML private Label userNameLabel;
-    @FXML private Label myBookingsLabel;
-    @FXML private FlowPane bookingsContainer;
-    @FXML private Button prevPageBtn;
-    @FXML private Button nextPageBtn;
+    private static final Logger logger = LoggerFactory.getLogger(BookingViewController.class);
+
+    @FXML
+    private BorderPane rootPane;
+    @FXML
+    private Label appNameLabel;
+    @FXML
+    private ComboBox<String> languageCombo;
+    @FXML
+    private Button courseBookingButton;
+    @FXML
+    private Button logoutButton;
+    @FXML
+    private Label userNameLabel;
+    @FXML
+    private Label myBookingsLabel;
+    @FXML
+    private FlowPane bookingsContainer;
+    @FXML
+    private Button prevPageBtn;
+    @FXML
+    private Button nextPageBtn;
 
     private BookingDAO bookingDAO;
     private TimeSlotDAO timeSlotDAO;
@@ -167,12 +181,14 @@ public class BookingViewController {
 
     private VBox createBookingCard(Booking booking) {
         VBox card = new VBox(8);
-        card.setStyle("-fx-background-color: white; -fx-border-color: #E2E8F0; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 16;");
+        card.setStyle(
+                "-fx-background-color: white; -fx-border-color: #E2E8F0; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 16;");
         card.setPrefWidth(200);
         card.setAlignment(Pos.TOP_LEFT);
 
         TimeSlot slot = timeSlotDAO.findById(booking.getSlotId());
-        if (slot == null) return card;
+        if (slot == null)
+            return card;
 
         TeacherProfile teacher = teacherProfileDAO.findById(slot.getTeacherProfileId());
         String teacherName = localizationManager.getString("message.unknown");
@@ -180,7 +196,8 @@ public class BookingViewController {
 
         if (teacher != null) {
             User teacherUser = userDAO.findById(teacher.getUserId());
-            teacherName = (teacherUser != null) ? teacherUser.getUsername() : localizationManager.getString("message.teacher");
+            teacherName = (teacherUser != null) ? teacherUser.getUsername()
+                    : localizationManager.getString("message.teacher");
 
             // Localize instrument name
             String rawInstrument = teacher.getInstrumentsTaught();
@@ -199,7 +216,8 @@ public class BookingViewController {
         timeBox.setAlignment(Pos.CENTER_LEFT);
 
         Button timeBtn = new Button(timeText);
-        timeBtn.setStyle("-fx-background-color: #2D4A47; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 16;");
+        timeBtn.setStyle(
+                "-fx-background-color: #2D4A47; -fx-text-fill: white; -fx-background-radius: 8; -fx-padding: 8 16;");
         timeBtn.setPrefWidth(100);
 
         Button deleteBtn = new Button(localizationManager.getString("action.delete"));
@@ -215,34 +233,7 @@ public class BookingViewController {
     }
 
     private String localizeInstrumentName(String instrumentName) {
-        if (instrumentName == null) return localizationManager.getString("message.unknown");
-
-        // Try to match common instruments and localize them
-        String lowerName = instrumentName.toLowerCase().trim();
-        if (lowerName.contains("piano")) {
-            return localizationManager.getString("instrument.piano");
-        } else if (lowerName.contains("guitar")) {
-            return localizationManager.getString("instrument.guitar");
-        } else if (lowerName.contains("violin")) {
-            return localizationManager.getString("instrument.violin");
-        } else if (lowerName.contains("drum")) {
-            return localizationManager.getString("instrument.drums");
-        } else if (lowerName.contains("flute")) {
-            return localizationManager.getString("instrument.flute");
-        } else if (lowerName.contains("saxophone") || lowerName.contains("sax")) {
-            return localizationManager.getString("instrument.saxophone");
-        } else if (lowerName.contains("cello")) {
-            return localizationManager.getString("instrument.cello");
-        } else if (lowerName.contains("trumpet")) {
-            return localizationManager.getString("instrument.trumpet");
-        } else if (lowerName.contains("clarinet")) {
-            return localizationManager.getString("instrument.clarinet");
-        } else if (lowerName.contains("harp")) {
-            return localizationManager.getString("instrument.harp");
-        }
-
-        // If no match found, return original name
-        return instrumentName;
+        return localizationManager.getLocalizedInstrumentName(instrumentName);
     }
 
     void handleDeleteBooking(Booking booking, TimeSlot slot) {
@@ -264,7 +255,7 @@ public class BookingViewController {
             stage.setScene(scene);
             stage.setTitle(localizationManager.getString("app.title.student.dashboard"));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Failed to load student dashboard", e);
         }
     }
 
@@ -288,7 +279,7 @@ public class BookingViewController {
             stage.setScene(scene);
             stage.setTitle(localizationManager.getString("app.title.login"));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Failed to load login screen", e);
         }
     }
 }

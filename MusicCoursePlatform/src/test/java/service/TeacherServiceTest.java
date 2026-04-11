@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Unit tests for TeacherService class.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class TeacherServiceTest {
+class TeacherServiceTest {
 
     private static TeacherService teacherService;
     private static TeacherProfileDAO teacherProfileDAO;
@@ -29,7 +29,7 @@ public class TeacherServiceTest {
 
         // Create test teacher user
         testTeacher = new User("tstest" + System.currentTimeMillis(), "hash",
-                              "ts@test.com", "TEACHER");
+                "ts@test.com", "TEACHER");
         userDAO.create(testTeacher);
     }
 
@@ -50,13 +50,12 @@ public class TeacherServiceTest {
     @DisplayName("Test: Create teacher profile successfully")
     void testCreateProfile_Success() {
         TeacherProfile profile = teacherService.createProfile(
-            testTeacher.getUserId(),
-            "Experienced piano teacher",
-            "Piano",
-            5,
-            50,
-            "Helsinki"
-        );
+                testTeacher.getUserId(),
+                "Experienced piano teacher",
+                "Piano",
+                5,
+                50,
+                "Helsinki");
 
         assertNotNull(profile);
         assertTrue(profile.getTeacherProfileId() > 0);
@@ -77,7 +76,7 @@ public class TeacherServiceTest {
     @DisplayName("Test: Create profile with invalid instruments")
     void testCreateProfile_InvalidInstruments() {
         User learner = new User("learner" + System.currentTimeMillis(), "hash",
-                               "l@test.com", "LEARNER");
+                "l@test.com", "LEARNER");
         userDAO.create(learner);
 
         assertThrows(IllegalArgumentException.class, () -> {
@@ -92,7 +91,7 @@ public class TeacherServiceTest {
     @DisplayName("Test: Create profile with negative experience")
     void testCreateProfile_NegativeExperience() {
         User teacher2 = new User("teach2" + System.currentTimeMillis(), "hash",
-                                "t2@test.com", "TEACHER");
+                "t2@test.com", "TEACHER");
         userDAO.create(teacher2);
 
         assertThrows(IllegalArgumentException.class, () -> {
@@ -109,13 +108,12 @@ public class TeacherServiceTest {
         TeacherProfile profile = teacherProfileDAO.findByUserId(testTeacher.getUserId());
 
         TeacherProfile updated = teacherService.updateProfile(
-            profile.getTeacherProfileId(),
-            "Updated biography",
-            "Piano, Guitar",
-            10,
-            75,
-            "Espoo"
-        );
+                profile.getTeacherProfileId(),
+                "Updated biography",
+                "Piano, Guitar",
+                10,
+                75,
+                "Espoo");
 
         assertNotNull(updated);
         assertEquals("Piano, Guitar", updated.getInstrumentsTaught());
@@ -207,12 +205,11 @@ public class TeacherServiceTest {
     void testDeleteProfile() {
         // Create a temporary profile for deletion
         User tempTeacher = new User("temp" + System.currentTimeMillis(), "hash",
-                                   "temp@test.com", "TEACHER");
+                "temp@test.com", "TEACHER");
         userDAO.create(tempTeacher);
 
         TeacherProfile tempProfile = teacherService.createProfile(
-            tempTeacher.getUserId(), "Temp", "Violin", 3, 40, "Vantaa"
-        );
+                tempTeacher.getUserId(), "Temp", "Violin", 3, 40, "Vantaa");
 
         boolean deleted = teacherService.deleteProfile(tempProfile.getTeacherProfileId());
         assertTrue(deleted);
@@ -229,4 +226,3 @@ public class TeacherServiceTest {
         });
     }
 }
-

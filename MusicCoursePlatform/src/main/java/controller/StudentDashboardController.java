@@ -22,6 +22,8 @@ import model.LearnerProfile;
 import model.TeacherProfile;
 import model.TimeSlot;
 import model.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import util.LocalizationManager;
 
 import java.io.IOException;
@@ -33,40 +35,76 @@ import java.util.Locale;
 
 public class StudentDashboardController {
 
-    @FXML private BorderPane rootPane;
-    @FXML private Label appNameLabel;
-    @FXML private ComboBox<String> languageCombo;
-    @FXML private Button viewScheduleButton;
-    @FXML private Button logoutButton;
-    @FXML private Label filterInstrumentLabel;
-    @FXML private Label selectTeacherLabel;
-    @FXML private Label teacherNameLabel;
-    @FXML private Label teacherInstrumentLabel;
-    @FXML private Label teacherExperienceLabel;
-    @FXML private Label teacherRateLabel;
-    @FXML private Label teacherBioLabel;
-    @FXML private Label experienceTitleLabel;
-    @FXML private Label rateTitleLabel;
-    @FXML private Label aboutTitleLabel;
-    @FXML private ComboBox<String> instrumentCombo;
-    @FXML private ComboBox<String> teacherCombo;
-    @FXML private Label calendarFrameLabel;
-    @FXML private Label monthLabel;
-    @FXML private FlowPane calendarGrid;
-    @FXML private Label sunLabel;
-    @FXML private Label monLabel;
-    @FXML private Label tueLabel;
-    @FXML private Label wedLabel;
-    @FXML private Label thuLabel;
-    @FXML private Label friLabel;
-    @FXML private Label satLabel;
-    @FXML private Label availableTimesLabel;
-    @FXML private Label selectedDateLabel;
-    @FXML private Label selectedTimeLabel;
-    @FXML private Label selectedTimeTitleLabel;
-    @FXML private VBox timeSlotsContainer;
-    @FXML private Button bookButton;
-    @FXML private Label errorLabel;
+    private static final Logger logger = LoggerFactory.getLogger(StudentDashboardController.class);
+
+    @FXML
+    private BorderPane rootPane;
+    @FXML
+    private Label appNameLabel;
+    @FXML
+    private ComboBox<String> languageCombo;
+    @FXML
+    private Button viewScheduleButton;
+    @FXML
+    private Button logoutButton;
+    @FXML
+    private Label filterInstrumentLabel;
+    @FXML
+    private Label selectTeacherLabel;
+    @FXML
+    private Label teacherNameLabel;
+    @FXML
+    private Label teacherInstrumentLabel;
+    @FXML
+    private Label teacherExperienceLabel;
+    @FXML
+    private Label teacherRateLabel;
+    @FXML
+    private Label teacherBioLabel;
+    @FXML
+    private Label experienceTitleLabel;
+    @FXML
+    private Label rateTitleLabel;
+    @FXML
+    private Label aboutTitleLabel;
+    @FXML
+    private ComboBox<String> instrumentCombo;
+    @FXML
+    private ComboBox<String> teacherCombo;
+    @FXML
+    private Label calendarFrameLabel;
+    @FXML
+    private Label monthLabel;
+    @FXML
+    private FlowPane calendarGrid;
+    @FXML
+    private Label sunLabel;
+    @FXML
+    private Label monLabel;
+    @FXML
+    private Label tueLabel;
+    @FXML
+    private Label wedLabel;
+    @FXML
+    private Label thuLabel;
+    @FXML
+    private Label friLabel;
+    @FXML
+    private Label satLabel;
+    @FXML
+    private Label availableTimesLabel;
+    @FXML
+    private Label selectedDateLabel;
+    @FXML
+    private Label selectedTimeLabel;
+    @FXML
+    private Label selectedTimeTitleLabel;
+    @FXML
+    private VBox timeSlotsContainer;
+    @FXML
+    private Button bookButton;
+    @FXML
+    private Label errorLabel;
 
     private TeacherProfileDAO teacherProfileDAO;
     private TimeSlotDAO timeSlotDAO;
@@ -100,13 +138,11 @@ public class StudentDashboardController {
         updateCalendar();
         loadTeachers();
 
-        // Listen for locale changes
         localizationManager.localeProperty().addListener((obs, oldLocale, newLocale) -> {
             updateTexts();
             applyDirection();
         });
 
-        // Apply initial direction
         applyDirection();
     }
 
@@ -119,7 +155,6 @@ public class StudentDashboardController {
     private void handleLanguageChange(ActionEvent event) {
         String selected = languageCombo.getValue();
         Locale newLocale = LocalizationManager.getLocaleFromDisplayName(selected);
-
         localizationManager.setLocale(newLocale);
     }
 
@@ -137,7 +172,6 @@ public class StudentDashboardController {
         selectedTimeTitleLabel.setText(localizationManager.getString("student.selected.time"));
         bookButton.setText(localizationManager.getString("student.book.lesson"));
 
-        // Update day of week labels
         sunLabel.setText(localizationManager.getString("calendar.day.sun"));
         monLabel.setText(localizationManager.getString("calendar.day.mon"));
         tueLabel.setText(localizationManager.getString("calendar.day.tue"));
@@ -146,10 +180,8 @@ public class StudentDashboardController {
         friLabel.setText(localizationManager.getString("calendar.day.fri"));
         satLabel.setText(localizationManager.getString("calendar.day.sat"));
 
-        // Update instrument combo box with localized names
         updateInstrumentCombo();
 
-        // Update other dynamic text if needed
         if (teacherCombo != null) {
             teacherCombo.setPromptText(localizationManager.getString("student.teacher.prompt"));
         }
@@ -170,7 +202,8 @@ public class StudentDashboardController {
         if (currentUser != null) {
             learnerProfile = learnerProfileDAO.findByUserId(currentUser.getUserId());
             if (learnerProfile == null) {
-                learnerProfile = new LearnerProfile(currentUser.getUserId(), "Piano");
+                // Use canonical key "piano" — not a localised display name
+                learnerProfile = new LearnerProfile(currentUser.getUserId(), "piano");
                 learnerProfileDAO.create(learnerProfile);
             }
         }
@@ -180,9 +213,12 @@ public class StudentDashboardController {
         updateInstrumentCombo();
     }
 
+    /**
+     * Repopulate the instrument filter combo for the current locale,
+     * restoring the previous selection via its canonical key.
+     */
     private void updateInstrumentCombo() {
-        String currentSelection = instrumentCombo.getValue();
-        String currentInstrumentKey = getInstrumentKeyFromDisplayName(currentSelection);
+        String currentKey = localizationManager.getInstrumentKey(instrumentCombo.getValue());
 
         instrumentCombo.getItems().clear();
         instrumentCombo.getItems().addAll(
@@ -193,79 +229,56 @@ public class StudentDashboardController {
                 localizationManager.getString("instrument.flute"),
                 localizationManager.getString("instrument.saxophone"),
                 localizationManager.getString("instrument.cello"),
-                localizationManager.getString("instrument.voice")
-        );
+                localizationManager.getString("instrument.voice"));
 
-        // Restore selection based on the instrument key, not display name
-        if (currentInstrumentKey != null) {
-            instrumentCombo.setValue(localizationManager.getString("instrument." + currentInstrumentKey));
+        if (currentKey != null) {
+            instrumentCombo.setValue(localizationManager.getString("instrument." + currentKey));
         } else {
             instrumentCombo.setValue(localizationManager.getString("instrument.piano"));
         }
     }
 
-    private String getInstrumentKeyFromDisplayName(String displayName) {
-        if (displayName == null) return null;
-
-        // Check against current localized names
-        if (displayName.equals(localizationManager.getString("instrument.piano"))) return "piano";
-        if (displayName.equals(localizationManager.getString("instrument.guitar"))) return "guitar";
-        if (displayName.equals(localizationManager.getString("instrument.violin"))) return "violin";
-        if (displayName.equals(localizationManager.getString("instrument.drums"))) return "drums";
-        if (displayName.equals(localizationManager.getString("instrument.flute"))) return "flute";
-        if (displayName.equals(localizationManager.getString("instrument.saxophone"))) return "saxophone";
-        if (displayName.equals(localizationManager.getString("instrument.cello"))) return "cello";
-        if (displayName.equals(localizationManager.getString("instrument.voice"))) return "voice";
-
-        // Fallback: check against English names for backward compatibility
-        switch (displayName.toLowerCase()) {
-            case "piano": return "piano";
-            case "guitar": return "guitar";
-            case "violin": return "violin";
-            case "drums": return "drums";
-            case "flute": return "flute";
-            case "saxophone": return "saxophone";
-            case "cello": return "cello";
-            case "voice": return "voice";
-            default: return null;
-        }
-    }
-
-    private String getInstrumentKeyFromLocalizedName(String localizedName) {
-        return getInstrumentKeyFromDisplayName(localizedName);
-    }
-
+    /**
+     * Load teachers whose {@code instrument_key} matches the currently
+     * selected instrument. Because the DB now stores canonical lowercase keys
+     * ("piano", "guitar", …) the query is a simple exact match — no LIKE
+     * pattern and no locale-dependent string needed.
+     */
     private void loadTeachers() {
         String selectedLocalizedInstrument = instrumentCombo.getValue();
-        if (selectedLocalizedInstrument != null) {
-            // Convert localized instrument name back to English for database query
-            String instrumentKey = getInstrumentKeyFromDisplayName(selectedLocalizedInstrument);
-            String englishInstrument = instrumentKey != null ? capitalizeFirstLetter(instrumentKey) : "Piano";
+        if (selectedLocalizedInstrument == null)
+            return;
 
-            teacherProfiles = teacherProfileDAO.findByInstrument(englishInstrument);
-            teacherCombo.getItems().clear();
-            for (TeacherProfile profile : teacherProfiles) {
-                User user = userDAO.findById(profile.getUserId());
-                String name = (user != null) ? user.getUsername() : "Teacher " + profile.getTeacherProfileId();
-                teacherCombo.getItems().add(name);
-            }
-            if (!teacherProfiles.isEmpty()) {
-                teacherCombo.setValue(teacherCombo.getItems().get(0));
-                selectedTeacher = teacherProfiles.get(0);
-                updateTeacherDisplay();
-                updateCalendar();
-            } else {
-                teacherNameLabel.setText(localizationManager.getString("message.no.teachers.available"));
-                if (teacherInstrumentLabel != null) teacherInstrumentLabel.setText("");
-                if (teacherExperienceLabel != null) teacherExperienceLabel.setText("");
-                if (teacherRateLabel != null) teacherRateLabel.setText("");
-            }
+        // Resolve canonical key from whatever locale the student sees
+        String instrumentKey = localizationManager.getInstrumentKey(selectedLocalizedInstrument);
+        if (instrumentKey == null)
+            instrumentKey = "piano";
+
+        teacherProfiles = teacherProfileDAO.findByInstrument(instrumentKey);
+        teacherCombo.getItems().clear();
+
+        for (TeacherProfile profile : teacherProfiles) {
+            User user = userDAO.findById(profile.getUserId());
+            String name = (user != null)
+                    ? user.getUsername()
+                    : "Teacher " + profile.getTeacherProfileId();
+            teacherCombo.getItems().add(name);
         }
-    }
 
-    private String capitalizeFirstLetter(String str) {
-        if (str == null || str.isEmpty()) return str;
-        return str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase();
+        if (!teacherProfiles.isEmpty()) {
+            teacherCombo.setValue(teacherCombo.getItems().get(0));
+            selectedTeacher = teacherProfiles.get(0);
+            updateTeacherDisplay();
+            updateCalendar();
+        } else {
+            teacherNameLabel.setText(localizationManager.getString("message.no.teachers.available"));
+            if (teacherInstrumentLabel != null)
+                teacherInstrumentLabel.setText("");
+            if (teacherExperienceLabel != null)
+                teacherExperienceLabel.setText("");
+            if (teacherRateLabel != null)
+                teacherRateLabel.setText("");
+        }
     }
 
     @FXML
@@ -286,42 +299,33 @@ public class StudentDashboardController {
     }
 
     private void updateTeacherDisplay() {
-        if (selectedTeacher != null) {
-            User user = userDAO.findById(selectedTeacher.getUserId());
-            String name = (user != null) ? user.getUsername() : "Teacher " + selectedTeacher.getTeacherProfileId();
-            teacherNameLabel.setText(name);
+        if (selectedTeacher == null)
+            return;
 
-            if (teacherInstrumentLabel != null) {
-                // Localize the instrument name for display
-                String instrument = selectedTeacher.getInstrumentsTaught();
-                String localizedInstrument = localizeInstrumentName(instrument);
-                teacherInstrumentLabel.setText(localizedInstrument);
-            }
-            if (teacherExperienceLabel != null) {
-                teacherExperienceLabel.setText(selectedTeacher.getYearsExperience() + " " + localizationManager.getString("student.years.experience"));
-            }
-            if (teacherRateLabel != null) {
-                teacherRateLabel.setText("$" + selectedTeacher.getHourlyRate() + "/" + localizationManager.getString("student.hour"));
-            }
-            if (teacherBioLabel != null) {
-                String bio = selectedTeacher.getBiography();
-                String noBioText = localizationManager.getString("student.no.biography");
-                teacherBioLabel.setText((bio != null && !bio.isEmpty()) ? bio : noBioText);
-            }
+        User user = userDAO.findById(selectedTeacher.getUserId());
+        String name = (user != null)
+                ? user.getUsername()
+                : "Teacher " + selectedTeacher.getTeacherProfileId();
+        teacherNameLabel.setText(name);
+
+        if (teacherInstrumentLabel != null) {
+            // instrument_key is a canonical key — translate it for display
+            String localizedInstrument = localizationManager.getLocalizedInstrumentName(
+                    selectedTeacher.getInstrumentsTaught());
+            teacherInstrumentLabel.setText(localizedInstrument);
         }
-    }
-
-    private String localizeInstrumentName(String instrumentName) {
-        if (instrumentName == null) {
-            return localizationManager.getString("message.unknown");
+        if (teacherExperienceLabel != null) {
+            teacherExperienceLabel.setText(selectedTeacher.getYearsExperience()
+                    + " " + localizationManager.getString("student.years.experience"));
         }
-
-        String lowerInstrument = instrumentName.toLowerCase();
-        try {
-            return localizationManager.getString("instrument." + lowerInstrument);
-        } catch (Exception e) {
-            // If localization key not found, return original name
-            return instrumentName;
+        if (teacherRateLabel != null) {
+            teacherRateLabel.setText("$" + selectedTeacher.getHourlyRate()
+                    + "/" + localizationManager.getString("student.hour"));
+        }
+        if (teacherBioLabel != null) {
+            String bio = selectedTeacher.getBiography();
+            String noBioText = localizationManager.getString("student.no.biography");
+            teacherBioLabel.setText((bio != null && !bio.isEmpty()) ? bio : noBioText);
         }
     }
 
@@ -362,8 +366,10 @@ public class StudentDashboardController {
     }
 
     private boolean hasAvailableSlots(LocalDate date) {
-        if (selectedTeacher == null) return false;
-        List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileIdAndDate(selectedTeacher.getTeacherProfileId(), date);
+        if (selectedTeacher == null)
+            return false;
+        List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileIdAndDate(
+                selectedTeacher.getTeacherProfileId(), date);
         return slots.stream().anyMatch(TimeSlot::isAvailable);
     }
 
@@ -377,17 +383,15 @@ public class StudentDashboardController {
     private void updateTimeSlots() {
         timeSlotsContainer.getChildren().clear();
 
-        if (selectedDate == null || selectedTeacher == null) {
+        if (selectedDate == null || selectedTeacher == null)
             return;
-        }
 
         List<TimeSlot> slots = timeSlotDAO.findByTeacherProfileIdAndDate(
                 selectedTeacher.getTeacherProfileId(), selectedDate);
 
         for (TimeSlot slot : slots) {
             if (slot.isAvailable()) {
-                HBox slotBox = createTimeSlotBox(slot);
-                timeSlotsContainer.getChildren().add(slotBox);
+                timeSlotsContainer.getChildren().add(createTimeSlotBox(slot));
             }
         }
 
@@ -428,11 +432,7 @@ public class StudentDashboardController {
     }
 
     private void confirmBooking() {
-        if (learnerProfile == null) {
-            showError(localizationManager.getString("error.fill.fields"));
-            return;
-        }
-        if (selectedSlot == null) {
+        if (learnerProfile == null || selectedSlot == null) {
             showError(localizationManager.getString("error.fill.fields"));
             return;
         }
@@ -486,11 +486,7 @@ public class StudentDashboardController {
 
     @FXML
     private void handleBookNow(ActionEvent event) {
-        if (selectedTeacher == null) {
-            showError(localizationManager.getString("error.fill.fields"));
-            return;
-        }
-        if (selectedSlot == null) {
+        if (selectedTeacher == null || selectedSlot == null) {
             showError(localizationManager.getString("error.fill.fields"));
             return;
         }
@@ -500,13 +496,14 @@ public class StudentDashboardController {
     @FXML
     private void handleViewSchedule(ActionEvent event) {
         try {
-            Parent scheduleRoot = FXMLLoader.load(getClass().getResource("/fxml/student_schedule_view.fxml"));
+            Parent scheduleRoot = FXMLLoader.load(
+                    getClass().getResource("/fxml/student_schedule_view.fxml"));
             Scene scheduleScene = new Scene(scheduleRoot);
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(scheduleScene);
             stage.setTitle(localizationManager.getString("app.title.student.dashboard"));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Failed to load schedule view", e);
             showError(localizationManager.getString("error.load.dashboard"));
         }
     }
@@ -521,7 +518,7 @@ public class StudentDashboardController {
             stage.setScene(loginScene);
             stage.setTitle(localizationManager.getString("app.title.login"));
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Failed to load login screen", e);
         }
     }
 }

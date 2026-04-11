@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * @version 1.0 (Sprint 2)
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class UserDAOTest {
+class UserDAOTest {
 
     private static UserDAO userDAO;
     private static User testUser;
@@ -32,11 +32,10 @@ public class UserDAOTest {
     void setUp() {
         // Create a fresh test user for each test
         testUser = new User(
-            TEST_PREFIX + "user",
-            "hashed_password_123",
-            TEST_PREFIX + "user@test.com",
-            "LEARNER"
-        );
+                TEST_PREFIX + "user",
+                "hashed_password_123",
+                TEST_PREFIX + "user@test.com",
+                "LEARNER");
     }
 
     @AfterEach
@@ -54,7 +53,7 @@ public class UserDAOTest {
     @DisplayName("Test: Create user successfully")
     void testCreateUser_Success() {
         boolean result = userDAO.create(testUser);
-        
+
         assertTrue(result, "User creation should succeed");
         assertTrue(testUser.getUserId() > 0, "User ID should be set after creation");
     }
@@ -65,15 +64,14 @@ public class UserDAOTest {
     void testCreateUser_DuplicateUsername() {
         // Create first user
         userDAO.create(testUser);
-        
+
         // Try to create second user with same username
         User duplicateUser = new User(
-            testUser.getUsername(),  // Same username
-            "different_password",
-            "different@test.com",
-            "TEACHER"
-        );
-        
+                testUser.getUsername(), // Same username
+                "different_password",
+                "different@test.com",
+                "TEACHER");
+
         boolean result = userDAO.create(duplicateUser);
         assertFalse(result, "Creating user with duplicate username should fail");
     }
@@ -84,15 +82,14 @@ public class UserDAOTest {
     void testCreateUser_DuplicateEmail() {
         // Create first user
         userDAO.create(testUser);
-        
+
         // Try to create second user with same email
         User duplicateUser = new User(
-            "different_username_" + System.currentTimeMillis(),
-            "different_password",
-            testUser.getEmail(),  // Same email
-            "TEACHER"
-        );
-        
+                "different_username_" + System.currentTimeMillis(),
+                "different_password",
+                testUser.getEmail(), // Same email
+                "TEACHER");
+
         boolean result = userDAO.create(duplicateUser);
         assertFalse(result, "Creating user with duplicate email should fail");
     }
@@ -104,9 +101,9 @@ public class UserDAOTest {
     @DisplayName("Test: Find user by ID")
     void testFindById_Success() {
         userDAO.create(testUser);
-        
+
         User foundUser = userDAO.findById(testUser.getUserId());
-        
+
         assertNotNull(foundUser, "Should find user by ID");
         assertEquals(testUser.getUsername(), foundUser.getUsername());
         assertEquals(testUser.getEmail(), foundUser.getEmail());
@@ -126,9 +123,9 @@ public class UserDAOTest {
     @DisplayName("Test: Find user by username")
     void testFindByUsername_Success() {
         userDAO.create(testUser);
-        
+
         User foundUser = userDAO.findByUsername(testUser.getUsername());
-        
+
         assertNotNull(foundUser, "Should find user by username");
         assertEquals(testUser.getUserId(), foundUser.getUserId());
         assertEquals(testUser.getEmail(), foundUser.getEmail());
@@ -147,9 +144,9 @@ public class UserDAOTest {
     @DisplayName("Test: Find user by email")
     void testFindByEmail_Success() {
         userDAO.create(testUser);
-        
+
         User foundUser = userDAO.findByEmail(testUser.getEmail());
-        
+
         assertNotNull(foundUser, "Should find user by email");
         assertEquals(testUser.getUserId(), foundUser.getUserId());
         assertEquals(testUser.getUsername(), foundUser.getUsername());
@@ -160,9 +157,9 @@ public class UserDAOTest {
     @DisplayName("Test: Find all users")
     void testFindAll() {
         userDAO.create(testUser);
-        
+
         List<User> users = userDAO.findAll();
-        
+
         assertNotNull(users, "User list should not be null");
         assertFalse(users.isEmpty(), "User list should not be empty");
     }
@@ -173,12 +170,12 @@ public class UserDAOTest {
     void testFindByUserType() {
         testUser.setUserType("TEACHER");
         userDAO.create(testUser);
-        
+
         List<User> teachers = userDAO.findByUserType("TEACHER");
-        
+
         assertNotNull(teachers, "Teacher list should not be null");
         assertTrue(teachers.stream().anyMatch(u -> u.getUserId() == testUser.getUserId()),
-            "Should find the created teacher in the list");
+                "Should find the created teacher in the list");
     }
 
     // ==================== UPDATE Tests ====================
@@ -188,16 +185,16 @@ public class UserDAOTest {
     @DisplayName("Test: Update user successfully")
     void testUpdateUser_Success() {
         userDAO.create(testUser);
-        
+
         // Update user information
         String newEmail = "updated_" + System.currentTimeMillis() + "@test.com";
         testUser.setEmail(newEmail);
         testUser.setUserType("TEACHER");
-        
+
         boolean result = userDAO.update(testUser);
-        
+
         assertTrue(result, "Update should succeed");
-        
+
         // Verify update
         User updatedUser = userDAO.findById(testUser.getUserId());
         assertEquals(newEmail, updatedUser.getEmail(), "Email should be updated");
@@ -212,12 +209,12 @@ public class UserDAOTest {
     void testDeleteUser_Success() {
         userDAO.create(testUser);
         int userId = testUser.getUserId();
-        
+
         boolean result = userDAO.delete(userId);
-        
+
         assertTrue(result, "Delete should succeed");
         assertNull(userDAO.findById(userId), "User should not exist after deletion");
-        
+
         // Set to 0 to prevent cleanup in tearDown
         testUser.setUserId(0);
     }
@@ -237,11 +234,11 @@ public class UserDAOTest {
     @DisplayName("Test: Username exists check")
     void testUsernameExists() {
         userDAO.create(testUser);
-        
-        assertTrue(userDAO.usernameExists(testUser.getUsername()), 
-            "Should return true for existing username");
-        assertFalse(userDAO.usernameExists("nonexistent_username_xyz"), 
-            "Should return false for non-existing username");
+
+        assertTrue(userDAO.usernameExists(testUser.getUsername()),
+                "Should return true for existing username");
+        assertFalse(userDAO.usernameExists("nonexistent_username_xyz"),
+                "Should return false for non-existing username");
     }
 
     @Test
@@ -249,11 +246,11 @@ public class UserDAOTest {
     @DisplayName("Test: Email exists check")
     void testEmailExists() {
         userDAO.create(testUser);
-        
-        assertTrue(userDAO.emailExists(testUser.getEmail()), 
-            "Should return true for existing email");
-        assertFalse(userDAO.emailExists("nonexistent@xyz.com"), 
-            "Should return false for non-existing email");
+
+        assertTrue(userDAO.emailExists(testUser.getEmail()),
+                "Should return true for existing email");
+        assertFalse(userDAO.emailExists("nonexistent@xyz.com"),
+                "Should return false for non-existing email");
     }
 
     @Test
@@ -261,11 +258,10 @@ public class UserDAOTest {
     @DisplayName("Test: Count all users")
     void testCountAll() {
         int initialCount = userDAO.countAll();
-        
+
         userDAO.create(testUser);
-        
+
         int newCount = userDAO.countAll();
         assertEquals(initialCount + 1, newCount, "Count should increase by 1 after adding user");
     }
 }
-

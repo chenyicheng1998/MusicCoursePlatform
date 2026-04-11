@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests booking creation, cancellation, and management logic.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class BookingServiceTest {
+class BookingServiceTest {
 
     private static BookingService bookingService;
     private static BookingDAO bookingDAO;
@@ -48,12 +48,12 @@ public class BookingServiceTest {
 
         // Create test learner
         testLearner = new User("booktest" + System.currentTimeMillis(), "hash",
-                              "test" + System.currentTimeMillis() + "@test.com", "LEARNER");
+                "test" + System.currentTimeMillis() + "@test.com", "LEARNER");
         userDAO.create(testLearner);
 
         // Create test teacher
         testTeacher = new User("teachtest" + System.currentTimeMillis(), "hash",
-                              "teach" + System.currentTimeMillis() + "@test.com", "TEACHER");
+                "teach" + System.currentTimeMillis() + "@test.com", "TEACHER");
         userDAO.create(testTeacher);
 
         // Create learner profile
@@ -86,8 +86,8 @@ public class BookingServiceTest {
     void setUp() {
         // Create a fresh time slot for each test (using TEACHER profile ID)
         testTimeSlot = new TimeSlot(testTeacherProfile.getTeacherProfileId(),
-                                    LocalDate.now().plusDays(1),
-                                    "10:00", "11:00");
+                LocalDate.now().plusDays(1),
+                "10:00", "11:00");
         timeSlotDAO.create(testTimeSlot);
     }
 
@@ -113,10 +113,9 @@ public class BookingServiceTest {
     @DisplayName("Test: Create booking successfully")
     void testCreateBooking_Success() {
         Booking booking = bookingService.createBooking(
-            testTimeSlot.getSlotId(),
-            testLearnerProfile.getLearnerProfileId(),
-            "Test booking"
-        );
+                testTimeSlot.getSlotId(),
+                testLearnerProfile.getLearnerProfileId(),
+                "Test booking");
 
         assertNotNull(booking);
         assertTrue(booking.getBookingId() > 0);
@@ -148,18 +147,16 @@ public class BookingServiceTest {
     void testCreateBooking_AlreadyBooked() {
         // First booking succeeds
         bookingService.createBooking(
-            testTimeSlot.getSlotId(),
-            testLearnerProfile.getLearnerProfileId(),
-            "First booking"
-        );
+                testTimeSlot.getSlotId(),
+                testLearnerProfile.getLearnerProfileId(),
+                "First booking");
 
         // Second booking should fail
         assertThrows(IllegalArgumentException.class, () -> {
             bookingService.createBooking(
-                testTimeSlot.getSlotId(),
-                testLearnerProfile.getLearnerProfileId(),
-                "Second booking"
-            );
+                    testTimeSlot.getSlotId(),
+                    testLearnerProfile.getLearnerProfileId(),
+                    "Second booking");
         });
     }
 
@@ -170,10 +167,9 @@ public class BookingServiceTest {
     @DisplayName("Test: Confirm booking successfully")
     void testConfirmBooking_Success() {
         Booking booking = bookingService.createBooking(
-            testTimeSlot.getSlotId(),
-            testLearnerProfile.getLearnerProfileId(),
-            "Test"
-        );
+                testTimeSlot.getSlotId(),
+                testLearnerProfile.getLearnerProfileId(),
+                "Test");
 
         Booking confirmed = bookingService.confirmBooking(booking.getBookingId());
 
@@ -197,10 +193,9 @@ public class BookingServiceTest {
     @DisplayName("Test: Cancel booking successfully")
     void testCancelBooking_Success() {
         Booking booking = bookingService.createBooking(
-            testTimeSlot.getSlotId(),
-            testLearnerProfile.getLearnerProfileId(),
-            "Test"
-        );
+                testTimeSlot.getSlotId(),
+                testLearnerProfile.getLearnerProfileId(),
+                "Test");
 
         Booking cancelled = bookingService.cancelBooking(booking.getBookingId());
 
@@ -222,10 +217,9 @@ public class BookingServiceTest {
     @DisplayName("Test: Cancel already cancelled booking")
     void testCancelBooking_AlreadyCancelled() {
         Booking booking = bookingService.createBooking(
-            testTimeSlot.getSlotId(),
-            testLearnerProfile.getLearnerProfileId(),
-            "Test"
-        );
+                testTimeSlot.getSlotId(),
+                testLearnerProfile.getLearnerProfileId(),
+                "Test");
 
         bookingService.cancelBooking(booking.getBookingId());
 
@@ -241,10 +235,9 @@ public class BookingServiceTest {
     @DisplayName("Test: Get booking by ID")
     void testGetBookingById() {
         Booking booking = bookingService.createBooking(
-            testTimeSlot.getSlotId(),
-            testLearnerProfile.getLearnerProfileId(),
-            "Test"
-        );
+                testTimeSlot.getSlotId(),
+                testLearnerProfile.getLearnerProfileId(),
+                "Test");
 
         Booking found = bookingService.getBookingById(booking.getBookingId());
 
@@ -257,10 +250,9 @@ public class BookingServiceTest {
     @DisplayName("Test: Get booking by slot ID")
     void testGetBookingBySlotId() {
         Booking booking = bookingService.createBooking(
-            testTimeSlot.getSlotId(),
-            testLearnerProfile.getLearnerProfileId(),
-            "Test"
-        );
+                testTimeSlot.getSlotId(),
+                testLearnerProfile.getLearnerProfileId(),
+                "Test");
 
         Booking found = bookingService.getBookingBySlotId(testTimeSlot.getSlotId());
 
@@ -273,14 +265,12 @@ public class BookingServiceTest {
     @DisplayName("Test: Get bookings by learner profile")
     void testGetBookingsByLearnerProfile() {
         bookingService.createBooking(
-            testTimeSlot.getSlotId(),
-            testLearnerProfile.getLearnerProfileId(),
-            "Test"
-        );
+                testTimeSlot.getSlotId(),
+                testLearnerProfile.getLearnerProfileId(),
+                "Test");
 
         List<Booking> bookings = bookingService.getBookingsByLearnerProfile(
-            testLearnerProfile.getLearnerProfileId()
-        );
+                testLearnerProfile.getLearnerProfileId());
 
         assertNotNull(bookings);
         assertFalse(bookings.isEmpty());
@@ -291,10 +281,9 @@ public class BookingServiceTest {
     @DisplayName("Test: Get bookings by status")
     void testGetBookingsByStatus() {
         bookingService.createBooking(
-            testTimeSlot.getSlotId(),
-            testLearnerProfile.getLearnerProfileId(),
-            "Test"
-        );
+                testTimeSlot.getSlotId(),
+                testLearnerProfile.getLearnerProfileId(),
+                "Test");
 
         List<Booking> bookings = bookingService.getBookingsByStatus(Booking.STATUS_CONFIRMED);
 
@@ -337,10 +326,9 @@ public class BookingServiceTest {
     @DisplayName("Test: Delete booking successfully")
     void testDeleteBooking_Success() {
         Booking booking = bookingService.createBooking(
-            testTimeSlot.getSlotId(),
-            testLearnerProfile.getLearnerProfileId(),
-            "Test"
-        );
+                testTimeSlot.getSlotId(),
+                testLearnerProfile.getLearnerProfileId(),
+                "Test");
 
         boolean deleted = bookingService.deleteBooking(booking.getBookingId());
 
@@ -357,4 +345,3 @@ public class BookingServiceTest {
         });
     }
 }
-

@@ -1,6 +1,5 @@
 package controller;
 
-import dao.BookingDAO;
 import dao.TeacherProfileDAO;
 import dao.TimeSlotDAO;
 import javafx.application.Platform;
@@ -17,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import util.LocalizationManager;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -34,9 +34,10 @@ class TeacherDashboardControllerTest {
 
     private TeacherDashboardController controller;
 
-    @Mock private TeacherProfileDAO mockTeacherProfileDAO;
-    @Mock private TimeSlotDAO mockTimeSlotDAO;
-    @Mock private BookingDAO mockBookingDAO;
+    @Mock
+    private TeacherProfileDAO mockTeacherProfileDAO;
+    @Mock
+    private TimeSlotDAO mockTimeSlotDAO;
 
     @BeforeAll
     static void initJavaFX() throws InterruptedException {
@@ -72,7 +73,7 @@ class TeacherDashboardControllerTest {
 
                 setField(controller, "teacherProfileDAO", mockTeacherProfileDAO);
                 setField(controller, "timeSlotDAO", mockTimeSlotDAO);
-                setField(controller, "bookingDAO", mockBookingDAO);
+                setField(controller, "localizationManager", LocalizationManager.getInstance());
 
                 setField(controller, "currentMonth", YearMonth.now());
 
@@ -150,7 +151,7 @@ class TeacherDashboardControllerTest {
             invokeMethod("handleSaveProfile");
 
             Label errorLabel = getField(controller, "errorLabel", Label.class);
-            assertTrue(errorLabel.getText().contains("Invalid experience"));
+            assertTrue(errorLabel.getText().contains("Please fill in all fields"));
             verifyNoInteractions(mockTeacherProfileDAO);
         });
     }
@@ -174,7 +175,7 @@ class TeacherDashboardControllerTest {
             invokeMethod("handleSaveProfile");
 
             Label errorLabel = getField(controller, "errorLabel", Label.class);
-            assertTrue(errorLabel.getText().contains("Invalid pricing"));
+            assertTrue(errorLabel.getText().contains("Please fill in all fields"));
             verifyNoInteractions(mockTeacherProfileDAO);
         });
     }
@@ -224,7 +225,7 @@ class TeacherDashboardControllerTest {
             invokeMethod("handleSaveProfile");
 
             Label errorLabel = getField(controller, "errorLabel", Label.class);
-            assertTrue(errorLabel.getText().contains("Failed to save"));
+            assertTrue(errorLabel.getText().contains("Signup failed"));
         });
     }
 
@@ -239,7 +240,7 @@ class TeacherDashboardControllerTest {
             invokeMethod("handleAddTimeSlot");
 
             Label errorLabel = getField(controller, "errorLabel", Label.class);
-            assertEquals("Please select a date first!", errorLabel.getText());
+            assertEquals("Please fill in all fields!", errorLabel.getText());
             verifyNoInteractions(mockTimeSlotDAO);
         });
     }
@@ -255,7 +256,7 @@ class TeacherDashboardControllerTest {
             invokeMethod("handleAddTimeSlot");
 
             Label errorLabel = getField(controller, "errorLabel", Label.class);
-            assertEquals("Teacher profile not found!", errorLabel.getText());
+            assertEquals("Please fill in all fields!", errorLabel.getText());
             verifyNoInteractions(mockTimeSlotDAO);
         });
     }
@@ -271,7 +272,7 @@ class TeacherDashboardControllerTest {
             invokeMethod("handleAddTimeSlot");
 
             Label errorLabel = getField(controller, "errorLabel", Label.class);
-            assertEquals("Please select start and end time!", errorLabel.getText());
+            assertEquals("Please fill in all fields!", errorLabel.getText());
             verifyNoInteractions(mockTimeSlotDAO);
         });
     }
@@ -321,7 +322,7 @@ class TeacherDashboardControllerTest {
             invokeMethod("handleAddTimeSlot");
 
             Label errorLabel = getField(controller, "errorLabel", Label.class);
-            assertTrue(errorLabel.getText().contains("Failed to add"));
+            assertTrue(errorLabel.getText().contains("Signup failed"));
         });
     }
 
@@ -432,7 +433,8 @@ class TeacherDashboardControllerTest {
                 method.invoke(controller);
             }
         } catch (Exception e) {
-            fail("Could not invoke " + methodName + ": " + (e.getCause() != null ? e.getCause().getMessage() : e.getMessage()));
+            fail("Could not invoke " + methodName + ": "
+                    + (e.getCause() != null ? e.getCause().getMessage() : e.getMessage()));
         }
     }
 
@@ -455,7 +457,7 @@ class TeacherDashboardControllerTest {
 
     private void runOnFX(RunnableWithException task) throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
-        final Exception[] thrown = {null};
+        final Exception[] thrown = { null };
         Platform.runLater(() -> {
             try {
                 task.run();
@@ -466,7 +468,8 @@ class TeacherDashboardControllerTest {
             }
         });
         latch.await();
-        if (thrown[0] != null) throw thrown[0];
+        if (thrown[0] != null)
+            throw thrown[0];
     }
 
     @FunctionalInterface

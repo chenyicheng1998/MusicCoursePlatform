@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class BookingDAOTest {
+class BookingDAOTest {
 
     private static BookingDAO bookingDAO;
     private static TimeSlotDAO timeSlotDAO;
@@ -38,8 +38,7 @@ public class BookingDAOTest {
                 "test_booking_teacher_" + timestamp,
                 "hashedpassword",
                 "test_booking_teacher_" + timestamp + "@test.com",
-                "TEACHER"
-        );
+                "TEACHER");
         userDAO.create(testTeacher);
 
         // Create Learner
@@ -47,8 +46,7 @@ public class BookingDAOTest {
                 "test_booking_learner_" + timestamp,
                 "hashedpassword",
                 "test_booking_learner_" + timestamp + "@test.com",
-                "LEARNER"
-        );
+                "LEARNER");
         userDAO.create(testLearner);
 
         // Create Teacher Profile (ALL required fields!)
@@ -71,8 +69,7 @@ public class BookingDAOTest {
                 testTeacherProfile.getTeacherProfileId(),
                 LocalDate.now().plusDays(1),
                 "10:00",
-                "11:00"
-        );
+                "11:00");
         assertTrue(timeSlotDAO.create(testSlot));
         assertTrue(testSlot.getSlotId() > 0);
     }
@@ -111,8 +108,7 @@ public class BookingDAOTest {
 
         testBooking = new Booking(
                 testLearnerProfile.getLearnerProfileId(),
-                testSlot.getSlotId()
-        );
+                testSlot.getSlotId());
 
         testBooking.setNotes("Test booking");
         testBooking.setBookingStatus(Booking.STATUS_PENDING);
@@ -138,14 +134,12 @@ public class BookingDAOTest {
     @Order(3)
     void testFindByLearnerProfileId() {
 
-        List<Booking> bookings =
-                bookingDAO.findByLearnerProfileId(testLearnerProfile.getLearnerProfileId());
+        List<Booking> bookings = bookingDAO.findByLearnerProfileId(testLearnerProfile.getLearnerProfileId());
 
         assertNotNull(bookings);
         assertTrue(
                 bookings.stream()
-                        .anyMatch(b -> b.getBookingId() == testBooking.getBookingId())
-        );
+                        .anyMatch(b -> b.getBookingId() == testBooking.getBookingId()));
     }
 
     @Test
@@ -162,14 +156,12 @@ public class BookingDAOTest {
     @Order(5)
     void testFindByStatus() {
 
-        List<Booking> bookings =
-                bookingDAO.findByStatus(Booking.STATUS_PENDING);
+        List<Booking> bookings = bookingDAO.findByStatus(Booking.STATUS_PENDING);
 
         assertNotNull(bookings);
         assertTrue(
                 bookings.stream()
-                        .anyMatch(b -> b.getBookingId() == testBooking.getBookingId())
-        );
+                        .anyMatch(b -> b.getBookingId() == testBooking.getBookingId()));
     }
 
     @Test
@@ -200,11 +192,9 @@ public class BookingDAOTest {
     @Order(8)
     void testUpdateStatus() {
 
-        boolean result =
-                bookingDAO.updateStatus(
-                        testBooking.getBookingId(),
-                        Booking.STATUS_CONFIRMED
-                );
+        boolean result = bookingDAO.updateStatus(
+                testBooking.getBookingId(),
+                Booking.STATUS_CONFIRMED);
 
         assertTrue(result);
 
@@ -220,15 +210,13 @@ public class BookingDAOTest {
                 testTeacherProfile.getTeacherProfileId(),
                 LocalDate.now().plusDays(3),
                 "14:00",
-                "15:00"
-        );
+                "15:00");
 
         assertTrue(timeSlotDAO.create(tempSlot));
 
         Booking toDelete = new Booking(
                 testLearnerProfile.getLearnerProfileId(),
-                tempSlot.getSlotId()
-        );
+                tempSlot.getSlotId());
 
         toDelete.setNotes("Temp booking");
         toDelete.setBookingStatus(Booking.STATUS_PENDING);
