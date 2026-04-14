@@ -235,10 +235,10 @@ docker pull chenyicheng1998/music-course-platform:latest
 ![Use Case Diagram](document/images/dia_usecase.jpg)
 
 **Database Schema**
-![Database Schema](document/images/dia_dbschema.jpg)
+![Database Schema](document/images/dia_dbschema.png)
 
 **ER Diagram**
-![ER Diagram](document/images/dia_er.jpg)
+![ER Diagram](document/images/dia_er.png)
 
 **Activity Diagram**
 ![Activity Diagram](document/images/dia_activity.jpg)
