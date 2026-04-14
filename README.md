@@ -25,6 +25,7 @@ The Music Course Platform is a JavaFX desktop application that connects music te
 - [Design](document/Design.md)
 - **UI localization (chosen method):** [Localization framework — technical reference](document/LOCALIZATION_FRAMEWORK.md) — `ResourceBundle`, `LocalizationManager`, RTL; see [Language Selection & Localization](#language-selection--localization).
 - **Database localization (Sprint 6):** [Plan & implementation report](document/DATABASE_LOCALIZATION.md) — canonical `instrument_key`, `INSTRUMENT` catalogue, UTF-8, ERD; see [Database localization](#database-localization-sprint-6) below.
+- **Static code review (SonarQube):** [Statistical Code Review Report](document/Statistical%20Code%20Review%20Report.md) — metrics, findings, and recommendations; see [SonarQube](#static-code-review-sonarqube) below.
 
 ---
 
@@ -180,6 +181,24 @@ The coverage report will be available at `target/site/jacoco/index.html`.
 
 ---
 
+## Static code review (SonarQube)
+
+Sprint 6 includes a **SonarQube Community Edition** analysis (Java 17, project key `MusicCoursePlatform`) for maintainability, reliability, and security-style checks.
+
+| Area | Snapshot (see full report) |
+|------|----------------------------|
+| **Quality gate** | **Passed** — with follow-up items |
+| **Security / Reliability** | 0 open issues in those categories |
+| **Maintainability** | 85 code smells (e.g. logging, `SELECT *`, complexity) |
+| **Coverage** | ~56.6% (below typical 80% target; aligns with JaCoCo work) |
+| **Duplication** | ~10.4% duplicated lines — controllers/DAOs called out for refactor |
+| **Security hotspots** | 5 items flagged for **manual** review in SonarQube |
+
+**Full write-up** (dashboard screenshots, per-file complexity, issue breakdown, prioritized recommendations):  
+[document/Statistical Code Review Report.md](document/Statistical%20Code%20Review%20Report.md)
+
+---
+
 ## CI/CD Pipeline (Jenkins)
 
 The project uses a Jenkins pipeline defined in `Jenkinsfile`. It triggers automatically on commits to the `dev` branch and runs the following stages:
@@ -217,6 +236,7 @@ docker pull chenyicheng1998/music-course-platform:latest
 | Sprint 3 | Su Wai Phyoe | [Sprint 3](https://trello.com/b/B5AJ4wIm/sep1musiccourseplatform-sprint3) | ✅ Done |
 | Sprint 4 | Liu Lu | [Sprint 4](https://trello.com/b/Rx627kZj/sep1musiccourseplatform-sprint4) | ✅ Done |
 | Sprint 5 | Luo Ying | [Sprint 5](https://trello.com/b/gQ18ryeD/sep1musiccourseplatform-sprint5) | ✅ Done |
+| Sprint 6 | Su Wai Phyoe | [Sprint 6](https://trello.com/b/gQ18ryeD/sep1musiccourseplatform-sprint6) | ✅ Done |
 
 ---
 
@@ -227,6 +247,7 @@ docker pull chenyicheng1998/music-course-platform:latest
 - [Sprint 3 Review](document/SprintReviewReports/Sprint_3_Review_Report.pdf)
 - [Sprint 4 Review](document/SprintReviewReports/Sprint_4_Review_Report.pdf)
 - [Sprint 5 Review](document/SprintReviewReports/Sprint_5_Review_Report.pdf)
+- [Sprint 6 Review](document/SprintReviewReports/Sprint%206%20Review%20Report.pdf)
 
 ### Diagrams
 
