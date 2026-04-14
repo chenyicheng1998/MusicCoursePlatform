@@ -23,6 +23,8 @@ The Music Course Platform is a JavaFX desktop application that connects music te
 - [Project Plan](document/Software%20Engineering%20Project%20Plan.pdf)
 - [User Stories](document/UserStories.md)
 - [Design](document/Design.md)
+- **UI localization (chosen method):** [Localization framework — technical reference](document/LOCALIZATION_FRAMEWORK.md) — `ResourceBundle`, `LocalizationManager`, RTL; see [Language Selection & Localization](#language-selection--localization).
+- **Database localization (Sprint 6):** [Plan & implementation report](document/DATABASE_LOCALIZATION.md) — canonical `instrument_key`, `INSTRUMENT` catalogue, UTF-8, ERD; see [Database localization](#database-localization-sprint-6) below.
 
 ---
 
@@ -47,7 +49,7 @@ cd MusicCoursePlatform
 
 #### 2. Configure Database Connection
 
-Connection settings are read from **`MusicCoursePlatform/src/main/java/dao/DatabaseConnection.java`**. The app builds the JDBC URL from host, port, and database name, and uses **environment variables when set**, otherwise **defaults in code** (see roughly lines 18–28).
+Connection settings are read from **`MusicCoursePlatform/src/main/java/util/DatabaseConnection.java`**. The app builds the JDBC URL from host, port, and database name, and uses **environment variables when set**, otherwise **defaults in code** (see roughly lines 22–36).
 
 | Variable | Purpose | Default (if unset) |
 |----------|---------|---------------------|
@@ -96,6 +98,21 @@ mvn javafx:run
 
 ## Language Selection & Localization
 
+### Chosen localization method (summary)
+
+We use **Java’s built-in internationalization stack**, not a third-party i18n library:
+
+| Aspect | Approach |
+|--------|----------|
+| **Strings** | `ResourceBundle` + UTF-8 `*.properties` files per locale (`messages_en`, `messages_zh`, `messages_ar`) under `MusicCoursePlatform/src/main/resources/i18n/` |
+| **Runtime API** | Singleton **`LocalizationManager`** (`util.LocalizationManager`): `getString(key)`, `setLocale`, **`localeProperty()`** so JavaFX controllers refresh the UI when the locale changes |
+| **Direction** | Arabic uses **RTL** via `isRTL()` and `applyDirection(Node)` on root panes |
+| **Data vs UI** | Instrument values in the database use **canonical keys** (e.g. `piano`); `LocalizationManager` maps between stored keys and localized labels for queries and display |
+
+**Full API, file layout, and extension steps** are in [document/LOCALIZATION_FRAMEWORK.md](document/LOCALIZATION_FRAMEWORK.md).
+
+---
+
 The Music Course Platform supports **multilingual user interface** with the following languages:
 
 | Language | Code | Text Direction |
@@ -122,19 +139,32 @@ The application automatically detects and applies the selected language. All UI 
 
 ...are dynamically localized based on your selection.
 
-### Localization Architecture
-
-The localization system uses Java's `ResourceBundle` framework with a singleton `LocalizationManager` class:
+### Resource bundle layout
 
 ```
-src/main/resources/i18n/
-├── messages_en.properties    # English (default)
+MusicCoursePlatform/src/main/resources/i18n/
+├── messages_en.properties    # English
 ├── messages_zh.properties    # Chinese
 └── messages_ar.properties    # Arabic
 ```
 
-For detailed documentation on the localization framework, see:
-- [Localization Framework Documentation](document/LOCALIZATION_FRAMEWORK.md)
+For step-by-step usage (controllers, listeners, adding keys/languages), see [LOCALIZATION_FRAMEWORK.md](document/LOCALIZATION_FRAMEWORK.md).
+
+---
+
+## Database localization (Sprint 6)
+
+**Chosen method (summary):** Translatable **domain data** in the database uses **canonical keys**, not a single language string.
+
+| Piece | Approach |
+|-------|----------|
+| **Instrument taught / preferred** | Column **`instrument_key`** (e.g. `piano`, `guitar`) on **`TEACHERPROFILE`** and **`LEARNERPROFILE`**, with **foreign key** to catalogue table **`INSTRUMENT`**. |
+| **Catalogue in DB** | **`INSTRUMENT`** holds `name_en`, `name_zh`, `name_ar` per key so the schema documents all supported translations. |
+| **UTF-8** | Database, tables, and session script use **`utf8mb4`** / **`utf8mb4_unicode_ci`** (see `database/schema.sql`). |
+| **App layer** | DAOs **normalize** values to keys on write; **`LocalizationManager`** maps between **localized combo labels** and **keys** for display and for **`findByInstrument(key)`**, so search works regardless of which language the teacher used when saving. |
+
+**Deliverable — full plan, ERD, encoding notes, validation checklist:**  
+[document/DATABASE_LOCALIZATION.md](document/DATABASE_LOCALIZATION.md)
 
 ---
 

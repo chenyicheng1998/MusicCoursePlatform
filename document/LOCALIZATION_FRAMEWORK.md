@@ -226,6 +226,10 @@ Integration checks:
 - Keep the three property files in sync when adding features.
 - **Possible future work:** persist preferred language (e.g. `Preferences` or DB), plural rules, `MessageFormat` for parameters.
 
+## Related: database-stored translatable fields
+
+Instrument keys persisted in **`TEACHERPROFILE` / `LEARNERPROFILE`** (`instrument_key`) and the **`INSTRUMENT`** reference table are documented in **[DATABASE_LOCALIZATION.md](DATABASE_LOCALIZATION.md)** (Sprint 6).
+
 ---
 
 **Version:** 1.1  
