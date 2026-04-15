@@ -236,7 +236,7 @@ docker pull chenyicheng1998/music-course-platform:latest
 | Sprint 3 | Su Wai Phyoe | [Sprint 3](https://trello.com/b/B5AJ4wIm/sep1musiccourseplatform-sprint3) | ✅ Done |
 | Sprint 4 | Liu Lu | [Sprint 4](https://trello.com/b/Rx627kZj/sep1musiccourseplatform-sprint4) | ✅ Done |
 | Sprint 5 | Luo Ying | [Sprint 5](https://trello.com/b/gQ18ryeD/sep1musiccourseplatform-sprint5) | ✅ Done |
-| Sprint 6 | Su Wai Phyoe | [Sprint 6](https://trello.com/b/gQ18ryeD/sep1musiccourseplatform-sprint6) | ✅ Done |
+| Sprint 6 | Su Wai Phyoe | [Sprint 6](https://trello.com/b/JHw5h1HD/sep1musiccourseplatform-sprint6) | ✅ Done |
 
 ---
 
