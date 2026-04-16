@@ -218,12 +218,39 @@ The project uses a Jenkins pipeline defined in `Jenkinsfile`. It triggers automa
 
 ## Docker
 
-The Docker image is available on Docker Hub:
-**[chenyicheng1998/music-course-platform](https://hub.docker.com/repository/docker/chenyicheng1998/music-course-platform)**
+Image on Docker Hub: **[chenyicheng1998/music-course-platform](https://hub.docker.com/repository/docker/chenyicheng1998/music-course-platform)**
+
+> This is a JavaFX app — an X11 server is required to display the GUI.
 
 ```bash
 docker pull chenyicheng1998/music-course-platform:latest
 ```
+
+**Windows (PowerShell)** — Install [Xming](http://www.straightrunning.com/XmingNotes/), launch with *No Access Control*, then:
+
+```powershell
+docker run -it --rm `
+  -e DISPLAY=host.docker.internal:0.0 `
+  -e DB_HOST=host.docker.internal `
+  -e DB_PORT=3306 `
+  -e DB_USER=root `
+  -e DB_PASSWORD=your_db_password `
+  chenyicheng1998/music-course-platform:latest
+```
+
+**macOS** — Install [XQuartz](https://www.xquartz.org/), enable *Allow connections from network clients*, run `xhost +localhost`, then:
+
+```bash
+docker run -it --rm \
+  -e DISPLAY=host.docker.internal:0 \
+  -e DB_HOST=host.docker.internal \
+  -e DB_PORT=3306 \
+  -e DB_USER=root \
+  -e DB_PASSWORD=your_db_password \
+  chenyicheng1998/music-course-platform:latest
+```
+
+> Make sure your local MariaDB is running and credentials match before starting the container.
 
 ---
 
