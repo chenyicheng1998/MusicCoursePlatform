@@ -16,6 +16,10 @@ pipeline {
 
         // Database configuration
         DB_NAME = 'music_course_platform'
+
+        // SonarQube configuration (Sprint 7)
+        SONAR_HOST_URL = 'http://localhost:9000'
+        SONAR_PROJECT_KEY = 'music-course-platform'
     }
 
     stages {
@@ -48,6 +52,34 @@ pipeline {
                 always {
                     // Publish test results
                     junit 'MusicCoursePlatform/target/surefire-reports/*.xml'
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                echo 'Running SonarQube static code analysis...'
+                dir('MusicCoursePlatform') {
+                    withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
+                        bat """
+                            mvn sonar:sonar ^
+                                -Dsonar.projectKey=%SONAR_PROJECT_KEY% ^
+                                -Dsonar.host.url=%SONAR_HOST_URL% ^
+                                -Dsonar.token=%SONAR_TOKEN% ^
+                                -Dsonar.java.binaries=target/classes ^
+                                -Dsonar.java.test.binaries=target/test-classes ^
+                                -Dsonar.sources=src/main/java ^
+                                -Dsonar.tests=src/test/java
+                        """
+                    }
+                }
+            }
+            post {
+                success {
+                    echo "SonarQube analysis complete. View results at ${SONAR_HOST_URL}/dashboard?id=${SONAR_PROJECT_KEY}"
+                }
+                failure {
+                    echo 'SonarQube analysis failed. Check that SonarQube is running at localhost:9000 and the token is valid.'
                 }
             }
         }
