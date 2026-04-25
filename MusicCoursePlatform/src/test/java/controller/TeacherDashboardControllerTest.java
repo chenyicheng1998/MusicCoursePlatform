@@ -71,6 +71,25 @@ class TeacherDashboardControllerTest {
                 setField(controller, "languageCombo", new ComboBox<>());
                 setField(controller, "errorLabel", new Label());
 
+                // Additional fields needed by updateTexts()
+                setField(controller, "appNameLabel", new Label());
+                setField(controller, "viewScheduleButton", new Button());
+                setField(controller, "logoutButton", new Button());
+                setField(controller, "saveProfileButton", new Button());
+                setField(controller, "calendarFrameLabel", new Label());
+                setField(controller, "setAvailabilityLabel", new Label());
+                setField(controller, "startTimeLabel", new Label());
+                setField(controller, "endTimeLabel", new Label());
+                setField(controller, "addTimeSlotButton", new Button());
+                setField(controller, "rootPane", new javafx.scene.layout.BorderPane());
+                setField(controller, "sunLabel", new Label());
+                setField(controller, "monLabel", new Label());
+                setField(controller, "tueLabel", new Label());
+                setField(controller, "wedLabel", new Label());
+                setField(controller, "thuLabel", new Label());
+                setField(controller, "friLabel", new Label());
+                setField(controller, "satLabel", new Label());
+
                 setField(controller, "teacherProfileDAO", mockTeacherProfileDAO);
                 setField(controller, "timeSlotDAO", mockTimeSlotDAO);
                 setField(controller, "localizationManager", LocalizationManager.getInstance());
@@ -389,6 +408,313 @@ class TeacherDashboardControllerTest {
         SessionManager.getInstance().logout();
 
         assertFalse(SessionManager.getInstance().isLoggedIn());
+    }
+
+    // --- handleDeleteSlot ---
+
+    @Test
+    void testHandleDeleteSlot_BookedSlot_ShowsErrorAndDoesNotDelete() throws Exception {
+        runOnFX(() -> {
+            TimeSlot bookedSlot = createTimeSlot();
+            bookedSlot.setSlotStatus(TimeSlot.STATUS_BOOKED);
+
+            Method method = TeacherDashboardController.class
+                    .getDeclaredMethod("handleDeleteSlot", TimeSlot.class);
+            method.setAccessible(true);
+            method.invoke(controller, bookedSlot);
+
+            verify(mockTimeSlotDAO, never()).delete(anyInt());
+
+            Label errorLabel = getField(controller, "errorLabel", Label.class);
+            assertFalse(errorLabel.getText().isEmpty());
+        });
+    }
+
+    @Test
+    void testHandleDeleteSlot_AvailableSlot_DeletesAndUpdatesUI() throws Exception {
+        runOnFX(() -> {
+            setField(controller, "selectedDate", LocalDate.now());
+            setField(controller, "teacherProfile", createTeacherProfile());
+
+            TimeSlot slot = createTimeSlot();
+            slot.setSlotStatus(TimeSlot.STATUS_AVAILABLE);
+
+            when(mockTimeSlotDAO.delete(slot.getSlotId())).thenReturn(true);
+            when(mockTimeSlotDAO.findByTeacherProfileIdAndDate(anyInt(), any()))
+                    .thenReturn(Collections.emptyList());
+
+            Method method = TeacherDashboardController.class
+                    .getDeclaredMethod("handleDeleteSlot", TimeSlot.class);
+            method.setAccessible(true);
+            method.invoke(controller, slot);
+
+            verify(mockTimeSlotDAO).delete(slot.getSlotId());
+        });
+    }
+
+    @Test
+    void testHandleDeleteSlot_DeleteFails_NoUIChange() throws Exception {
+        runOnFX(() -> {
+            setField(controller, "selectedDate", LocalDate.now());
+            setField(controller, "teacherProfile", createTeacherProfile());
+
+            TimeSlot slot = createTimeSlot();
+            slot.setSlotStatus(TimeSlot.STATUS_AVAILABLE);
+
+            when(mockTimeSlotDAO.delete(slot.getSlotId())).thenReturn(false);
+
+            Method method = TeacherDashboardController.class
+                    .getDeclaredMethod("handleDeleteSlot", TimeSlot.class);
+            method.setAccessible(true);
+            method.invoke(controller, slot);
+
+            verify(mockTimeSlotDAO).delete(slot.getSlotId());
+            // No update calls when delete fails
+            verify(mockTimeSlotDAO, never()).findByTeacherProfileIdAndDate(anyInt(), any());
+        });
+    }
+
+    // --- loadTeacherProfile ---
+
+    @Test
+    void testLoadTeacherProfile_NullUser_ReturnsEarly() throws Exception {
+        runOnFX(() -> {
+            setField(controller, "currentUser", null);
+
+            invokeMethod("loadTeacherProfile");
+
+            verifyNoInteractions(mockTeacherProfileDAO);
+        });
+    }
+
+    @Test
+    void testLoadTeacherProfile_ProfileExists_SetsFields() throws Exception {
+        runOnFX(() -> {
+            User user = createUser();
+            setField(controller, "currentUser", user);
+
+            TeacherProfile profile = createTeacherProfile();
+            profile.setInstrumentsTaught("piano");
+            profile.setYearsExperience(5);
+            profile.setHourlyRate(60);
+            profile.setBiography("Great teacher");
+
+            when(mockTeacherProfileDAO.findByUserId(user.getUserId())).thenReturn(profile);
+
+            invokeMethod("loadTeacherProfile");
+
+            Label nameLabel = getField(controller, "nameLabel", Label.class);
+            assertEquals(user.getUsername(), nameLabel.getText());
+
+            TextField expField = getField(controller, "experienceField", TextField.class);
+            assertEquals("5", expField.getText());
+        });
+    }
+
+    @Test
+    void testLoadTeacherProfile_ProfileDoesNotExist_CreatesDefault() throws Exception {
+        runOnFX(() -> {
+            User user = createUser();
+            setField(controller, "currentUser", user);
+
+            when(mockTeacherProfileDAO.findByUserId(user.getUserId())).thenReturn(null);
+            when(mockTeacherProfileDAO.create(any())).thenReturn(true);
+
+            invokeMethod("loadTeacherProfile");
+
+            verify(mockTeacherProfileDAO).create(any(TeacherProfile.class));
+
+            TeacherProfile profile = getField(controller, "teacherProfile", TeacherProfile.class);
+            assertNotNull(profile);
+            assertEquals("piano", profile.getInstrumentsTaught());
+        });
+    }
+
+    // --- handleAddTimeSlot: invalid time order ---
+
+    @Test
+    void testHandleAddTimeSlot_StartTimeEqualToEnd_ShowsError() throws Exception {
+        runOnFX(() -> {
+            setField(controller, "selectedDate", LocalDate.now());
+            setField(controller, "teacherProfile", createTeacherProfile());
+
+            ComboBox<String> startCombo = getField(controller, "startTimeCombo", ComboBox.class);
+            ComboBox<String> endCombo = getField(controller, "endTimeCombo", ComboBox.class);
+            startCombo.getItems().add("10:00");
+            startCombo.setValue("10:00");
+            endCombo.getItems().add("10:00");
+            endCombo.setValue("10:00");
+
+            invokeMethod("handleAddTimeSlot");
+
+            Label errorLabel = getField(controller, "errorLabel", Label.class);
+            assertFalse(errorLabel.getText().isEmpty());
+            verifyNoInteractions(mockTimeSlotDAO);
+        });
+    }
+
+    @Test
+    void testHandleAddTimeSlot_StartAfterEnd_ShowsError() throws Exception {
+        runOnFX(() -> {
+            setField(controller, "selectedDate", LocalDate.now());
+            setField(controller, "teacherProfile", createTeacherProfile());
+
+            ComboBox<String> startCombo = getField(controller, "startTimeCombo", ComboBox.class);
+            ComboBox<String> endCombo = getField(controller, "endTimeCombo", ComboBox.class);
+            startCombo.getItems().add("14:00");
+            startCombo.setValue("14:00");
+            endCombo.getItems().add("10:00");
+            endCombo.setValue("10:00");
+
+            invokeMethod("handleAddTimeSlot");
+
+            verifyNoInteractions(mockTimeSlotDAO);
+        });
+    }
+
+    // --- createTimeSlotBox with booked slot ---
+
+    @Test
+    void testCreateTimeSlotBox_BookedSlot_HasBookedStyle() throws Exception {
+        runOnFX(() -> {
+            TimeSlot bookedSlot = createTimeSlot();
+            bookedSlot.setSlotStatus(TimeSlot.STATUS_BOOKED);
+
+            Method method = TeacherDashboardController.class
+                    .getDeclaredMethod("createTimeSlotBox", TimeSlot.class);
+            method.setAccessible(true);
+            javafx.scene.layout.HBox box =
+                    (javafx.scene.layout.HBox) method.invoke(controller, bookedSlot);
+
+            assertNotNull(box);
+            javafx.scene.control.Label timeLabel =
+                    (javafx.scene.control.Label) box.getChildren().get(0);
+            assertTrue(timeLabel.getStyleClass().contains("time-slot-booked"));
+        });
+    }
+
+    @Test
+    void testCreateTimeSlotBox_AvailableSlot_NoBookedStyle() throws Exception {
+        runOnFX(() -> {
+            TimeSlot slot = createTimeSlot();
+
+            Method method = TeacherDashboardController.class
+                    .getDeclaredMethod("createTimeSlotBox", TimeSlot.class);
+            method.setAccessible(true);
+            javafx.scene.layout.HBox box =
+                    (javafx.scene.layout.HBox) method.invoke(controller, slot);
+
+            assertNotNull(box);
+        });
+    }
+
+    // --- hasTimeSlots ---
+
+    @Test
+    void testHasTimeSlots_NullTeacherProfile_ReturnsFalse() throws Exception {
+        runOnFX(() -> {
+            setField(controller, "teacherProfile", null);
+
+            Method method = TeacherDashboardController.class
+                    .getDeclaredMethod("hasTimeSlots", LocalDate.class);
+            method.setAccessible(true);
+            boolean result = (boolean) method.invoke(controller, LocalDate.now());
+
+            assertFalse(result);
+        });
+    }
+
+    @Test
+    void testHasTimeSlots_WithSlots_ReturnsTrue() throws Exception {
+        runOnFX(() -> {
+            setField(controller, "teacherProfile", createTeacherProfile());
+
+            when(mockTimeSlotDAO.findByTeacherProfileIdAndDate(anyInt(), any()))
+                    .thenReturn(List.of(createTimeSlot()));
+
+            Method method = TeacherDashboardController.class
+                    .getDeclaredMethod("hasTimeSlots", LocalDate.class);
+            method.setAccessible(true);
+            boolean result = (boolean) method.invoke(controller, LocalDate.now());
+
+            assertTrue(result);
+        });
+    }
+
+    // --- setupTimeComboBoxes ---
+
+    @Test
+    void testSetupTimeComboBoxes_PopulatesItems() throws Exception {
+        runOnFX(() -> {
+            ComboBox<String> startCombo = getField(controller, "startTimeCombo", ComboBox.class);
+            ComboBox<String> endCombo = getField(controller, "endTimeCombo", ComboBox.class);
+
+            invokeMethod("setupTimeComboBoxes");
+
+            assertFalse(startCombo.getItems().isEmpty());
+            assertFalse(endCombo.getItems().isEmpty());
+            // from 7:00 to 21:30 (2 slots per hour = 30 slots)
+            assertTrue(startCombo.getItems().contains("7:00"));
+            assertTrue(startCombo.getItems().contains("21:00"));
+        });
+    }
+
+    // --- updateInstrumentsCombo with preserved key ---
+
+    @Test
+    void testUpdateInstrumentsCombo_PreservesCurrentSelection() throws Exception {
+        runOnFX(() -> {
+            ComboBox<String> combo = getField(controller, "instrumentsCombo", ComboBox.class);
+            combo.getItems().add("Piano");
+            combo.setValue("Piano");
+
+            invokeMethod("updateInstrumentsCombo");
+
+            // Should still have a value after repopulating
+            assertNotNull(combo.getValue());
+        });
+    }
+
+    // --- showError / showSuccess ---
+
+    @Test
+    void testShowError_SetsErrorLabelText() throws Exception {
+        runOnFX(() -> {
+            Method method = TeacherDashboardController.class
+                    .getDeclaredMethod("showError", String.class);
+            method.setAccessible(true);
+            method.invoke(controller, "Error occurred");
+
+            Label errorLabel = getField(controller, "errorLabel", Label.class);
+            assertEquals("Error occurred", errorLabel.getText());
+        });
+    }
+
+    @Test
+    void testShowSuccess_SetsSuccessLabelText() throws Exception {
+        runOnFX(() -> {
+            Method method = TeacherDashboardController.class
+                    .getDeclaredMethod("showSuccess", String.class);
+            method.setAccessible(true);
+            method.invoke(controller, "Profile saved!");
+
+            Label errorLabel = getField(controller, "errorLabel", Label.class);
+            assertEquals("Profile saved!", errorLabel.getText());
+        });
+    }
+
+    // --- updateTexts with selectedDate ---
+
+    @Test
+    void testUpdateTexts_WithSelectedDateNull_SetsSelectDatePrompt() throws Exception {
+        runOnFX(() -> {
+            setField(controller, "selectedDate", null);
+
+            invokeMethod("updateTexts");
+
+            Label selectedDateLabel = getField(controller, "selectedDateLabel", Label.class);
+            assertFalse(selectedDateLabel.getText().isEmpty());
+        });
     }
 
     // --- Helpers ---

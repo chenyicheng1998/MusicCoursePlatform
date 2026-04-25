@@ -8,7 +8,7 @@ import model.User;
 import java.util.List;
 
 public class TeacherService {
-    
+
     private final TeacherProfileDAO teacherProfileDAO;
     private final UserDAO userDAO;
 
@@ -23,7 +23,7 @@ public class TeacherService {
     }
 
     public TeacherProfile createProfile(int userId, String biography, String instruments,
-                                         int yearsExperience, int hourlyRate, String location) {
+            int yearsExperience, int hourlyRate, String location) {
         User user = userDAO.findById(userId);
         if (user == null) {
             throw new IllegalArgumentException("User not found");
@@ -44,17 +44,17 @@ public class TeacherService {
         profile.setYearsExperience(yearsExperience);
         profile.setHourlyRate(hourlyRate);
         profile.setLocation(location);
-        
+
         boolean success = teacherProfileDAO.create(profile);
         if (!success) {
-            throw new RuntimeException("Failed to create teacher profile");
+            throw new IllegalStateException("Failed to create teacher profile");
         }
-        
+
         return profile;
     }
 
     public TeacherProfile updateProfile(int profileId, String biography, String instruments,
-                                         int yearsExperience, int hourlyRate, String location) {
+            int yearsExperience, int hourlyRate, String location) {
         TeacherProfile profile = teacherProfileDAO.findById(profileId);
         if (profile == null) {
             throw new IllegalArgumentException("Teacher profile not found");
@@ -70,7 +70,7 @@ public class TeacherService {
 
         boolean success = teacherProfileDAO.update(profile);
         if (!success) {
-            throw new RuntimeException("Failed to update teacher profile");
+            throw new IllegalStateException("Failed to update teacher profile");
         }
 
         return profile;

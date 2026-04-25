@@ -6,95 +6,40 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.StackPane;
+import javafx.scene.control.Button;
+import javafx.scene.control.Hyperlink;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import model.User;
-import service.UserService;
-import util.LocalizationManager;
 
 import java.io.IOException;
-import java.util.Locale;
 
-public class SignupController {
-
-    @FXML
-    private StackPane rootPane;
-
-    @FXML
-    private ComboBox<String> languageCombo;
-
-    @FXML
-    private Label languageLabel;
-
-    @FXML
-    private Button backButton;
-
-    @FXML
-    private Label titleLabel;
+public class SignupController extends BaseController {
 
     @FXML
     private TextField usernameField;
-
     @FXML
     private TextField emailField;
-
     @FXML
     private PasswordField passwordField;
-
     @FXML
     private Button studentButton;
-
     @FXML
     private Button teacherButton;
-
     @FXML
     private Label haveAccountLabel;
-
     @FXML
     private Hyperlink loginLink;
 
     @FXML
-    private Label errorLabel;
-
-    private UserService userService;
-    private LocalizationManager localizationManager;
-
-    @FXML
     public void initialize() {
-        userService = new UserService();
-        localizationManager = LocalizationManager.getInstance();
-
-        // Setup language combo box
-        setupLanguageSelector();
-
-        // Initialize texts
-        updateTexts();
-
-        // Listen for locale changes
-        localizationManager.localeProperty().addListener((obs, oldLocale, newLocale) -> {
-            updateTexts();
-            applyDirection();
-        });
-
-        // Apply initial direction
-        applyDirection();
+        initializeBase();
     }
 
-    private void setupLanguageSelector() {
-        languageCombo.getItems().addAll("English", "中文", "العربية");
-        languageCombo.setValue(localizationManager.getCurrentLanguageDisplayName());
-    }
-
-    @FXML
-    private void handleLanguageChange(ActionEvent event) {
-        String selected = languageCombo.getValue();
-        Locale newLocale = LocalizationManager.getLocaleFromDisplayName(selected);
-
-        localizationManager.setLocale(newLocale);
-    }
-
-    private void updateTexts() {
+    @Override
+    protected void updateTexts() {
         languageLabel.setText(localizationManager.getString("language.selector"));
         titleLabel.setText(localizationManager.getString("signup.title"));
         usernameField.setPromptText(localizationManager.getString("signup.username"));
@@ -104,10 +49,6 @@ public class SignupController {
         teacherButton.setText(localizationManager.getString("signup.as.teacher"));
         haveAccountLabel.setText(localizationManager.getString("signup.have.account"));
         loginLink.setText(localizationManager.getString("signup.login"));
-    }
-
-    private void applyDirection() {
-        localizationManager.applyDirection(rootPane);
     }
 
     @FXML
@@ -157,52 +98,17 @@ public class SignupController {
         return email.matches("^[A-Za-z0-9+_.-]+@(.+)$");
     }
 
-    private void navigateToDashboard(ActionEvent event, User user) {
-        try {
-            String fxmlPath;
-            String title;
-
-            if (user.isTeacher()) {
-                fxmlPath = "/fxml/teacher_set_availability.fxml";
-                title = localizationManager.getString("app.title.teacher.dashboard");
-            } else {
-                fxmlPath = "/fxml/student_course_booking.fxml";
-                title = localizationManager.getString("app.title.student.dashboard");
-            }
-
-            Parent root = FXMLLoader.load(getClass().getResource(fxmlPath));
-            Scene scene = new Scene(root);
-            scene.getStylesheets().add(getClass().getResource("/css/styles.css").toExternalForm());
-
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle(title);
-        } catch (IOException e) {
-            e.printStackTrace();
-            showError(localizationManager.getString("error.load.dashboard"));
-        }
-    }
-
     @FXML
     private void handleBackToLogin(ActionEvent event) {
         try {
             Parent loginRoot = FXMLLoader.load(getClass().getResource("/fxml/login.fxml"));
             Scene loginScene = new Scene(loginRoot);
-
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(loginScene);
             stage.setTitle(localizationManager.getString("app.title.login"));
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.warning("Failed to load login screen: " + e.getMessage());
             showError(localizationManager.getString("error.load.dashboard"));
-        }
-    }
-
-    private void showError(String message) {
-        if (errorLabel != null) {
-            errorLabel.setText(message);
-            errorLabel.setVisible(true);
-            errorLabel.setManaged(true);
         }
     }
 }

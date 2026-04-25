@@ -16,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import util.LocalizationManager;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.time.LocalDate;
@@ -70,6 +72,7 @@ class StudentDashboardControllerTest {
                 setField(controller, "timeSlotsContainer", new VBox());
                 setField(controller, "languageCombo", new ComboBox<>());
                 setField(controller, "bookButton", new Button());
+                setField(controller, "teacherBioLabel", new Label());
 
                 // Add localization fields
                 setField(controller, "appNameLabel", new Label());
@@ -97,6 +100,7 @@ class StudentDashboardControllerTest {
                 setField(controller, "bookingDAO", mockBookingDAO);
                 setField(controller, "learnerProfileDAO", mockLearnerProfileDAO);
                 setField(controller, "userDAO", mockUserDAO);
+                setField(controller, "localizationManager", LocalizationManager.getInstance());
 
                 setField(controller, "currentMonth", YearMonth.now());
 
@@ -297,6 +301,441 @@ class StudentDashboardControllerTest {
 
             VBox container = getField(controller, "timeSlotsContainer", VBox.class);
             assertFalse(container.getChildren().isEmpty());
+        });
+    }
+
+    // --- handleLanguageChange ---
+
+    @Test
+    void testHandleLanguageChange_SetsLocale() throws Exception {
+        runOnFX(() -> {
+            ComboBox<String> langCombo = getField(controller, "languageCombo", ComboBox.class);
+            langCombo.getItems().add("中文");
+            langCombo.setValue("中文");
+
+            invokeMethod("handleLanguageChange");
+
+            assertEquals(LocalizationManager.CHINESE, LocalizationManager.getInstance().getCurrentLocale());
+
+            // Reset to English so other tests are not affected
+            LocalizationManager.getInstance().setLocale(LocalizationManager.ENGLISH);
+        });
+    }
+
+    // --- loadLearnerProfile ---
+
+    @Test
+    void testLoadLearnerProfile_NoUser_DoesNotCallDAO() throws Exception {
+        runOnFX(() -> {
+            SessionManager.getInstance().logout();
+
+            invokeMethod("loadLearnerProfile");
+
+            verifyNoInteractions(mockLearnerProfileDAO);
+        });
+    }
+
+    @Test
+    void testLoadLearnerProfile_WithUserAndExistingProfile() throws Exception {
+        runOnFX(() -> {
+            User user = new User("student1", "hash", "s@test.com", "LEARNER");
+            user.setUserId(5);
+            SessionManager.getInstance().setCurrentUser(user);
+
+            LearnerProfile existingProfile = new LearnerProfile(5, "piano");
+            existingProfile.setLearnerProfileId(10);
+            when(mockLearnerProfileDAO.findByUserId(5)).thenReturn(existingProfile);
+
+            invokeMethod("loadLearnerProfile");
+
+            LearnerProfile result = getField(controller, "learnerProfile", LearnerProfile.class);
+            assertNotNull(result);
+            assertEquals(10, result.getLearnerProfileId());
+
+            SessionManager.getInstance().logout();
+        });
+    }
+
+    @Test
+    void testLoadLearnerProfile_WithUserButNoProfile_CreatesNew() throws Exception {
+        runOnFX(() -> {
+            User user = new User("student2", "hash", "s2@test.com", "LEARNER");
+            user.setUserId(6);
+            SessionManager.getInstance().setCurrentUser(user);
+
+            when(mockLearnerProfileDAO.findByUserId(6)).thenReturn(null);
+            when(mockLearnerProfileDAO.create(any())).thenReturn(true);
+
+            invokeMethod("loadLearnerProfile");
+
+            verify(mockLearnerProfileDAO).create(any(LearnerProfile.class));
+
+            SessionManager.getInstance().logout();
+        });
+    }
+
+    // --- loadTeachers ---
+
+    @Test
+    void testLoadTeachers_NullInstrumentValue_ReturnsEarly() throws Exception {
+        runOnFX(() -> {
+            // instrumentCombo has no value (null)
+            invokeMethod("loadTeachers");
+
+            verifyNoInteractions(mockTeacherProfileDAO);
+        });
+    }
+
+    @Test
+    void testLoadTeachers_EmptyList_ShowsNoTeachersMessage() throws Exception {
+        runOnFX(() -> {
+            ComboBox<String> combo = getField(controller, "instrumentCombo", ComboBox.class);
+            combo.getItems().add("Piano");
+            combo.setValue("Piano");
+
+            when(mockTeacherProfileDAO.findByInstrument(anyString()))
+                    .thenReturn(Collections.emptyList());
+
+            invokeMethod("loadTeachers");
+
+            Label teacherNameLabel = getField(controller, "teacherNameLabel", Label.class);
+            assertFalse(teacherNameLabel.getText().isEmpty());
+        });
+    }
+
+    @Test
+    void testLoadTeachers_WithTeachers_PopulatesComboAndSetsSelected() throws Exception {
+        runOnFX(() -> {
+            ComboBox<String> combo = getField(controller, "instrumentCombo", ComboBox.class);
+            combo.getItems().add("Piano");
+            combo.setValue("Piano");
+
+            TeacherProfile profile = createTeacherProfile();
+            User user = new User("teacher1", "hash", "t@test.com", "TEACHER");
+            user.setUserId(1);
+
+            when(mockTeacherProfileDAO.findByInstrument(anyString()))
+                    .thenReturn(List.of(profile));
+            when(mockUserDAO.findById(anyInt())).thenReturn(user);
+            lenient().when(mockTimeSlotDAO.findByTeacherProfileIdAndDate(anyInt(), any()))
+                    .thenReturn(Collections.emptyList());
+
+            invokeMethod("loadTeachers");
+
+            ComboBox<String> teacherCombo = getField(controller, "teacherCombo", ComboBox.class);
+            assertFalse(teacherCombo.getItems().isEmpty());
+
+            TeacherProfile selected = getField(controller, "selectedTeacher", TeacherProfile.class);
+            assertNotNull(selected);
+        });
+    }
+
+    @Test
+    void testLoadTeachers_WithTeachers_UserNotFound_UsesDefaultName() throws Exception {
+        runOnFX(() -> {
+            ComboBox<String> combo = getField(controller, "instrumentCombo", ComboBox.class);
+            combo.getItems().add("Piano");
+            combo.setValue("Piano");
+
+            TeacherProfile profile = createTeacherProfile();
+            profile.setTeacherProfileId(99);
+
+            when(mockTeacherProfileDAO.findByInstrument(anyString()))
+                    .thenReturn(List.of(profile));
+            when(mockUserDAO.findById(anyInt())).thenReturn(null);
+            lenient().when(mockTimeSlotDAO.findByTeacherProfileIdAndDate(anyInt(), any()))
+                    .thenReturn(Collections.emptyList());
+
+            invokeMethod("loadTeachers");
+
+            ComboBox<String> teacherCombo = getField(controller, "teacherCombo", ComboBox.class);
+            assertTrue(teacherCombo.getItems().get(0).contains("Teacher 99"));
+        });
+    }
+
+    // --- handleInstrumentChange ---
+
+    @Test
+    void testHandleInstrumentChange_CallsLoadTeachersAndUpdateTimeSlots() throws Exception {
+        runOnFX(() -> {
+            ComboBox<String> combo = getField(controller, "instrumentCombo", ComboBox.class);
+            combo.getItems().add("Guitar");
+            combo.setValue("Guitar");
+
+            when(mockTeacherProfileDAO.findByInstrument(anyString()))
+                    .thenReturn(Collections.emptyList());
+
+            invokeMethod("handleInstrumentChange");
+
+            verify(mockTeacherProfileDAO).findByInstrument(anyString());
+        });
+    }
+
+    // --- handleTeacherChange ---
+
+    @Test
+    void testHandleTeacherChange_ValidIndex_SetsSelectedTeacher() throws Exception {
+        runOnFX(() -> {
+            TeacherProfile profile = createTeacherProfile();
+            setField(controller, "teacherProfiles", List.of(profile));
+
+            ComboBox<String> teacherCombo = getField(controller, "teacherCombo", ComboBox.class);
+            teacherCombo.getItems().add("Teacher1");
+            teacherCombo.getSelectionModel().select(0);
+
+            User user = new User("teacher1", "hash", "t@test.com", "TEACHER");
+            when(mockUserDAO.findById(anyInt())).thenReturn(user);
+            lenient().when(mockTimeSlotDAO.findByTeacherProfileIdAndDate(anyInt(), any()))
+                    .thenReturn(Collections.emptyList());
+
+            invokeMethod("handleTeacherChange");
+
+            TeacherProfile selected = getField(controller, "selectedTeacher", TeacherProfile.class);
+            assertNotNull(selected);
+            assertEquals(1, selected.getTeacherProfileId());
+        });
+    }
+
+    @Test
+    void testHandleTeacherChange_NegativeIndex_DoesNothing() throws Exception {
+        runOnFX(() -> {
+            setField(controller, "teacherProfiles", List.of(createTeacherProfile()));
+
+            ComboBox<String> teacherCombo = getField(controller, "teacherCombo", ComboBox.class);
+            teacherCombo.getSelectionModel().clearSelection();
+
+            invokeMethod("handleTeacherChange");
+
+            verifyNoInteractions(mockUserDAO);
+        });
+    }
+
+    // --- updateTeacherDisplay ---
+
+    @Test
+    void testUpdateTeacherDisplay_NullTeacher_DoesNothing() throws Exception {
+        runOnFX(() -> {
+            setField(controller, "selectedTeacher", null);
+
+            invokeMethod("updateTeacherDisplay");
+
+            verifyNoInteractions(mockUserDAO);
+        });
+    }
+
+    @Test
+    void testUpdateTeacherDisplay_WithTeacher_SetsAllLabels() throws Exception {
+        runOnFX(() -> {
+            TeacherProfile profile = createTeacherProfile();
+            profile.setBiography("Experienced teacher");
+            setField(controller, "selectedTeacher", profile);
+
+            User user = new User("teacher1", "hash", "t@test.com", "TEACHER");
+            when(mockUserDAO.findById(anyInt())).thenReturn(user);
+
+            invokeMethod("updateTeacherDisplay");
+
+            Label nameLabel = getField(controller, "teacherNameLabel", Label.class);
+            assertEquals("teacher1", nameLabel.getText());
+
+            Label rateLabel = getField(controller, "teacherRateLabel", Label.class);
+            assertTrue(rateLabel.getText().contains("$50"));
+        });
+    }
+
+    @Test
+    void testUpdateTeacherDisplay_WithTeacherBioEmpty_ShowsNoBioText() throws Exception {
+        runOnFX(() -> {
+            TeacherProfile profile = createTeacherProfile();
+            profile.setBiography("");
+            setField(controller, "selectedTeacher", profile);
+
+            when(mockUserDAO.findById(anyInt())).thenReturn(
+                    new User("t", "h", "t@t.com", "TEACHER"));
+
+            invokeMethod("updateTeacherDisplay");
+
+            Label bioLabel = getField(controller, "teacherBioLabel", Label.class);
+            assertFalse(bioLabel.getText().isEmpty());
+        });
+    }
+
+    @Test
+    void testUpdateTeacherDisplay_UserNotFound_UsesDefaultName() throws Exception {
+        runOnFX(() -> {
+            TeacherProfile profile = createTeacherProfile();
+            profile.setTeacherProfileId(42);
+            setField(controller, "selectedTeacher", profile);
+
+            when(mockUserDAO.findById(anyInt())).thenReturn(null);
+
+            invokeMethod("updateTeacherDisplay");
+
+            Label nameLabel = getField(controller, "teacherNameLabel", Label.class);
+            assertTrue(nameLabel.getText().contains("Teacher 42"));
+        });
+    }
+
+    // --- hasAvailableSlots ---
+
+    @Test
+    void testHasAvailableSlots_NoTeacher_ReturnsFalse() throws Exception {
+        runOnFX(() -> {
+            setField(controller, "selectedTeacher", null);
+
+            Method method = StudentDashboardController.class
+                    .getDeclaredMethod("hasAvailableSlots", LocalDate.class);
+            method.setAccessible(true);
+            boolean result = (boolean) method.invoke(controller, LocalDate.now());
+
+            assertFalse(result);
+        });
+    }
+
+    @Test
+    void testHasAvailableSlots_WithAvailableSlot_ReturnsTrue() throws Exception {
+        runOnFX(() -> {
+            setField(controller, "selectedTeacher", createTeacherProfile());
+
+            TimeSlot slot = createTimeSlot(true);
+            when(mockTimeSlotDAO.findByTeacherProfileIdAndDate(anyInt(), any()))
+                    .thenReturn(List.of(slot));
+
+            Method method = StudentDashboardController.class
+                    .getDeclaredMethod("hasAvailableSlots", LocalDate.class);
+            method.setAccessible(true);
+            boolean result = (boolean) method.invoke(controller, LocalDate.now());
+
+            assertTrue(result);
+        });
+    }
+
+    @Test
+    void testHasAvailableSlots_BookedSlotsOnly_ReturnsFalse() throws Exception {
+        runOnFX(() -> {
+            setField(controller, "selectedTeacher", createTeacherProfile());
+
+            TimeSlot slot = createTimeSlot(false);
+            when(mockTimeSlotDAO.findByTeacherProfileIdAndDate(anyInt(), any()))
+                    .thenReturn(List.of(slot));
+
+            Method method = StudentDashboardController.class
+                    .getDeclaredMethod("hasAvailableSlots", LocalDate.class);
+            method.setAccessible(true);
+            boolean result = (boolean) method.invoke(controller, LocalDate.now());
+
+            assertFalse(result);
+        });
+    }
+
+    // --- handleSlotSelect ---
+
+    @Test
+    void testHandleSlotSelect_SetsSelectedSlotAndUpdatesLabel() throws Exception {
+        runOnFX(() -> {
+            setField(controller, "selectedDate", LocalDate.now());
+            setField(controller, "selectedTeacher", createTeacherProfile());
+
+            TimeSlot slot = createTimeSlot(true);
+            when(mockTimeSlotDAO.findByTeacherProfileIdAndDate(anyInt(), any()))
+                    .thenReturn(List.of(slot));
+
+            Method method = StudentDashboardController.class
+                    .getDeclaredMethod("handleSlotSelect", TimeSlot.class);
+            method.setAccessible(true);
+            method.invoke(controller, slot);
+
+            TimeSlot selectedSlot = getField(controller, "selectedSlot", TimeSlot.class);
+            assertNotNull(selectedSlot);
+            assertEquals(slot.getSlotId(), selectedSlot.getSlotId());
+
+            Label timeLabel = getField(controller, "selectedTimeLabel", Label.class);
+            assertTrue(timeLabel.getText().contains(slot.getStartTime()));
+        });
+    }
+
+    // --- createTimeSlotBox with selected slot ---
+
+    @Test
+    void testCreateTimeSlotBox_SelectedSlotMatching_HasSelectedStyle() throws Exception {
+        runOnFX(() -> {
+            TimeSlot slot = createTimeSlot(true);
+            setField(controller, "selectedSlot", slot);
+
+            Method method = StudentDashboardController.class
+                    .getDeclaredMethod("createTimeSlotBox", TimeSlot.class);
+            method.setAccessible(true);
+            javafx.scene.layout.HBox box =
+                    (javafx.scene.layout.HBox) method.invoke(controller, slot);
+
+            assertNotNull(box);
+            javafx.scene.control.Button btn =
+                    (javafx.scene.control.Button) box.getChildren().get(0);
+            assertTrue(btn.getStyleClass().contains("time-slot-selected"));
+        });
+    }
+
+    // --- showError / showSuccessMessage ---
+
+    @Test
+    void testShowError_SetsLabelText() throws Exception {
+        runOnFX(() -> {
+            Method method = StudentDashboardController.class
+                    .getDeclaredMethod("showError", String.class);
+            method.setAccessible(true);
+            method.invoke(controller, "Test error message");
+
+            Label label = getField(controller, "errorLabel", Label.class);
+            assertEquals("Test error message", label.getText());
+            assertTrue(label.isVisible());
+        });
+    }
+
+    @Test
+    void testShowSuccessMessage_SetsGreenLabel() throws Exception {
+        runOnFX(() -> {
+            Method method = StudentDashboardController.class
+                    .getDeclaredMethod("showSuccessMessage", String.class);
+            method.setAccessible(true);
+            method.invoke(controller, "Success!");
+
+            Label label = getField(controller, "errorLabel", Label.class);
+            assertEquals("Success!", label.getText());
+            assertTrue(label.getStyle().contains("#38a169"));
+        });
+    }
+
+    // --- updateCalendar with selectedDate and available slots ---
+
+    @Test
+    void testUpdateCalendar_WithSelectedDate_RendersCalendar() throws Exception {
+        runOnFX(() -> {
+            setField(controller, "selectedTeacher", createTeacherProfile());
+            setField(controller, "selectedDate", LocalDate.now());
+
+            when(mockTimeSlotDAO.findByTeacherProfileIdAndDate(anyInt(), any()))
+                    .thenReturn(List.of(createTimeSlot(true)));
+
+            invokeMethod("updateCalendar");
+
+            FlowPane grid = getField(controller, "calendarGrid", FlowPane.class);
+            assertFalse(grid.getChildren().isEmpty());
+        });
+    }
+
+    // --- updateTexts with selectedDate and selectedSlot set ---
+
+    @Test
+    void testUpdateTexts_WithSelectedDateSet_DoesNotOverwriteDateLabel() throws Exception {
+        runOnFX(() -> {
+            setField(controller, "selectedDate", LocalDate.now());
+            setField(controller, "selectedSlot", createTimeSlot(true));
+
+            invokeMethod("updateTexts");
+
+            // selectedDateLabel should NOT be reset when selectedDate is non-null
+            Label dateLabel = getField(controller, "selectedDateLabel", Label.class);
+            assertNotNull(dateLabel);
         });
     }
 

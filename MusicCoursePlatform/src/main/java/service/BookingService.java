@@ -48,10 +48,10 @@ public class BookingService {
 
         Booking booking = new Booking(learnerProfileId, slotId);
         booking.setNotes(notes);
-        
+
         boolean success = bookingDAO.create(booking);
         if (!success) {
-            throw new RuntimeException("Failed to create booking");
+            throw new IllegalStateException("Failed to create booking");
         }
 
         timeSlotDAO.updateStatus(slotId, TimeSlot.STATUS_BOOKED);
@@ -71,7 +71,7 @@ public class BookingService {
         booking.confirm();
         boolean success = bookingDAO.updateStatus(bookingId, Booking.STATUS_CONFIRMED);
         if (!success) {
-            throw new RuntimeException("Failed to confirm booking");
+            throw new IllegalStateException("Failed to confirm booking");
         }
 
         return booking;
@@ -89,7 +89,7 @@ public class BookingService {
         booking.cancel();
         boolean success = bookingDAO.updateStatus(bookingId, Booking.STATUS_CANCELLED);
         if (!success) {
-            throw new RuntimeException("Failed to cancel booking");
+            throw new IllegalStateException("Failed to cancel booking");
         }
 
         timeSlotDAO.updateStatus(booking.getSlotId(), TimeSlot.STATUS_AVAILABLE);

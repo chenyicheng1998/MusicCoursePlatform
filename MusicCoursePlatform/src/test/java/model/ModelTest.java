@@ -28,6 +28,29 @@ class ModelTest {
     }
 
     @Test
+    @DisplayName("Test: User full constructor with all fields")
+    void testUser_FullConstructorAndGetCreatedAt() {
+        LocalDateTime now = LocalDateTime.now();
+        User user = new User(10, "fulluser", "hash", "full@test.com", "TEACHER", now);
+
+        assertEquals(10, user.getUserId());
+        assertEquals("fulluser", user.getUsername());
+        assertEquals("hash", user.getPasswordHash());
+        assertEquals("full@test.com", user.getEmail());
+        assertEquals("TEACHER", user.getUserType());
+        assertEquals(now, user.getCreatedAt());
+    }
+
+    @Test
+    @DisplayName("Test: User getCreatedAt after setCreatedAt")
+    void testUser_GetCreatedAt() {
+        User user = new User();
+        LocalDateTime now = LocalDateTime.now();
+        user.setCreatedAt(now);
+        assertEquals(now, user.getCreatedAt());
+    }
+
+    @Test
     @DisplayName("Test: User setters")
     void testUser_Setters() {
         User user = new User();
@@ -130,6 +153,38 @@ class ModelTest {
         assertFalse(str.isEmpty());
     }
 
+    @Test
+    @DisplayName("Test: TeacherProfile date getters/setters and getInstrumentsList")
+    void testTeacherProfile_DatesAndInstrumentsList() {
+        TeacherProfile profile = new TeacherProfile(1, "Piano,Guitar");
+
+        // getCreatedAt / setCreatedAt
+        assertNotNull(profile.getCreatedAt()); // set in constructor
+        java.time.LocalDate customDate = java.time.LocalDate.of(2024, 1, 1);
+        profile.setCreatedAt(customDate);
+        assertEquals(customDate, profile.getCreatedAt());
+
+        // getUpdatedAt / setUpdatedAt
+        profile.setUpdatedAt(customDate);
+        assertEquals(customDate, profile.getUpdatedAt());
+
+        // getInstrumentsList with multiple instruments
+        String[] instruments = profile.getInstrumentsList();
+        assertEquals(2, instruments.length);
+        assertEquals("Piano", instruments[0]);
+    }
+
+    @Test
+    @DisplayName("Test: TeacherProfile getInstrumentsList - null and empty")
+    void testTeacherProfile_GetInstrumentsList_NullAndEmpty() {
+        TeacherProfile profile = new TeacherProfile();
+        // null instrumentsTaught
+        assertEquals(0, profile.getInstrumentsList().length);
+        // empty instrumentsTaught
+        profile.setInstrumentsTaught("");
+        assertEquals(0, profile.getInstrumentsList().length);
+    }
+
     // ==================== LearnerProfile Model Tests ====================
 
     @Test
@@ -216,6 +271,34 @@ class ModelTest {
         String str = slot.toString();
         assertNotNull(str);
         assertFalse(str.isEmpty());
+    }
+
+    @Test
+    @DisplayName("Test: TimeSlot getLessonDate, getCreatedAt, setCreatedAt, markAsBooked/Available")
+    void testTimeSlot_AdditionalMethodCoverage() {
+        TimeSlot slot = new TimeSlot(1, java.time.LocalDate.now(), "10:00", "11:00");
+
+        // getLessonDate
+        assertNotNull(slot.getLessonDate());
+        assertEquals(java.time.LocalDate.now(), slot.getLessonDate());
+
+        // getCreatedAt set by constructor
+        assertNotNull(slot.getCreatedAt());
+
+        // setCreatedAt / getCreatedAt
+        java.time.LocalDate customDate = java.time.LocalDate.of(2024, 6, 15);
+        slot.setCreatedAt(customDate);
+        assertEquals(customDate, slot.getCreatedAt());
+
+        // markAsBooked
+        slot.markAsBooked();
+        assertTrue(slot.isBooked());
+        assertFalse(slot.isAvailable());
+
+        // markAsAvailable
+        slot.markAsAvailable();
+        assertTrue(slot.isAvailable());
+        assertFalse(slot.isBooked());
     }
 
     // ==================== Booking Model Tests ====================

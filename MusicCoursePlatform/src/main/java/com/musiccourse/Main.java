@@ -7,20 +7,15 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import util.LocalizationManager;
 
-/**
- * Main application entry point for Music Course Platform.
- * JavaFX desktop application for connecting music teachers with learners.
- *
- * @author Sprint 2 Team
- * @version 1.0
- * @updated Sprint 5 - Added localization support
- */
+import java.util.logging.Logger;
+
 public class Main extends Application {
+
+    private static final Logger logger = Logger.getLogger(Main.class.getName());
 
     @Override
     public void start(Stage primaryStage) {
         try {
-            // Initialize localization manager
             LocalizationManager localizationManager = LocalizationManager.getInstance();
 
             Parent root = FXMLLoader.load(getClass().getResource("/fxml/login.fxml"));
@@ -33,19 +28,11 @@ public class Main extends Application {
             primaryStage.setMinHeight(600);
             primaryStage.show();
 
-            System.out.println("Application started successfully!");
-
         } catch (Exception e) {
-            System.err.println("Error starting application:");
-            e.printStackTrace();
+            logger.severe("Error starting application: " + e.getMessage());
         }
     }
 
-    /**
-     * Main method - launches the JavaFX application.
-     *
-     * @param args command line arguments
-     */
     public static void main(String[] args) {
         launch(args);
     }

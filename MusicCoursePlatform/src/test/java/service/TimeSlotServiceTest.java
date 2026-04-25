@@ -282,4 +282,120 @@ class TimeSlotServiceTest {
             timeSlotService.deleteTimeSlot(99999);
         });
     }
+
+    @Test
+    @Order(18)
+    @DisplayName("Test: Create time slot with past date")
+    void testCreateTimeSlot_PastDate() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            timeSlotService.createTimeSlot(
+                    testProfile.getTeacherProfileId(),
+                    LocalDate.now().minusDays(1),
+                    "10:00",
+                    "11:00");
+        });
+    }
+
+    @Test
+    @Order(19)
+    @DisplayName("Test: Create overlapping time slot throws exception")
+    void testCreateTimeSlot_OverlapThrows() {
+        LocalDate date = LocalDate.now().plusDays(20);
+        TimeSlot existing = timeSlotService.createTimeSlot(
+                testProfile.getTeacherProfileId(), date, "10:00", "11:00");
+
+        try {
+            assertThrows(IllegalArgumentException.class, () -> {
+                timeSlotService.createTimeSlot(
+                        testProfile.getTeacherProfileId(), date, "10:30", "11:30");
+            });
+        } finally {
+            timeSlotDAO.delete(existing.getSlotId());
+        }
+    }
+
+    @Test
+    @Order(20)
+    @DisplayName("Test: Update booked time slot throws exception")
+    void testUpdateTimeSlot_BookedSlot() {
+        LocalDate date = LocalDate.now().plusDays(21);
+        TimeSlot slot = timeSlotService.createTimeSlot(
+                testProfile.getTeacherProfileId(), date, "10:00", "11:00");
+        timeSlotDAO.updateStatus(slot.getSlotId(), TimeSlot.STATUS_BOOKED);
+
+        try {
+            assertThrows(IllegalArgumentException.class, () -> {
+                timeSlotService.updateTimeSlot(slot.getSlotId(), date, "11:00", "12:00");
+            });
+        } finally {
+            timeSlotDAO.updateStatus(slot.getSlotId(), TimeSlot.STATUS_AVAILABLE);
+            timeSlotDAO.delete(slot.getSlotId());
+        }
+    }
+
+    @Test
+    @Order(21)
+    @DisplayName("Test: Mark as booked - slot not found")
+    void testMarkAsBooked_SlotNotFound() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            timeSlotService.markAsBooked(99999);
+        });
+    }
+
+    @Test
+    @Order(22)
+    @DisplayName("Test: Mark as booked - already booked")
+    void testMarkAsBooked_AlreadyBooked() {
+        LocalDate date = LocalDate.now().plusDays(22);
+        TimeSlot slot = timeSlotService.createTimeSlot(
+                testProfile.getTeacherProfileId(), date, "07:00", "08:00");
+        timeSlotDAO.updateStatus(slot.getSlotId(), TimeSlot.STATUS_BOOKED);
+
+        try {
+            assertThrows(IllegalArgumentException.class, () -> {
+                timeSlotService.markAsBooked(slot.getSlotId());
+            });
+        } finally {
+            timeSlotDAO.updateStatus(slot.getSlotId(), TimeSlot.STATUS_AVAILABLE);
+            timeSlotDAO.delete(slot.getSlotId());
+        }
+    }
+
+    @Test
+    @Order(23)
+    @DisplayName("Test: Mark as available - slot not found")
+    void testMarkAsAvailable_SlotNotFound() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            timeSlotService.markAsAvailable(99999);
+        });
+    }
+
+    @Test
+    @Order(24)
+    @DisplayName("Test: Delete booked time slot throws exception")
+    void testDeleteTimeSlot_BookedSlot() {
+        LocalDate date = LocalDate.now().plusDays(23);
+        TimeSlot slot = timeSlotService.createTimeSlot(
+                testProfile.getTeacherProfileId(), date, "06:00", "07:00");
+        timeSlotDAO.updateStatus(slot.getSlotId(), TimeSlot.STATUS_BOOKED);
+
+        try {
+            assertThrows(IllegalArgumentException.class, () -> {
+                timeSlotService.deleteTimeSlot(slot.getSlotId());
+            });
+        } finally {
+            timeSlotDAO.updateStatus(slot.getSlotId(), TimeSlot.STATUS_AVAILABLE);
+            timeSlotDAO.delete(slot.getSlotId());
+        }
+    }
+
+    @Test
+    @Order(25)
+    @DisplayName("Test: Default constructor creates service successfully")
+    void testDefaultConstructor() {
+        TimeSlotService service = new TimeSlotService();
+        assertNotNull(service);
+        // Verify it works by calling a simple method
+        assertNotNull(service.getAllTimeSlots());
+    }
 }
