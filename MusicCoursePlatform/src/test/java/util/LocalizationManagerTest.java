@@ -249,4 +249,39 @@ class LocalizationManagerTest {
         List<String> variants = LocalizationManager.getInstance().getAllInstrumentVariants("guitar");
         assertTrue(variants.size() > 1);
     }
+
+    // -----------------------------------------------------------------------
+    // createDateFormatter() — new method added in Sprint 7
+    // -----------------------------------------------------------------------
+
+    @Test
+    void testCreateDateFormatter_EnglishLocale_ReturnsNonNull() {
+        LocalizationManager lm = LocalizationManager.getInstance();
+        lm.setLocale(LocalizationManager.ENGLISH);
+        assertNotNull(lm.createDateFormatter());
+    }
+
+    @Test
+    void testCreateDateFormatter_ChineseLocale_ReturnsNonNull() {
+        LocalizationManager lm = LocalizationManager.getInstance();
+        lm.setLocale(LocalizationManager.CHINESE);
+        assertNotNull(lm.createDateFormatter());
+    }
+
+    @Test
+    void testCreateDateFormatter_ArabicLocale_ReturnsNonNull() {
+        LocalizationManager lm = LocalizationManager.getInstance();
+        lm.setLocale(LocalizationManager.ARABIC);
+        assertNotNull(lm.createDateFormatter());
+    }
+
+    @Test
+    void testCreateDateFormatter_FormatsDateCorrectly_English() {
+        LocalizationManager lm = LocalizationManager.getInstance();
+        lm.setLocale(LocalizationManager.ENGLISH);
+        java.time.format.DateTimeFormatter fmt = lm.createDateFormatter();
+        String formatted = java.time.LocalDate.of(2026, 4, 15).format(fmt);
+        assertNotNull(formatted);
+        assertFalse(formatted.isEmpty());
+    }
 }

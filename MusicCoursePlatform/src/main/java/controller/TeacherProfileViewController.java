@@ -4,11 +4,7 @@ import dao.TeacherProfileDAO;
 import dao.TimeSlotDAO;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -16,15 +12,14 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import model.TeacherProfile;
 import model.TimeSlot;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import util.LocalizationManager;
+import util.NavigationHelper;
 
-import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
@@ -82,14 +77,7 @@ public class TeacherProfileViewController {
     }
 
     private void setupDateFormatter() {
-        Locale currentLocale = localizationManager.getCurrentLocale();
-        if (LocalizationManager.ARABIC.equals(currentLocale)) {
-            dateFormatter = DateTimeFormatter.ofPattern("EEEE، d MMMM", currentLocale);
-        } else if (LocalizationManager.CHINESE.equals(currentLocale)) {
-            dateFormatter = DateTimeFormatter.ofPattern("M月d日 EEEE", currentLocale);
-        } else {
-            dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM d", currentLocale);
-        }
+        dateFormatter = localizationManager.createDateFormatter();
     }
 
     private void setupLanguageSelector() {
@@ -223,29 +211,14 @@ public class TeacherProfileViewController {
 
     @FXML
     private void handleBack(ActionEvent event) {
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/fxml/teacher_set_availability.fxml"));
-            Scene scene = new Scene(root);
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle(localizationManager.getString("app.title.teacher.dashboard"));
-        } catch (IOException e) {
-            logger.error("Failed to load availability screen", e);
-        }
+        NavigationHelper.navigateTo(event, getClass(),
+                "/fxml/teacher_set_availability.fxml",
+                localizationManager.getString("app.title.teacher.dashboard"));
     }
 
     @FXML
     private void handleLogout(ActionEvent event) {
-        SessionManager.getInstance().logout();
-        try {
-            Parent root = FXMLLoader.load(getClass().getResource("/fxml/login.fxml"));
-            Scene scene = new Scene(root);
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle(localizationManager.getString("app.title.login"));
-        } catch (IOException e) {
-            logger.error("Failed to load login screen", e);
-        }
+        NavigationHelper.logout(event, getClass(), localizationManager.getString("app.title.login"));
     }
 
     private void showError(String message) {

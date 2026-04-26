@@ -6,6 +6,7 @@ import javafx.scene.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -163,6 +164,25 @@ public class LocalizationManager {
             return "العربية";
         }
         return locale.getDisplayLanguage();
+    }
+
+    /**
+     * Create a locale-aware {@link DateTimeFormatter} for lesson/booking date display.
+     *
+     * <p>Centralises the locale-check pattern that was previously duplicated in
+     * {@code TeacherProfileViewController} and {@code BookingViewController}.</p>
+     *
+     * @return a formatter appropriate for the current locale
+     */
+    public DateTimeFormatter createDateFormatter() {
+        Locale locale = getCurrentLocale();
+        if (ARABIC.equals(locale)) {
+            return DateTimeFormatter.ofPattern("EEEE، d MMMM", locale);
+        } else if (CHINESE.equals(locale)) {
+            return DateTimeFormatter.ofPattern("M月d日 EEEE", locale);
+        } else {
+            return DateTimeFormatter.ofPattern("EEEE, MMMM d", locale);
+        }
     }
 
     // -----------------------------------------------------------------------

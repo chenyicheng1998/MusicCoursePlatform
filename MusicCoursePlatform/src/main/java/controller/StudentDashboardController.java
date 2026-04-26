@@ -7,16 +7,11 @@ import dao.LearnerProfileDAO;
 import dao.UserDAO;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import model.Booking;
 import model.LearnerProfile;
 import model.TeacherProfile;
@@ -24,9 +19,10 @@ import model.TimeSlot;
 import model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.CalendarBuilder;
 import util.LocalizationManager;
+import util.NavigationHelper;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -330,39 +326,8 @@ public class StudentDashboardController {
     }
 
     private void updateCalendar() {
-        monthLabel.setText(currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")));
-        calendarGrid.getChildren().clear();
-
-        LocalDate firstOfMonth = currentMonth.atDay(1);
-        int dayOfWeek = firstOfMonth.getDayOfWeek().getValue() % 7;
-
-        for (int i = 0; i < dayOfWeek; i++) {
-            Label emptyLabel = new Label("");
-            emptyLabel.setPrefWidth(40);
-            emptyLabel.setPrefHeight(40);
-            calendarGrid.getChildren().add(emptyLabel);
-        }
-
-        for (int day = 1; day <= currentMonth.lengthOfMonth(); day++) {
-            LocalDate date = currentMonth.atDay(day);
-            Button dayBtn = new Button(String.valueOf(day));
-            dayBtn.setPrefWidth(40);
-            dayBtn.setPrefHeight(40);
-            dayBtn.getStyleClass().add("calendar-day");
-
-            if (hasAvailableSlots(date)) {
-                dayBtn.getStyleClass().add("calendar-day-available");
-            }
-
-            if (date.equals(selectedDate)) {
-                dayBtn.getStyleClass().add("calendar-day-selected");
-            }
-
-            final LocalDate clickedDate = date;
-            dayBtn.setOnAction(e -> handleDateClick(clickedDate));
-
-            calendarGrid.getChildren().add(dayBtn);
-        }
+        CalendarBuilder.buildCalendar(calendarGrid, monthLabel, currentMonth, selectedDate,
+                this::hasAvailableSlots, this::handleDateClick);
     }
 
     private boolean hasAvailableSlots(LocalDate date) {
@@ -495,30 +460,13 @@ public class StudentDashboardController {
 
     @FXML
     private void handleViewSchedule(ActionEvent event) {
-        try {
-            Parent scheduleRoot = FXMLLoader.load(
-                    getClass().getResource("/fxml/student_schedule_view.fxml"));
-            Scene scheduleScene = new Scene(scheduleRoot);
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(scheduleScene);
-            stage.setTitle(localizationManager.getString("app.title.student.dashboard"));
-        } catch (IOException e) {
-            logger.error("Failed to load schedule view", e);
-            showError(localizationManager.getString("error.load.dashboard"));
-        }
+        NavigationHelper.navigateTo(event, getClass(),
+                "/fxml/student_schedule_view.fxml",
+                localizationManager.getString("app.title.student.dashboard"));
     }
 
     @FXML
     private void handleLogout(ActionEvent event) {
-        SessionManager.getInstance().logout();
-        try {
-            Parent loginRoot = FXMLLoader.load(getClass().getResource("/fxml/login.fxml"));
-            Scene loginScene = new Scene(loginRoot);
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            stage.setScene(loginScene);
-            stage.setTitle(localizationManager.getString("app.title.login"));
-        } catch (IOException e) {
-            logger.error("Failed to load login screen", e);
-        }
+        NavigationHelper.logout(event, getClass(), localizationManager.getString("app.title.login"));
     }
 }

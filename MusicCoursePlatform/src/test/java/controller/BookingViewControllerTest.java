@@ -267,7 +267,8 @@ class BookingViewControllerTest {
 
     @Test
     void testSetupDateFormatter_ArabicLocale_UsesArabicPattern() throws Exception {
-        when(localizationManager.getCurrentLocale()).thenReturn(util.LocalizationManager.ARABIC);
+        when(localizationManager.createDateFormatter()).thenReturn(
+                java.time.format.DateTimeFormatter.ofPattern("EEEE، d MMMM", new java.util.Locale("ar")));
 
         java.lang.reflect.Method method =
                 BookingViewController.class.getDeclaredMethod("setupDateFormatter");
@@ -281,7 +282,8 @@ class BookingViewControllerTest {
 
     @Test
     void testSetupDateFormatter_ChineseLocale_UsesChinesePattern() throws Exception {
-        when(localizationManager.getCurrentLocale()).thenReturn(util.LocalizationManager.CHINESE);
+        when(localizationManager.createDateFormatter()).thenReturn(
+                java.time.format.DateTimeFormatter.ofPattern("M月d日 EEEE", java.util.Locale.CHINESE));
 
         java.lang.reflect.Method method =
                 BookingViewController.class.getDeclaredMethod("setupDateFormatter");
@@ -295,7 +297,8 @@ class BookingViewControllerTest {
 
     @Test
     void testSetupDateFormatter_EnglishLocale_UsesEnglishPattern() throws Exception {
-        when(localizationManager.getCurrentLocale()).thenReturn(util.LocalizationManager.ENGLISH);
+        when(localizationManager.createDateFormatter()).thenReturn(
+                java.time.format.DateTimeFormatter.ofPattern("EEEE, MMMM d", java.util.Locale.ENGLISH));
 
         java.lang.reflect.Method method =
                 BookingViewController.class.getDeclaredMethod("setupDateFormatter");
@@ -362,7 +365,8 @@ class BookingViewControllerTest {
 
     /** Set up dateFormatter on the controller without calling initialize(). */
     private void setupDateFormatterWithEnglish() throws Exception {
-        when(localizationManager.getCurrentLocale()).thenReturn(java.util.Locale.ENGLISH);
+        when(localizationManager.createDateFormatter()).thenReturn(
+                java.time.format.DateTimeFormatter.ofPattern("EEEE, MMMM d", java.util.Locale.ENGLISH));
         java.lang.reflect.Method m =
                 BookingViewController.class.getDeclaredMethod("setupDateFormatter");
         m.setAccessible(true);

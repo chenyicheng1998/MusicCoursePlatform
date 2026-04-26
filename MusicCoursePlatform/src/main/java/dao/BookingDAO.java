@@ -3,6 +3,7 @@ package dao;
 import model.Booking;
 import util.DaoHelper;
 
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;

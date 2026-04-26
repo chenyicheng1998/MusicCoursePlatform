@@ -253,11 +253,11 @@ class TeacherProfileViewControllerTest {
     @Test
     void testSetupDateFormatter_ChineseLocale_FormatsDate() throws Exception {
         runOnFX(() -> {
-            when(mockLocalizationManager.getCurrentLocale()).thenReturn(LocalizationManager.CHINESE);
+            when(mockLocalizationManager.createDateFormatter()).thenReturn(
+                    java.time.format.DateTimeFormatter.ofPattern("M月d日 EEEE", java.util.Locale.CHINESE));
             invokeMethod("setupDateFormatter");
 
-            // verify dateFormatter is not null (createScheduleCard can be called without
-            // NPE)
+            // verify dateFormatter is not null (createScheduleCard can be called without NPE)
             TimeSlot slot = createTimeSlot();
             setField(controller, "teacherProfile", createTeacherProfile());
             when(mockTimeSlotDAO.findByTeacherProfileId(anyInt())).thenReturn(List.of(slot));
@@ -271,7 +271,8 @@ class TeacherProfileViewControllerTest {
     @Test
     void testSetupDateFormatter_ArabicLocale_FormatsDate() throws Exception {
         runOnFX(() -> {
-            when(mockLocalizationManager.getCurrentLocale()).thenReturn(LocalizationManager.ARABIC);
+            when(mockLocalizationManager.createDateFormatter()).thenReturn(
+                    java.time.format.DateTimeFormatter.ofPattern("EEEE، d MMMM", new java.util.Locale("ar")));
             invokeMethod("setupDateFormatter");
 
             TimeSlot slot = createTimeSlot();
