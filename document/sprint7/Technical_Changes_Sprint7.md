@@ -30,7 +30,7 @@ This document records all technical changes made during Sprint 7 to the Music Co
 - Added `setField(controller, "localizationManager", LocalizationManager.getInstance())` to inject real localization instance
 - Updated 7 test assertions from hardcoded English strings to use `LocalizationManager.getInstance().getString(key)` for i18n-safe comparisons
 
-**Impact:** All 228 unit tests now pass with 0 failures.
+**Impact:** All 383 unit tests now pass with 0 failures.
 
 ---
 
@@ -190,14 +190,18 @@ All three files now use `java.util.logging.Logger` for proper production logging
 
 **New test file — `LocalizationManagerTest.java`:**
 
-- 35 test cases covering all previously untested methods in `LocalizationManager`
-- Tests cover: `getString()` with missing key, `isRTL()`, `applyDirection()` (RTL/LTR), `getLocaleFromDisplayName()`, `getLanguageDisplayName()`, `getInstrumentKey()`, `getLocalizedInstrumentName()`, `getAllInstrumentVariants()`
+- 36 test cases covering all previously untested methods in `LocalizationManager`
+- Tests cover: `getString()` with missing key, `isRTL()`, `applyDirection()` (RTL/LTR), `getLocaleFromDisplayName()`, `getLanguageDisplayName()`, `getInstrumentKey()`, `getLocalizedInstrumentName()`, `getAllInstrumentVariants()`, `createDateFormatter()`
+
+**New test file — `NavigationHelperTest.java`:**
+
+- 4 test cases covering `NavigationHelper` utility
 
 **Expanded `TeacherProfileViewControllerTest.java`:**
 
 - Added 10 new test cases: `loadTeacherInfo()` (user logged in / profile null / no user), `handleDeleteSlot()` (available/booked slot), `setupDateFormatter()` (Arabic/Chinese locale), `updateTexts()`, `loadSchedule()` with booked slot
 
-**Impact:** Line coverage increased from 54.5% → **61.8%** (total 228 tests, 0 failures).
+**Impact:** Line coverage increased from 54.5% → **87.9%** (total 383 tests, 0 failures). Exceeds project target of >50%.
 
 ---
 
@@ -291,11 +295,11 @@ No new dependencies were added to `pom.xml` during Sprint 7. All test dependenci
 
 | Document                                       | Status  | Description                                                                                |
 | ---------------------------------------------- | ------- | ------------------------------------------------------------------------------------------ |
-| `README.md`                                    | Updated | Enhanced Docker usage instructions; added Xming setup for Windows, XQuartz setup for macOS |
-| `docs/sprint7/Test_Plan_Sprint7.md`            | New     | Formal test plan for Sprint 7                                                              |
-| `docs/sprint7/Bug_Tracking_Table.md`           | New     | Bug tracking table documenting all issues found during Sprint 7 testing                    |
-| `docs/sprint7/Technical_Changes_Sprint7.md`    | New     | This document                                                                              |
-| `docs/sprint7/Heuristic_Evaluation_Sprint7.md` | New     | Nielsen Heuristic Evaluation reports for all 4 team members                                |
+| `README.md`                                        | Updated | Enhanced Docker usage instructions; added Xming setup for Windows, XQuartz setup for macOS |
+| `document/sprint7/Test_Plan_Sprint7.md`            | New     | Formal test plan for Sprint 7                                                              |
+| `document/sprint7/Bug_Tracking_Table.md`           | New     | Bug tracking table documenting all issues found during Sprint 7 testing                    |
+| `document/sprint7/Technical_Changes_Sprint7.md`    | New     | This document                                                                              |
+| `document/sprint7/Heuristic_Evaluation_Sprint7.md` | New     | Nielsen Heuristic Evaluation reports for all 4 team members                                |
 | ER Diagram                                     | Updated | Redrawn to match actual 6-table database schema                                            |
 | UML Class Diagram                              | Updated | Redrawn to match actual implemented classes                                                |
 
@@ -303,8 +307,7 @@ No new dependencies were added to `pom.xml` during Sprint 7. All test dependenci
 
 ## 7. Known Technical Debt
 
-| Item                            | Description                                                                                                            | Priority | Status |
-| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------- | ------ |
-| Language preference persistence | Selected locale is not saved between application restarts                                                              | Low      | Open   |
-| SonarQube coverage gate         | Coverage is 61.8%; SonarQube default Quality Gate is 80%; requires custom gate configuration or further test expansion | Low      | Open   |
-| UI tests                        | JavaFX controller tests use reflection-based field injection; TestFX integration tests would provide better coverage   | Medium   | Open   |
+| Item                            | Description                                                                                                          | Priority | Status |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------- | -------- | ------ |
+| Language preference persistence | Selected locale is not saved between application restarts                                                            | Low      | Open   |
+| UI tests                        | JavaFX controller tests use reflection-based field injection; TestFX integration tests would provide better coverage | Medium   | Open   |

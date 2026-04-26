@@ -295,13 +295,13 @@ class UserServiceTest {
     @Order(23)
     @DisplayName("Test: Check email availability")
     void testIsEmailAvailable() {
-        String email = "avail" + (System.currentTimeMillis() % 100000) + "@test.com";
+        String email = "avail" + System.currentTimeMillis() + "@test.com";
 
         // Should be available before creation
         assertTrue(userService.isEmailAvailable(email));
 
         // Create user
-        userService.registerUser("avluser" + (System.currentTimeMillis() % 10000), "ValidPass123", email, "LEARNER");
+        userService.registerUser("ec" + (System.currentTimeMillis() % 100000000L), "ValidPass123", email, "LEARNER");
 
         // Should not be available after creation
         assertFalse(userService.isEmailAvailable(email));
