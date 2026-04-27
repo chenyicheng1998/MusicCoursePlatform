@@ -2,6 +2,7 @@
 ## Software Engineering Project 2 — Group 5
 
 ## Team Members
+
 | Name | Role |
 |------|------|
 | **Luo Ying** | Frontend Development, UI/UX Design (Figma), Modelling Diagram, Documentation |
@@ -13,44 +14,46 @@
 
 ## Description
 
-The Music Course Platform is a JavaFX desktop application that connects music teachers with learners. Teachers can manage their profiles and availability, while learners can search for teachers and book lessons.
+The **Music Course Platform** is a **JavaFX** desktop application that connects **music teachers** and **learners**: teachers manage profiles and availability; learners find teachers and book lessons. The stack is **Java 17**, **Maven**, **MariaDB**, and **Jenkins** / **Docker** for build and deployment.
 
 ---
 
-## Documentation
+## Table of contents
 
-- [Product Vision](document/Product%20Vision.pdf)
-- [Project Plan](document/Software%20Engineering%20Project%20Plan.pdf)
-- [User Stories](document/UserStories.md)
-- [Design](document/Design.md)
-- **UI localization (chosen method):** [Localization framework — technical reference](document/LOCALIZATION_FRAMEWORK.md) — `ResourceBundle`, `LocalizationManager`, RTL; see [Language Selection & Localization](#language-selection--localization).
-- **Database localization (Sprint 6):** [Plan & implementation report](document/DATABASE_LOCALIZATION.md) — canonical `instrument_key`, `INSTRUMENT` catalogue, UTF-8, ERD; see [Database localization](#database-localization-sprint-6) below.
-- **Static code review (SonarQube):** [Statistical Code Review Report](document/Statistical%20Code%20Review%20Report.md) — metrics, findings, and recommendations; see [SonarQube](#static-code-review-sonarqube) below.
+- [Quick start](#quick-start)
+- [Documentation](#documentation)
+- [Localization](#localization)
+- [Testing & code coverage](#testing--code-coverage)
+- [Static code review (SonarQube)](#static-code-review-sonarqube)
+- [CI/CD (Jenkins)](#cicd-jenkins)
+- [Docker](#docker)
+- [Trello boards](#trello-boards)
+- [Sprint review reports](#sprint-review-reports)
+- [Diagrams](#diagrams)
 
 ---
 
-
-## Getting Started
+## Quick start
 
 ### Prerequisites
 
 - **JDK 17+** — `java -version`
 - **Apache Maven 3.6+** — `mvn -version`
-- **MariaDB 10.6+** (default port: 3306)
+- **MariaDB 10.6+** (default port `3306`)
 - **Git**
 
-### Installation & Setup
+All commands below assume the **repository root** contains the `MusicCoursePlatform` Maven module (the folder you get after `git clone`).
 
-#### 1. Clone the Repository
+#### 1. Clone the repository
 
 ```bash
 git clone https://github.com/chenyicheng1998/MusicCoursePlatform.git
 cd MusicCoursePlatform
 ```
 
-#### 2. Configure Database Connection
+#### 2. Configure the database connection
 
-Connection settings are read from **`MusicCoursePlatform/src/main/java/util/DatabaseConnection.java`**. The app builds the JDBC URL from host, port, and database name, and uses **environment variables when set**, otherwise **defaults in code** (see roughly lines 22–36).
+Settings are in **`MusicCoursePlatform/src/main/java/util/DatabaseConnection.java`**: JDBC URL is built from host, port, and database name. You can use **environment variables** or the **defaults in code** (see about lines 22–36 in that file).
 
 | Variable | Purpose | Default (if unset) |
 |----------|---------|---------------------|
@@ -59,7 +62,7 @@ Connection settings are read from **`MusicCoursePlatform/src/main/java/util/Data
 | `DB_USER` | Database user | `root` |
 | `DB_PASSWORD` | Database password | `123456` |
 
-**Option A — environment variables (recommended for Docker or shared machines)**
+**Option A — environment variables** (e.g. Docker or shared PC):
 
 ```bash
 export DB_HOST=localhost
@@ -68,28 +71,26 @@ export DB_USER=root
 export DB_PASSWORD=your_password_here
 ```
 
-When running in Docker and MariaDB is on the host, you may need `DB_HOST=host.docker.internal` (see comments in `DatabaseConnection.java`).
+If the app runs in Docker and MariaDB is on the host, you may need `DB_HOST=host.docker.internal` (see comments in `DatabaseConnection.java`).
 
-**Option B — edit defaults in code**
+**Option B — edit the default fallbacks** in the same file so they match your local MariaDB user/password.
 
-Change the fallback values in the `?:` expressions (e.g. the default password after `DB_PASSWORD`) so your local MariaDB user/password match without exporting variables.
+#### 3. Create the database
 
-#### 3. Create the Database
-
-In your MariaDB client, run:
+In a MariaDB client (path is relative to the repo root):
 
 ```sql
 SOURCE MusicCoursePlatform/database/schema.sql;
 ```
 
-#### 4. Build the Project
+#### 4. Build
 
 ```bash
 cd MusicCoursePlatform
 mvn clean compile
 ```
 
-#### 5. Run the Application
+#### 5. Run the desktop app
 
 ```bash
 mvn javafx:run
@@ -97,136 +98,95 @@ mvn javafx:run
 
 ---
 
-## Language Selection & Localization
+## Documentation
 
-### Chosen localization method (summary)
-
-We use **Java’s built-in internationalization stack**, not a third-party i18n library:
-
-| Aspect | Approach |
-|--------|----------|
-| **Strings** | `ResourceBundle` + UTF-8 `*.properties` files per locale (`messages_en`, `messages_zh`, `messages_ar`) under `MusicCoursePlatform/src/main/resources/i18n/` |
-| **Runtime API** | Singleton **`LocalizationManager`** (`util.LocalizationManager`): `getString(key)`, `setLocale`, **`localeProperty()`** so JavaFX controllers refresh the UI when the locale changes |
-| **Direction** | Arabic uses **RTL** via `isRTL()` and `applyDirection(Node)` on root panes |
-| **Data vs UI** | Instrument values in the database use **canonical keys** (e.g. `piano`); `LocalizationManager` maps between stored keys and localized labels for queries and display |
-
-**Full API, file layout, and extension steps** are in [document/LOCALIZATION_FRAMEWORK.md](document/LOCALIZATION_FRAMEWORK.md).
+| Document | What it is |
+|----------|------------|
+| [Product Vision](document/Product%20Vision.pdf) | Product goals |
+| [Project Plan](document/Software%20Engineering%20Project%20Plan.pdf) | Planning |
+| [User Stories](document/UserStories.md) | Backlog / stories |
+| [Design](document/Design.md) | Design notes |
+| [Diagrams index](document/Diagrams.md) | Central list of modelling images (same files as [Diagrams](#diagrams) below) |
+| [Localization framework](document/LOCALIZATION_FRAMEWORK.md) | UI i18n: `ResourceBundle`, `LocalizationManager`, RTL |
+| [Database localization](document/DATABASE_LOCALIZATION.md) | DB strategy: `instrument_key`, `INSTRUMENT` table, UTF-8 |
+| [Statistical Code Review (SonarQube)](document/Statistical%20Code%20Review%20Report.md) | Full static analysis write-up |
 
 ---
 
-The Music Course Platform supports **multilingual user interface** with the following languages:
+## Localization
 
-| Language | Code | Text Direction |
-|----------|------|----------------|
-| English | `en` | LTR (Left-to-Right) |
-| Chinese (中文) | `zh` | LTR |
-| Arabic (العربية) | `ar` | RTL (Right-to-Left) |
+### User interface (UI)
 
-### Switching Languages
+- **Languages:** English (`en`), Chinese (`zh`), Arabic (`ar`); Arabic uses **RTL** where applicable.
+- **Implementation:** Java **`ResourceBundle`** and UTF-8 `messages_en.properties` / `messages_zh.properties` / `messages_ar.properties` under `MusicCoursePlatform/src/main/resources/i18n/`. A singleton **`LocalizationManager`** (`util.LocalizationManager`) provides `getString`, `setLocale`, and `localeProperty()` so controllers refresh the UI on language change.
+- **User flow:** run the app → use the **language** control in the navigation area → the interface updates (labels, dates, instrument names, etc.).
 
-1. Launch the application using `mvn javafx:run`
-2. Look for the **language selector dropdown** in the navigation bar (top-right corner)
-3. Select your preferred language from the dropdown menu
-4. The UI will automatically update to display text in the selected language
+**Details and API:** [document/LOCALIZATION_FRAMEWORK.md](document/LOCALIZATION_FRAMEWORK.md).
 
-### Running Localized Versions
+### Database
 
-The application automatically detects and applies the selected language. All UI elements including:
-- Navigation menus
-- Form labels and buttons
-- Calendar and date formats
-- Error and success messages
-- Instrument names
+Translatable **business data** (e.g. instrument) is stored as a **canonical key** (e.g. `piano`) in **`TEACHERPROFILE` / `LEARNERPROFILE`**, with a reference table **`INSTRUMENT`** (`name_en`, `name_zh`, `name_ar`). The app maps between keys and on-screen text so teachers and students can use **different UI languages** without breaking search or joins.
 
-...are dynamically localized based on your selection.
-
-### Resource bundle layout
-
-```
-MusicCoursePlatform/src/main/resources/i18n/
-├── messages_en.properties    # English
-├── messages_zh.properties    # Chinese
-└── messages_ar.properties    # Arabic
-```
-
-For step-by-step usage (controllers, listeners, adding keys/languages), see [LOCALIZATION_FRAMEWORK.md](document/LOCALIZATION_FRAMEWORK.md).
+**Schema, ERD, and validation notes:** [document/DATABASE_LOCALIZATION.md](document/DATABASE_LOCALIZATION.md).
 
 ---
 
-## Database localization (Sprint 6)
+## Testing & code coverage
 
-**Chosen method (summary):** Translatable **domain data** in the database uses **canonical keys**, not a single language string.
-
-| Piece | Approach |
-|-------|----------|
-| **Instrument taught / preferred** | Column **`instrument_key`** (e.g. `piano`, `guitar`) on **`TEACHERPROFILE`** and **`LEARNERPROFILE`**, with **foreign key** to catalogue table **`INSTRUMENT`**. |
-| **Catalogue in DB** | **`INSTRUMENT`** holds `name_en`, `name_zh`, `name_ar` per key so the schema documents all supported translations. |
-| **UTF-8** | Database, tables, and session script use **`utf8mb4`** / **`utf8mb4_unicode_ci`** (see `database/schema.sql`). |
-| **App layer** | DAOs **normalize** values to keys on write; **`LocalizationManager`** maps between **localized combo labels** and **keys** for display and for **`findByInstrument(key)`**, so search works regardless of which language the teacher used when saving. |
-
-**Deliverable — full plan, ERD, encoding notes, validation checklist:**  
-[document/DATABASE_LOCALIZATION.md](document/DATABASE_LOCALIZATION.md)
-
----
-
-## Testing & Code Coverage
-
-To run all tests and generate the JaCoCo coverage report:
+From the `MusicCoursePlatform` directory:
 
 ```bash
 mvn clean test jacoco:report
 ```
 
-The coverage report will be available at `target/site/jacoco/index.html`.
+Open the HTML report at **`MusicCoursePlatform/target/site/jacoco/index.html`**.
 
 ---
 
 ## Static code review (SonarQube)
 
-Sprint 6 includes a **SonarQube Community Edition** analysis (Java 17, project key `MusicCoursePlatform`) for maintainability, reliability, and security-style checks.
+The project is analysed with **SonarQube** (see Jenkins stage **SonarQube Analysis** and [document/Statistical Code Review Report](document/Statistical%20Code%20Review%20Report.md)). The SonarQube project key in CI is **`music-course-platform`** (see `Jenkinsfile`).
 
-| Area | Snapshot (see full report) |
-|------|----------------------------|
-| **Quality gate** | **Passed** — with follow-up items |
-| **Security / Reliability** | 0 open issues in those categories |
-| **Maintainability** | 85 code smells (e.g. logging, `SELECT *`, complexity) |
-| **Coverage** | ~56.6% (below typical 80% target; aligns with JaCoCo work) |
-| **Duplication** | ~10.4% duplicated lines — controllers/DAOs called out for refactor |
-| **Security hotspots** | 5 items flagged for **manual** review in SonarQube |
-
-**Full write-up** (dashboard screenshots, per-file complexity, issue breakdown, prioritized recommendations):  
-[document/Statistical Code Review Report.md](document/Statistical%20Code%20Review%20Report.md)
+| Area | Notes (see full report for numbers and screenshots) |
+|------|--------------------------------------------------------|
+| Quality gate | Has passed; follow-up on smells and coverage as documented |
+| Security / Reliability | Treated in SonarQube and in the report |
+| Maintainability | Code smells, complexity, duplications — detailed in the report |
+| Coverage & duplication | Aligned with JaCoCo; targets discussed in the report |
 
 ---
 
-## CI/CD Pipeline (Jenkins)
+## CI/CD (Jenkins)
 
-The project uses a Jenkins pipeline defined in `Jenkinsfile`. It triggers automatically on commits to the `dev` branch and runs the following stages:
+The pipeline is defined in **`MusicCoursePlatform/Jenkinsfile`**. It checks out the **`main`** branch from GitHub and runs the Maven project under the `MusicCoursePlatform` folder (the Jenkinsfile uses Windows `bat` steps; adapt if your server uses Linux).
 
-| Stage | Description |
-|-------|-------------|
-| Checkout | Clone latest code from GitHub |
-| Build | Compile with Maven (`mvn clean compile`) |
-| Run Tests | Execute JUnit tests (`mvn test`) |
-| Generate JaCoCo Report | Produce code coverage report |
-| Package Application | Build shaded JAR (`mvn package`) |
-| Archive Artifacts | Save JAR files as build artifacts |
-| Build Docker Image | Build Docker image from Dockerfile |
-| Push to Docker Hub | Push image to `chenyicheng1998/music-course-platform` |
+| Stage | What it does |
+|-------|----------------|
+| Checkout | Clone `https://github.com/chenyicheng1998/MusicCoursePlatform.git`, branch **`main`** |
+| Build | `mvn clean install -DskipTests` in `MusicCoursePlatform` |
+| Run Tests | `mvn test`, publish JUnit results |
+| SonarQube Analysis | `mvn sonar:sonar` (token via Jenkins credentials, project key `music-course-platform`) |
+| Generate JaCoCo Report | `mvn jacoco:report`, publish coverage in Jenkins |
+| Package Application | `mvn package -DskipTests` |
+| Archive Artifacts | Archive JARs from `target/` |
+| Build Docker Image | `docker build` in `MusicCoursePlatform` |
+| Push Docker Image to Docker Hub | Push to `chenyicheng1998/music-course-platform` |
+
+> Configure **SonarQube** URL/token and **Docker Hub** credentials in Jenkins to match your environment. On push, the `main` history on GitHub should contain the `Jenkinsfile` you use on the server.
 
 ---
 
 ## Docker
 
-Image on Docker Hub: **[chenyicheng1998/music-course-platform](https://hub.docker.com/repository/docker/chenyicheng1998/music-course-platform)**
+**Image (Docker Hub):** [chenyicheng1998/music-course-platform](https://hub.docker.com/repository/docker/chenyicheng1998/music-course-platform)
 
-> This is a JavaFX app — an X11 server is required to display the GUI.
+> JavaFX needs a **display (X11)**. Install an X server on the host, then run the container with the appropriate `DISPLAY` and database env vars.
 
 ```bash
 docker pull chenyicheng1998/music-course-platform:latest
 ```
 
-**Windows (PowerShell)** — Install [Xming](http://www.straightrunning.com/XmingNotes/), launch with *No Access Control*, then:
+**Windows (PowerShell)** — e.g. [Xming](http://www.straightrunning.com/XmingNotes/) with *No Access Control*:
 
 ```powershell
 docker run -it --rm `
@@ -238,7 +198,7 @@ docker run -it --rm `
   chenyicheng1998/music-course-platform:latest
 ```
 
-**macOS** — Install [XQuartz](https://www.xquartz.org/), enable *Allow connections from network clients*, run `xhost +localhost`, then:
+**macOS** — e.g. [XQuartz](https://www.xquartz.org/), *Allow connections from network clients*, then `xhost +localhost`:
 
 ```bash
 docker run -it --rm \
@@ -250,46 +210,51 @@ docker run -it --rm \
   chenyicheng1998/music-course-platform:latest
 ```
 
-> Make sure your local MariaDB is running and credentials match before starting the container.
+Ensure **MariaDB** is running on the host and credentials match `DB_*` before starting the container.
 
 ---
 
-## Trello Boards
+## Trello boards
 
 | Sprint | Scrum Master | Board | Status |
-|--------|-------------|-------|--------|
+|--------|----------------|-------|--------|
 | Sprint 1 | Chen Yicheng | [Sprint 1](https://trello.com/b/YnjfjBxd/sep1musiccourseplatform) | ✅ Done |
 | Sprint 2 | Luo Ying | [Sprint 2](https://trello.com/b/IMIZmc7K/sep1musiccourseplatform-sprint2) | ✅ Done |
 | Sprint 3 | Su Wai Phyoe | [Sprint 3](https://trello.com/b/B5AJ4wIm/sep1musiccourseplatform-sprint3) | ✅ Done |
 | Sprint 4 | Liu Lu | [Sprint 4](https://trello.com/b/Rx627kZj/sep1musiccourseplatform-sprint4) | ✅ Done |
 | Sprint 5 | Luo Ying | [Sprint 5](https://trello.com/b/gQ18ryeD/sep1musiccourseplatform-sprint5) | ✅ Done |
 | Sprint 6 | Su Wai Phyoe | [Sprint 6](https://trello.com/b/JHw5h1HD/sep1musiccourseplatform-sprint6) | ✅ Done |
+| Sprint 7 | Liu Lu | [Sprint 7](https://trello.com/b/6EcNAcQ8/sep1musiccourseplatform-sprint7) | ✅ Done |
 
 ---
 
-## Sprints Review
+## Sprint review reports
 
-- [Sprint 1 Review](document/SprintReviewReports/Sprint_1_Review_Report.pdf)
-- [Sprint 2 Review](document/SprintReviewReports/Sprint_2_Review_Report.pdf)
-- [Sprint 3 Review](document/SprintReviewReports/Sprint_3_Review_Report.pdf)
-- [Sprint 4 Review](document/SprintReviewReports/Sprint_4_Review_Report.pdf)
-- [Sprint 5 Review](document/SprintReviewReports/Sprint_5_Review_Report.pdf)
-- [Sprint 6 Review](document/SprintReviewReports/Sprint%206%20Review%20Report.pdf)
+- [Sprint 1](document/SprintReviewReports/Sprint_1_Review_Report.pdf) · [Sprint 2](document/SprintReviewReports/Sprint_2_Review_Report.pdf) · [Sprint 3](document/SprintReviewReports/Sprint_3_Review_Report.pdf) · [Sprint 4](document/SprintReviewReports/Sprint_4_Review_Report.pdf)
+- [Sprint 5](document/SprintReviewReports/Sprint_5_Review_Report.pdf) · [Sprint 6](document/SprintReviewReports/Sprint_6_Review_Report.pdf) · [Sprint 7](document/SprintReviewReports/Sprint_7_Review_Report.pdf)
 
-### Diagrams
+---
 
-**Use Case Diagram (with Localization)**
+## Diagrams
 
-![Use Case Diagram](document/images/dia_usecase.jpg)
+These images use files under **`document/images/`** so they also render on the **GitHub repository home page**. The same paths are listed with headings in **[document/Diagrams.md](document/Diagrams.md)** (one set of files, two ways to open them: README vs. `document/` index).
 
-**Database Schema**
-![Database Schema](document/images/dia_dbschema.png)
+**Use case diagram (with localization)**
 
-**ER Diagram**
-![ER Diagram](document/images/dia_er.png)
+![Use case diagram](document/images/dia_usecase.jpg)
 
-**Activity Diagram**
-![Activity Diagram](document/images/dia_activity.jpg)
+**Database schema**
 
-**Class Diagram**
-![Class Diagram](document/images/dia_class.jpg)
+![Database schema](document/images/dia_dbschema.png)
+
+**ER diagram**
+
+![ER diagram](document/images/dia_er.png)
+
+**Activity diagram**
+
+![Activity diagram](document/images/dia_activity.jpg)
+
+**Class diagram**
+
+![Class diagram](document/images/dia_class.jpg)
