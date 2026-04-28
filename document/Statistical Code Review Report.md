@@ -3,9 +3,10 @@
 - **Project Name**: Music Course Platform
 - **Branch**: `main`
 - **Analysis Tool**: SonarQube Community Edition v26.1.0.118079
-- **Language**: Java 17+ , MySQL
-- **Review Date**: Sprint 6 – 13 April 2026
+- **Language**: Java 17+, MySQL
+- **Review Date**: Sprint 7 – 28 April 2026
 - **Repository**: github.com/chenyicheng1998/MusicCoursePlatform
+
 ---
 
 ## 1. Overview
@@ -16,15 +17,25 @@
 |---|---|---|---|
 | **Security** | 0 Open Issues | A | ✅ Passed |
 | **Reliability** | 0 Open Issues | A | ✅ Passed |
-| **Maintainability** | 85 Open Issues | A | ⚠️ Code smells present |
-| **Coverage** | 56.6% | — | ⚠️ Below 80% target |
-| **Duplications** | 10.4% | — | ⚠️ Above 5% threshold |
-| **Security Hotspots** | 5 | E | 🔴 Requires manual review |
+| **Maintainability** | 43 Open Issues | A | ⚠️ Code smells present |
+| **Coverage** | 87.9% | — | ✅ Above 80% target |
+| **Duplications** | 4.5% | — | ✅ Below 5% threshold |
+| **Security Hotspots** | 0 | A | ✅ All resolved |
 | **Accepted Issues** | 0 | — | ✅ None suppressed |
 
-> **Quality Gate: PASSED** *(with warnings)*
+> **Quality Gate: PASSED**
 
-### 1.2 Dashboard Screenshot
+### 1.2 Sprint-over-Sprint Improvement
+
+| Metric | Previous Sprint | Current Sprint | Status |
+|---|---|---|---|
+| Security Hotspots | 5 | 0 | ✅ Resolved |
+| Test Coverage | 56.6% | 87.9% | ✅ +31.3 pp — target met |
+| Duplication Density | 10.4% | 4.5% | ✅ Below 5% threshold |
+| Maintainability Issues | 85 | 43 | ⚠️ Reduced by 49% |
+| Cyclomatic Complexity | 650 | 652 | ⚠️ Marginally increased |
+
+### 1.3 Dashboard Screenshot
 
 ![SonarQube Dashboard](images/dia_SonarQube.png)
 *Figure 1: SonarQube Dashboard – Overall Code View*
@@ -35,83 +46,81 @@
 
 ### 2.1 Cyclomatic Complexity
 
-**Total Project Cyclomatic Complexity: 650 | Cognitive Complexity: 421**
+**Total Cyclomatic Complexity: 652 | Cognitive Complexity: 321**
 
 ![SonarQube Complexity](images/dia_complexity.png)
 *Figure 2: SonarQube Measures – Cyclomatic Complexity per file*
 
-Cyclomatic complexity measures the number of independent execution paths through a method's code. A score above 10 per method is considered high; a per-file total above 30 indicates the file contains too much logic and should be split. The project total of **650 across 26 files** is a significant concern.
+Cyclomatic complexity measures the number of independent execution paths through a method's code. A score above 10 per method is considered high; a per-file total above 30 indicates the file contains too much logic and should be split.
 
 | File | Cyclomatic Complexity | Status |
 |---|---|---|
-| `controller/StudentDashboardController.java` | 78 | 🔴 Critical |
-| `controller/TeacherDashboardController.java` | 69 | 🔴 Critical |
+| `controller/StudentDashboardController.java` | 73 | 🔴 Critical |
+| `controller/TeacherDashboardController.java` | 64 | 🔴 Critical |
 | `service/UserService.java` | 41 | 🔴 High |
-| `service/TimeSlotService.java` | 36 | 🔴 High |
-| `util/LocalizationManager.java` | 33 | 🟠 Medium |
-| `controller/BookingViewController.java` | 31 | 🟠 Medium |
-| *(remaining 20 files)* | *(see SonarQube Measures tab)* | |
-| **Total** | **650** | 🔴 High |
+| `util/LocalizationManager.java` | 36 | 🟠 Medium |
+| `service/TimeSlotService.java` | 36 | 🟠 Medium |
+| `dao/UserDAO.java` | 30 | 🟠 Medium |
+| *(remaining files)* | *(see SonarQube Measures tab)* | |
+| **Total** | **652** | 🔴 High |
 
-The two dashboard controllers alone account for **147 of 650 (22.6%)** of the total complexity. These files almost certainly contain large `if/else` chains and deeply nested event-handler logic that should be extracted into dedicated service methods.
+The two dashboard controllers alone account for **137 of 652 (21.0%)** of the total complexity. These files almost certainly contain large `if/else` chains and deeply nested event-handler logic that should be extracted into dedicated service methods.
 
 ---
 
 ### 2.2 Lines of Code per File
 
-**Total Lines of Code: 3,937 | Total Lines (inc. blanks/comments): 5,129**
+**Total Lines of Code: 3,539 | Total Lines (inc. blanks/comments): 4,529**
 
 ![SonarQube Size Measures](images/dia_sizemeasures.png)
 *Figure 3: SonarQube Measures – Size (Lines of Code per file)*
 
 | Metric | Value |
 |---|---|
-| Lines of Code (LOC) | 3,937 |
-| Total Lines | 5,129 |
-| Statements | 1,742 |
-| Functions | 338 |
-| Classes | 26 |
-| Files | 28 |
-| Comment Lines | 215 |
-| Comment Ratio | 5.2% |
-| **Average LOC per function** | **~11.7** |
-| **Average functions per class** | **~13** |
+| Lines of Code (LOC) | 3,539 |
+| Total Lines | 4,529 |
+| Statements | 1,406 |
+| Functions | 342 |
+| Classes | 32 |
+| Files | 32 |
+| Comment Lines | 197 |
+| Comment Ratio | 5.3% |
+| **Average LOC per function** | **~10.3** |
+| **Average functions per class** | **~10.7** |
 
 **Largest files by LOC:**
 
 | File | Lines of Code | Status |
 |---|---|---|
-| `controller/StudentDashboardController.java` | 446 | 🔴 Too large — split required |
-| `controller/TeacherDashboardController.java` | 411 | 🔴 Too large — split required |
-| `controller/BookingViewController.java` | 232 | 🟠 Monitor |
-| `controller/TeacherProfileViewController.java` | 209 | 🟠 Monitor |
-| `dao/UserDAO.java` | 188 | 🟡 Acceptable |
-| *(remaining 23 files)* | *(see SonarQube Measures tab)* | |
+| `controller/StudentDashboardController.java` | 401 | 🔴 Too large — split required |
+| `controller/TeacherDashboardController.java` | 366 | 🔴 Too large — split required |
+| `controller/BookingViewController.java` | 205 | 🟠 Monitor |
+| `controller/TeacherProfileViewController.java` | 182 | 🟠 Monitor |
+| *(remaining files)* | *(see SonarQube Measures tab)* | |
 
-**Note on comment ratio:** At 5.2%, the codebase is lightly documented. Public-facing methods in service and controller classes largely lack Javadoc, which also accounts for 21 of the 85 open maintainability issues.
+**Note on comment ratio:** At 5.3%, the codebase is lightly documented. Public-facing methods in service and controller classes largely lack Javadoc, which contributes to open maintainability issues.
 
 ---
 
 ### 2.3 Duplicate and Unreachable Code
 
-**Duplication Density: 10.4% | Duplicated Lines: 534 | Duplicated Blocks: 34 | Duplicated Files: 9**
+**Duplication Density: 4.5% | Duplicated Lines: 206 | Duplicated Blocks: 14 | Duplicated Files: 6**
 
 ![SonarQube Duplications](images/dia_duplication.png)
 *Figure 4: SonarQube Measures – Duplications Overview bubble chart*
 
 | Metric | Value | Threshold | Status |
 |---|---|---|---|
-| Duplication density | 10.4% | ≤ 5% | 🔴 Exceeds threshold |
-| Duplicated lines | 534 | — | ⚠️ Needs refactoring |
-| Duplicated blocks | 34 | — | ⚠️ Needs refactoring |
-| Duplicated files | 9 | — | ⚠️ 9 of 28 files affected |
+| Duplication density | 4.5% | ≤ 5% | ✅ Within threshold |
+| Duplicated lines | 206 | — | ⚠️ Needs refactoring |
+| Duplicated blocks | 14 | — | ⚠️ Needs refactoring |
+| Duplicated files | 6 | — | ⚠️ 6 of 32 files affected |
 
-The bubble chart (Figure 4) shows two clusters of heavily duplicated files. The two largest bubbles in the top-right corner correspond to files with ~400+ LOC and ~85–100 duplicated lines each — consistent with `StudentDashboardController.java` and `TeacherDashboardController.java`, which share similar event-handling and UI-update logic. The mid-chart cluster (~150–230 LOC, ~35–45 duplicated lines) likely corresponds to the DAO files which share repeated `System.err` + `SELECT *` patterns.
+Duplication has dropped significantly from 10.4% to 4.5%, now falling within the acceptable threshold. The bubble chart (Figure 4) shows two clusters of files with remaining duplication. The two largest bubbles in the top-right correspond to the dashboard controllers which share similar event-handling and UI-update logic. The mid-chart cluster corresponds to the DAO files which retain some repeated error-handling and query patterns.
 
-**Known sources of duplication identified from issues list:**
+**Known remaining sources of duplication:**
 - Repeated `System.err` error-handling blocks across `BookingDAO`, `TimeSlotDAO`, and `UserDAO`
 - `SELECT *` query patterns copy-pasted across all three DAO files
-- Duplicate method implementations in `Booking.java`, `TeacherProfile.java`, and `TimeSlot.java`
 - Similar UI event logic shared between `StudentDashboardController` and `TeacherDashboardController`
 
 **Unreachable code:**
@@ -121,64 +130,39 @@ The bubble chart (Figure 4) shows two clusters of heavily duplicated files. The 
 
 ## 3. Issue Breakdown
 
-### 3.1 By Severity
+### 3.1 Total Open Issues
 
-| Severity | Count |
+| Category | Count |
 |---|---|
-| 🔴 Medium | 67 |
-| 🟡 Low | 14 |
-| ℹ️ Info | 2 |
-| **Total** | **85** |
+| Maintainability (Code Smells) | 43 |
+| Security Issues | 0 |
+| Reliability Issues | 0 |
+| Security Hotspots | 0 |
+| **Total** | **43** |
 
 ### 3.2 By Issue Type
 
-| Issue Type | Count | Affected Files |
-|---|---|---|
-| `System.err` / `System.out` instead of logger | 34 | `Main.java`, `BookingDAO`, `TimeSlotDAO`, `UserDAO` |
-| `SELECT *` queries | 15 | `BookingDAO`, `TimeSlotDAO`, `UserDAO` |
-| Test lambda with multiple throwable calls | 12 | `BookingServiceTest`, `TeacherServiceTest`, `TimeSlotServiceTest` |
-| Generic exception handling | 8 | `BookingService`, `TeacherService`, `TimeSlotService`, `UserService` |
-| Hardcoded URIs | 4 | `LoginController`, `SignupController` |
-| Unused imports | 5 | `BookingViewControllerTest`, `LoginControllerTest` |
-| Duplicate method implementations | 3 | `Booking`, `TeacherProfile`, `TimeSlot` |
-| Singleton pattern warnings | 2 | `SessionManager`, `LocalizationManager` |
-| Other (style, structure) | 2 | `Launcher.java`, `PasswordUtilTest` |
+The 43 open maintainability issues are distributed across the following categories, identified from the SonarQube issues list:
 
-### 3.3 By File
-
-| File | Issues | Dominant Problem |
-|---|---|---|
-| `dao/BookingDAO.java` | 14 | `System.err` + `SELECT *` |
-| `dao/TimeSlotDAO.java` | 14 | `System.err` + `SELECT *` |
-| `dao/UserDAO.java` | 14 | `System.err` + `SELECT *` |
-| `test/TimeSlotServiceTest.java` | 5 | Lambda with multiple throwable calls |
-| `test/BookingServiceTest.java` | 4 | Lambda with multiple throwable calls |
-| `test/BookingViewControllerTest.java` | 4 | Unused imports + style |
-| `service/BookingService.java` | 3 | Generic exceptions |
-| `service/TeacherService.java` | 2 | Generic exceptions |
-| `service/TimeSlotService.java` | 2 | Generic exceptions |
-| `controller/LoginController.java` | 2 | Hardcoded URIs |
-| `controller/SignupController.java` | 2 | Hardcoded URIs |
-| `test/TeacherServiceTest.java` | 2 | Lambda with multiple throwable calls |
-| `util/LocalizationManager.java` | 2 | Singleton + nested try block |
-| `main/Main.java` | 2 | `System.out` / `System.err` |
-| `model/Booking.java` | 1 | Duplicate method |
-| `model/TeacherProfile.java` | 1 | Duplicate method |
-| `model/TimeSlot.java` | 1 | Duplicate method |
-| `util/DatabaseConnection.java` | 1 | Always-true expression |
-| `controller/SessionManager.java` | 1 | Singleton warning |
-| `main/Launcher.java` | 1 | Not in named package |
-| `service/UserService.java` | 1 | Generic exception |
-| `test/LoginControllerTest.java` | 1 | Unused import |
-| `test/PasswordUtilTest.java` | 1 | Use `isEmpty()` |
+| Issue Type | Affected Files |
+|---|---|
+| `System.err` / `System.out` instead of logger | `Main.java`, `BookingDAO`, `TimeSlotDAO`, `UserDAO` |
+| `SELECT *` queries | `BookingDAO`, `TimeSlotDAO`, `UserDAO` |
+| Test lambda with multiple throwable calls | `BookingServiceTest`, `TeacherServiceTest`, `TimeSlotServiceTest` |
+| Generic exception handling | `BookingService`, `TeacherService`, `TimeSlotService`, `UserService` |
+| Hardcoded URIs | `LoginController`, `SignupController` |
+| Unused imports | `BookingViewControllerTest`, `LoginControllerTest` |
+| Duplicate method implementations | `Booking`, `TeacherProfile`, `TimeSlot` |
+| Singleton pattern warnings | `SessionManager`, `LocalizationManager` |
+| Other (style, structure) | `Launcher.java`, `PasswordUtilTest` |
 
 ---
 
 ## 4. Key Findings
 
-### 🚨 4.1 System.err / System.out — 34 Occurrences (Medium)
+### 🚨 4.1 System.err / System.out (Medium)
 
-**Files:** `Main.java`, `BookingDAO.java` (×9), `TimeSlotDAO.java` (×10), `UserDAO.java` (×11)
+**Files:** `Main.java`, `BookingDAO.java`, `TimeSlotDAO.java`, `UserDAO.java`
 
 Using `System.err` and `System.out` bypasses the logging framework, meaning there is no control over log levels, no timestamps, no log routing, and no ability to suppress output in production environments.
 
@@ -194,9 +178,9 @@ logger.error("Error occurred", e);
 
 ---
 
-### 🚨 4.2 SELECT * Queries — 15 Occurrences (Medium)
+### 🚨 4.2 SELECT * Queries (Medium)
 
-**Files:** `BookingDAO.java` (L43, L63, L82, L102, L122), `TimeSlotDAO.java` (L44, L64, L84, L105, L125, L145), `UserDAO.java` (L62, L88, L113, L138, L161)
+**Files:** `BookingDAO.java`, `TimeSlotDAO.java`, `UserDAO.java`
 
 `SELECT *` fetches all columns including unused ones, wastes memory and network bandwidth, and makes code fragile when the database schema changes.
 
@@ -211,9 +195,9 @@ SELECT booking_id, user_id, slot_id, status FROM bookings WHERE booking_id = ?
 
 ---
 
-### 🚨 4.3 Generic Exception Handling — 8 Occurrences (Medium)
+### 🚨 4.3 Generic Exception Handling (Medium)
 
-**Files:** `BookingService.java` (L54, L74, L92), `TeacherService.java` (L50, L73), `TimeSlotService.java` (L40, L65), `UserService.java` (L31)
+**Files:** `BookingService.java`, `TeacherService.java`, `TimeSlotService.java`, `UserService.java`
 
 Throwing or catching the generic `Exception` class makes it impossible for callers to distinguish between different error conditions and handle them appropriately.
 
@@ -228,9 +212,9 @@ throw new BookingNotFoundException("Booking not found for id: " + id);
 
 ---
 
-### 🚨 4.4 Hardcoded URIs — 4 Occurrences (Low)
+### 🚨 4.4 Hardcoded URIs (Low)
 
-**Files:** `LoginController.java` (L136, L139), `SignupController.java` (L166, L169)
+**Files:** `LoginController.java`, `SignupController.java`
 
 Hardcoded URIs violate the DRY principle and require edits in multiple files when paths change.
 
@@ -245,7 +229,7 @@ getHostServices().showDocument(AppConfig.DASHBOARD_URI);
 
 ---
 
-### ⚠️ 4.5 Duplicate Method Implementations — 3 Occurrences (Medium)
+### ⚠️ 4.5 Duplicate Method Implementations (Medium)
 
 | File | Duplicate of | Line |
 |---|---|---|
@@ -257,9 +241,9 @@ Two methods in the same class share identical implementations. The duplicate sho
 
 ---
 
-### ⚠️ 4.6 Test Lambda Issues — 12 Occurrences (Medium)
+### ⚠️ 4.6 Test Lambda Issues (Medium)
 
-**Files:** `BookingServiceTest.java` (L130, L139, L155, L226), `TeacherServiceTest.java` (L82, L97), `TimeSlotServiceTest.java` (L83, L93, L103, L108, L140)
+**Files:** `BookingServiceTest.java`, `TeacherServiceTest.java`, `TimeSlotServiceTest.java`
 
 `assertThrows` lambdas contain multiple statements, making it ambiguous which line is actually expected to throw the exception.
 
@@ -277,7 +261,7 @@ assertThrows(Exception.class, () -> service.process(data));
 
 ---
 
-### ⚠️ 4.7 Always-True Expression / Dead Code — 1 Occurrence (Medium)
+### ⚠️ 4.7 Always-True Expression / Dead Code (Medium)
 
 **File:** `util/DatabaseConnection.java` L103
 
@@ -287,36 +271,27 @@ A condition always evaluates to `true`, meaning one branch is permanently unreac
 
 ---
 
-### 🔴 4.8 Security Hotspots — 5 Occurrences (Requires Manual Review)
+### ✅ 4.8 Security Hotspots — Resolved
 
-SonarQube flagged **5 security hotspots** rated **E**, meaning they require manual developer review to determine whether a real vulnerability exists. Unlike security issues, hotspots are not confirmed bugs — they are sensitive code patterns that could become vulnerabilities if misused.
+All **5 security hotspots** from the previous sprint have been successfully resolved. SonarQube now reports **0 security hotspots** with an **A rating**.
 
-| Hotspot Category | Likely Location | Risk Description |
-|---|---|---|
-| Weak cryptography / hashing | `util/PasswordUtil.java` | Use of a weak or insufficiently iterated hashing algorithm for password storage |
-| SQL injection surface | `dao/UserDAO.java`, `dao/BookingDAO.java` | Parameterised queries must be verified; any dynamic query construction is a risk |
-| Hardcoded credentials | `util/DatabaseConnection.java` | Database URL, username, or password may be stored in plain text in source code |
-| Insecure random number generation | TBD | Use of `java.util.Random` instead of `java.security.SecureRandom` in a security context |
-| Unvalidated input | `controller/LoginController.java` | User-supplied input passed to downstream logic without sanitisation |
-
-> **Action required:** Each hotspot must be manually reviewed in the SonarQube Security Hotspots tab and marked as either *Safe* (reviewed and confirmed not exploitable) or *To Fix* (confirmed vulnerability requiring remediation). None of the 5 hotspots has been reviewed yet.
-
-**Recommended review steps:**
-1. Open SonarQube → Security Hotspots tab for the `MusicCoursePlatform` project
-2. For each hotspot: read the highlighted code, assess real-world exploitability
-3. If safe: mark *Acknowledged* with a brief justification comment
-4. If vulnerable: raise a High-priority issue and apply a fix before the next release
+> **Previously resolved hotspots:**
+> - Weak cryptography / hashing in `util/PasswordUtil.java`
+> - SQL injection surface in `dao/UserDAO.java` and `dao/BookingDAO.java`
+> - Hardcoded credentials in `util/DatabaseConnection.java`
+> - Insecure random number generation
+> - Unvalidated input in `controller/LoginController.java`
 
 ---
 
-### ℹ️ 4.9 Singleton Pattern Warnings — 2 Occurrences (Info)
+### ℹ️ 4.9 Singleton Pattern Warnings (Info)
 
 | File | Line |
 |---|---|
 | `controller/SessionManager.java` | L5 |
 | `util/LocalizationManager.java` | L24 |
 
-Singletons can cause thread-safety issues and make unit testing harder by introducing global state. SonarQube flags these as design concerns requiring manual verification.
+Singletons can cause thread-safety issues and make unit testing harder by introducing global state.
 
 **Recommendation:** Verify thread-safe initialisation is used (e.g., enum singleton or Bill Pugh holder pattern). Consider replacing with dependency injection.
 
@@ -341,38 +316,37 @@ Singletons can cause thread-safety issues and make unit testing harder by introd
 
 | Metric | Value | Target | Status |
 |---|---|---|---|
-| Overall coverage | 56.6% | ≥ 80% | 🔴 Below target |
-| Lines to cover | 2,100 | — | — |
-| Total functions | 338 | — | — |
+| Overall coverage | 87.9% | ≥ 80% | ✅ Target met |
+| Lines to cover | ~1,700 | — | — |
+| Total functions | 342 | — | — |
 
-The 12 test quality issues across the test files also suggest that some existing tests may not be asserting the correct behaviour. Fixing the `assertThrows` lambda issues and adding missing test cases are both needed to raise coverage to the 80% target.
+Coverage has improved significantly from 56.6% to **87.9%**, exceeding the 80% target. The remaining `assertThrows` lambda issues in the test files should still be addressed to ensure tests are correctly asserting the expected behaviour.
 
 ---
 
 ## 6. Recommendations
 
 ### High Priority
-1. Replace all `System.err` / `System.out` calls with SLF4J logger across all DAO and Main classes (34 occurrences)
-2. Replace all `SELECT *` queries with explicit column names in `BookingDAO`, `TimeSlotDAO`, and `UserDAO` (15 occurrences)
-3. Refactor `StudentDashboardController` (CC: 78, LOC: 446) and `TeacherDashboardController` (CC: 69, LOC: 411) — extract business logic into dedicated service methods
-4. Replace generic `Exception` throws with custom exceptions in all service classes (8 occurrences)
+1. Refactor `StudentDashboardController` (CC: 73, LOC: 401) and `TeacherDashboardController` (CC: 64, LOC: 366) — extract business logic into dedicated service methods
+2. Replace all remaining `System.err` / `System.out` calls with SLF4J logger across all DAO and Main classes
+3. Replace all remaining `SELECT *` queries with explicit column names in `BookingDAO`, `TimeSlotDAO`, and `UserDAO`
+4. Replace generic `Exception` throws with custom exceptions in all service classes
 5. Investigate and fix the always-true dead code branch in `DatabaseConnection.java` L103
-6. Review all 5 security hotspots in the SonarQube Security Hotspots tab and mark each as Safe or To Fix
 
 ### Medium Priority
 - Extract hardcoded URIs in `LoginController` and `SignupController` to a constants file
 - Remove duplicate method implementations in `Booking`, `TeacherProfile`, and `TimeSlot` models
 - Refactor `assertThrows` lambdas in test files to contain a single throwable statement
-- Increase test coverage from 56.6% to ≥ 80%
+- Maintain test coverage above 80% as new features are added
 - Extract nested try block in `LocalizationManager.java` L185 into a separate method
-- Reduce code duplication from 10.4% — consolidate shared DAO patterns into a base class or utility
+- Continue reducing code duplication — consolidate shared DAO patterns into a base class or utility
 
 ### Low Priority
 - Move `Launcher.java` into a proper named package
 - Clean up unused imports across test files (run IntelliJ → Optimize Imports)
 - Replace `.length() == 0` with `.isEmpty()` in `PasswordUtilTest.java` L26
 - Review Singleton implementations in `SessionManager` and `LocalizationManager` for thread safety
-- Add Javadoc to public methods (currently only 5.2% comment ratio)
+- Add Javadoc to public methods (currently only 5.3% comment ratio)
 
 ---
 
@@ -383,7 +357,7 @@ The 12 test quality issues across the test files also suggest that some existing
 - **Figure 1** – `dia_SonarQube.png` — Quality Gate overview dashboard
 - **Figure 2** – `dia_complexity.png` — Cyclomatic Complexity per file
 - **Figure 3** – `dia_sizemeasures.png` — Lines of Code (Size measures)
-- **Figure 4** – `dia_duplication.png` — Duplications Overview bubble chart
+- **Figure 4** – `dia_duplications.png` — Duplications Overview bubble chart
 
 ### B. Tool Configuration
 
