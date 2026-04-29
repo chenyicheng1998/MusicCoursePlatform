@@ -104,7 +104,7 @@ Improvements made based on SonarLint real-time feedback and Checkstyle Google Ch
 - Added `BASE_QUERY` constants to all DAO classes, replacing all `SELECT *` queries with explicit column lists
 - Refactored all 5 DAO classes to use DaoHelper methods
 
-**Impact:** Code duplication reduced from ~11% to 7.2%.
+**Impact:** DaoHelper was the primary driver of duplication reduction. Combined with the controller refactoring in §2.6, total code duplication was reduced from ~11% to **4.5%** (final Sprint 7 result).
 
 ---
 
