@@ -122,6 +122,8 @@ pipeline {
         }
 
         stage('Package Application') {
+            steps {
+                echo 'Packaging application...'
                 dir('MusicCoursePlatform') {
                     bat 'mvn package -DskipTests'
                 }
