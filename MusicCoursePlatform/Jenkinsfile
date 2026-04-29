@@ -7,7 +7,7 @@ pipeline {
 
     environment {
         // Add Docker to PATH for Windows
-        PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;${env.PATH}"
+        PATH = "C:\\Program Files\\Docker\\Docker\\resources\\bin;C:\\Tools\\apache-jmeter-5.6.3\\bin;${env.PATH}"
 
         // Docker Hub credentials (you need to configure this in Jenkins)
         DOCKERHUB_CREDENTIALS_ID = 'Docker_Hub'
@@ -20,6 +20,9 @@ pipeline {
         // SonarQube configuration (Sprint 7)
         SONAR_HOST_URL = 'http://localhost:9000'
         SONAR_PROJECT_KEY = 'music-course-platform'
+
+        // JMeter configuration (Sprint 7)
+        JMETER_HOME = 'C:\\Tools\\apache-jmeter-5.6.3'
     }
 
     stages {
@@ -103,9 +106,22 @@ pipeline {
             }
         }
 
-        stage('Package Application') {
+        stage('Non-Functional Test (JMeter)') {
             steps {
-                echo 'Packaging application...'
+                echo 'Running JMeter performance tests against MariaDB...'
+                dir('MusicCoursePlatform') {
+                    bat 'jmeter -n -t tests/performance/musiccourse.jmx -l result.jtl'
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'MusicCoursePlatform/result.jtl', allowEmptyArchive: true
+                    perfReport sourceDataFiles: 'MusicCoursePlatform/result.jtl'
+                }
+            }
+        }
+
+        stage('Package Application') {
                 dir('MusicCoursePlatform') {
                     bat 'mvn package -DskipTests'
                 }

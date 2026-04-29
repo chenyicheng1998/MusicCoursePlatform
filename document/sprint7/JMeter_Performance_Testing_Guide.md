@@ -4,7 +4,8 @@
 **Date:** 2026-04-25
 
 > **Note:** JMeter tests the MariaDB database directly via JDBC, since the app has no HTTP/REST API.  
-> We use **JMeter JDBC Sampler** to simulate multiple concurrent users running database queries.
+> We use **JMeter JDBC Sampler** to simulate multiple concurrent users running database queries.  
+> The test plan file is stored at `tests/performance/musiccourse.jmx` and can be run from both the JMeter GUI and the Jenkins CI pipeline.
 
 ---
 
@@ -132,9 +133,55 @@ Run the tests and fill in this table:
 
 ## 10. Save and Share
 
-- Save the JMeter test plan as: `document/sprint7/jmeter_test_plan.jmx`
-- Save results CSV as: `document/sprint7/jmeter_results.csv`
+- Save the JMeter test plan as: `tests/performance/musiccourse.jmx` (already committed to repository)
+- Save results CSV as: `result.jtl` (generated in project root when run)
 - Include screenshot in Sprint 7 report
+
+---
+
+## 11. Run from Command Line (Non-GUI Mode)
+
+After creating the test plan in the GUI, you can run it headlessly:
+
+```bat
+jmeter -n -t tests/performance/musiccourse.jmx -l result.jtl
+```
+
+- `-n` — non-GUI mode
+- `-t` — path to the `.jmx` test plan
+- `-l` — output results file (`.jtl`)
+
+This is the same command used in the Jenkins pipeline stage.
+
+---
+
+## 12. Jenkins Integration
+
+The Jenkins pipeline (`Jenkinsfile`) includes a **Non-Functional Test** stage that runs JMeter automatically:
+
+```groovy
+stage('Non-Functional Test (JMeter)') {
+    steps {
+        dir('MusicCoursePlatform') {
+            bat 'jmeter -n -t tests/performance/musiccourse.jmx -l result.jtl'
+        }
+    }
+    post {
+        always {
+            archiveArtifacts artifacts: 'MusicCoursePlatform/result.jtl', allowEmptyArchive: true
+            perfReport sourceDataFiles: 'MusicCoursePlatform/result.jtl'
+        }
+    }
+}
+```
+
+**Prerequisites for Jenkins:**
+
+- JMeter installed at `C:\Tools\apache-jmeter-5.6.3\` on the Jenkins agent
+- `C:\Tools\apache-jmeter-5.6.3\bin` added to PATH in the Jenkinsfile `environment` block
+- MariaDB JDBC driver (`mariadb-java-client-3.x.x.jar`) placed in `C:\Tools\apache-jmeter-5.6.3\lib\`
+- The **Performance Plugin** installed in Jenkins (for `perfReport` to work)
+- Seed data SQL executed before running the pipeline (see Seed Data section below)
 
 ---
 
