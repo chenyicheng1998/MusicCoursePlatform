@@ -21,4 +21,4 @@ All 10 test cases passed successfully across all 4 team members. The system corr
 
 ## Heuristic Evaluation
 
-* [Heuristic Evaluation](HeuristicEvaluationReport.pdf)
+* [Heuristic Evaluation](Heuristic_Evaluation_FinalReport.pdf)
