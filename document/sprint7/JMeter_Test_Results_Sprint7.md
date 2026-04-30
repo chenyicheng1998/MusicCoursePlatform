@@ -5,7 +5,7 @@
 **Tool:** Apache JMeter 5.6.3  
 **Test Plan:** `tests/performance/musiccourse.jmx`  
 **Results File:** `result.jtl`  
-**Executed by:** Su Wai Phyoe
+**Executed by:** Chen Yicheng
 
 ---
 
