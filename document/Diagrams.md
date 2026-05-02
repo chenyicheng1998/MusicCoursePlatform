@@ -25,3 +25,9 @@ Central index of modelling images (files live in `document/images/`). The [root 
 ## Sequence diagram
 
 ![Sequence Diagram](images/dia_SequenceDiagram.jpg "Sequence Diagram")
+
+## Package diagram
+![Package Diagram](images/dia_package.jpg "Package Diagram")
+
+## Deployment diagram
+![Deployment diagram](images/dia_deployment.jpg "Deployment Diagram")
