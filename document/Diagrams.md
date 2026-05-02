@@ -1,6 +1,6 @@
 # Diagrams
 
-Central index of modelling images (files live in `document/images/`). The [root README](../README.md#diagrams) embeds the same figures for visibility on the GitHub repo home page — both point to the same image paths; this file is the dedicated **document-folder** index for reports and hand-ins.
+Central index of modelling images (files live in `document/images/`). The [root README](../README.md) embeds the **ER diagram** (Sprint 2) and **activity diagram** (Sprint 8) only; all figures—including use case, database schema, class diagram, and sequence diagram—are linked from here for reports and hand-ins.
 
 ## Use Case Diagram (with localization)
 
@@ -21,3 +21,7 @@ Central index of modelling images (files live in `document/images/`). The [root 
 ## Class diagram
 
 ![Class Diagram](images/dia_class.jpg "Class Diagram")
+
+## Sequence diagram
+
+![Sequence Diagram](images/dia_SequenceDiagram.jpg "Sequence Diagram")
