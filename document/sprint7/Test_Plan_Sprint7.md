@@ -35,11 +35,17 @@ Testing covers:
 | Localization       | Language switching (English / Chinese / Arabic)            |
 | Database Layer     | CRUD operations via DAO classes (MariaDB)                  |
 
+These features represent the main interactions available to users in the system. Testing them ensures that both learners and teachers can complete key tasks without errors.
+
+---
+
 ### 2.2 Out of Scope
 
 - Payment processing (not implemented)
 - Email notifications (not implemented)
 - Mobile or web versions of the application
+
+These features are not part of the current implementation, so they are excluded from testing. This keeps the focus on validating the completed functionality.
 
 ---
 
@@ -60,6 +66,8 @@ Testing covers:
 | Containerization | Docker (eclipse-temurin:21-jdk base)                      |
 | IDE              | IntelliJ IDEA with Checkstyle-IDEA plugin (Google Checks) |
 
+This setup defines the environment in which all tests are executed. Keeping it consistent helps ensure that results are reliable and repeatable.
+
 ---
 
 ## 4. Resources
@@ -70,6 +78,8 @@ Testing covers:
 | Developer / Tester | Lu Liu       | Unit tests (Controller layer), Heuristic Evaluation         |
 | Developer / Tester | Su Wai Phyoe | Unit tests (Model, Util), UAT execution, JMeter             |
 | Developer / Tester | Ying Luo     | Unit tests (Controller), Bug tracking, Heuristic Evaluation |
+
+Responsibilities are distributed across the team to cover all testing activities. This ensures that each part of the system is reviewed and validated.
 
 ---
 
@@ -106,6 +116,8 @@ Testing covers:
 | `TeacherProfileViewControllerTest` | Controller | 14      |
 | **Total**                          |            | **383** |
 
+These tests verify that individual components behave as expected. Passing all tests confirms that recent code changes did not introduce regressions.
+
 **Pass/Fail Criteria:** All 383 tests must pass with 0 failures. Build is considered failing if any test fails.
 
 ---
@@ -124,6 +136,8 @@ Testing covers:
 | Duplications                  | < 10%        | **4.7%**          |
 | Security Hotspots             | 0            | **0**             |
 
+These results reflect the quality of the code after cleanup. The current metrics indicate that the system is stable and maintainable.
+
 **Additional tools:** SonarLint (IntelliJ — real-time), Checkstyle (Google Checks profile)
 
 ---
@@ -131,14 +145,17 @@ Testing covers:
 ### 5.3 Usability Testing — Nielsen's Heuristic Evaluation
 
 **Method:** Nielsen's Heuristic Evaluation — 4 evaluators independently assess the UI against Nielsen's 10 Usability Heuristics, then aggregate findings.  
-**Severity Scale:** 0 = not a problem, 1 = cosmetic, 2 = minor, 3 = major, 4 = catastrophe  
-**Phases followed:**
-1. **Pre-evaluation training** — each evaluator was assigned a user role (learner / teacher) and given scenario context before evaluating
-2. **Evaluation** — 4 team members independently examined the UI and recorded issues
-3. **Severity rating** — each evaluator independently assigned severity scores (0–4)
-4. **Debriefing** — team aggregated findings, discussed root causes, and agreed on priority fixes
+**Severity Scale:** 0 = not a problem, 1 = cosmetic, 2 = minor, 3 = major, 4 = catastrophe
 
-**Output:** Individual evaluation reports + consolidated summary table + debriefing notes (see Heuristic_Evaluation_Sprint7.md)
+**Phases followed:**
+1. Pre-evaluation training
+2. Evaluation
+3. Severity rating
+4. Debriefing
+
+This evaluation focuses on how users interact with the interface. The findings help identify usability issues that may affect the user experience.
+
+**Output:** Individual reports + summary + debriefing notes
 
 ---
 
@@ -161,23 +178,24 @@ Testing covers:
 | TC09  | Language switching (EN → ZH → AR)         | PASS   |
 | TC10  | Learner views teacher profile page        | PASS   |
 
+These tests simulate real user actions in the system. All passing results indicate that the system behaves correctly in practical usage.
+
 ---
 
 ### 5.5 Performance Testing (JMeter)
 
 **Tool:** Apache JMeter 5.6.x  
-**Target:** Database-facing operations (login, booking creation)  
-**Scenarios:**
+**Target:** Database-facing operations
 
-- 10 concurrent virtual users performing login
-- 10 concurrent virtual users creating bookings
+**Scenarios:**
+- 10 concurrent users performing login
+- 10 concurrent users creating bookings
 
 **Accept criteria:**
-
-- Average response time < 500 ms under 10 concurrent users
+- Average response time < 500 ms
 - Error rate < 5%
 
-_See JMeter_Performance_Testing_Guide.md for setup and results._
+These tests evaluate how the system performs under concurrent usage. The results confirm that the system remains responsive under normal load conditions.
 
 ---
 
@@ -186,11 +204,10 @@ _See JMeter_Performance_Testing_Guide.md for setup and results._
 All defects discovered during testing are tracked in the Bug Tracking Table (see Bug_Tracking_Table.md).
 
 **Severity classification:**
-
-- **Critical** — app crash or data loss
-- **High** — major feature broken
-- **Medium** — feature works but with incorrect behavior
-- **Low** — cosmetic or minor UX issue
+- Critical — system crash or data loss
+- High — major feature not working
+- Medium — incorrect behavior
+- Low — minor or visual issue
 
 ---
 
@@ -210,6 +227,8 @@ All defects discovered during testing are tracked in the Bug Tracking Table (see
 - All Critical and High severity bugs resolved
 - Heuristic Evaluation reports completed by all 4 team members
 
+These criteria define when testing starts and when it is considered complete. They ensure that testing is carried out in a controlled and consistent way.
+
 ---
 
 ## 8. Test Schedule
@@ -223,3 +242,5 @@ All defects discovered during testing are tracked in the Bug Tracking Table (see
 | JMeter performance tests          | 2026-04-23 | Su Wai Phyoe |
 | Bug tracking review               | 2026-04-24 | All          |
 | Sprint 7 report submitted         | 2026-04-25 | All          |
+
+This schedule summarizes when each testing activity was completed. It ensures that all tasks were finished before the final delivery.
