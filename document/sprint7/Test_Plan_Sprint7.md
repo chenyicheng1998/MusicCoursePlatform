@@ -72,12 +72,12 @@ This setup defines the environment in which all tests are executed. Keeping it c
 
 ## 4. Resources
 
-| Role               | Team Member  | Responsibility                                              |
-| ------------------ | ------------ | ----------------------------------------------------------- |
-| Developer / Tester | Yicheng Chen | Unit tests (DAO, Service layer), Jenkins CI, SonarQube      |
-| Developer / Tester | Lu Liu       | Unit tests (Controller layer), Heuristic Evaluation         |
-| Developer / Tester | Su Wai Phyoe | Unit tests (Model, Util), UAT execution, JMeter             |
-| Developer / Tester | Ying Luo     | Unit tests (Controller), Bug tracking, Heuristic Evaluation |
+| Role               | Team Member  | Responsibility                                                          |
+| ------------------ | ------------ |-------------------------------------------------------------------------|
+| Developer / Tester | Yicheng Chen | Unit tests (DAO, Service layer), Jenkins CI, SonarQube ,JMeter          |
+| Developer / Tester | Lu Liu       | Unit tests (Controller layer), Heuristic Evaluation                     |
+| Developer / Tester | Su Wai Phyoe | Unit tests (Model, Util), UAT execution,SonarQube, Heuristic Evaluation |
+| Developer / Tester | Ying Luo     | Unit tests (Controller), Bug tracking                                   |
 
 > **Note:** All four team members participated in the Heuristic Evaluation independently, as reflected in `Heuristic_Evaluation_Sprint7.md`. The Responsibility column above lists primary leads; heuristic evaluation was conducted by the full team.
 
