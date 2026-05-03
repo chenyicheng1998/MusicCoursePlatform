@@ -79,6 +79,8 @@ This setup defines the environment in which all tests are executed. Keeping it c
 | Developer / Tester | Su Wai Phyoe | Unit tests (Model, Util), UAT execution, JMeter             |
 | Developer / Tester | Ying Luo     | Unit tests (Controller), Bug tracking, Heuristic Evaluation |
 
+> **Note:** All four team members participated in the Heuristic Evaluation independently, as reflected in `Heuristic_Evaluation_Sprint7.md`. The Responsibility column above lists primary leads; heuristic evaluation was conducted by the full team.
+
 Responsibilities are distributed across the team to cover all testing activities. This ensures that each part of the system is reviewed and validated.
 
 ---
@@ -96,24 +98,26 @@ Responsibilities are distributed across the team to cover all testing activities
 | ---------------------------------- | ---------- | ------- |
 | `UserDAOTest`                      | DAO        | 16      |
 | `BookingDAOTest`                   | DAO        | 9       |
-| `TimeSlotDAOTest`                  | DAO        | 10      |
+| `TimeSlotDAOTest`                  | DAO        | 9       |
 | `LearnerProfileDAOTest`            | DAO        | 6       |
 | `TeacherProfileDAOTest`            | DAO        | 8       |
 | `UserServiceTest`                  | Service    | 23      |
 | `BookingServiceTest`               | Service    | 18      |
 | `TeacherServiceTest`               | Service    | 15      |
-| `TimeSlotServiceTest`              | Service    | 17      |
-| `ModelTest`                        | Model      | 20      |
+| `TimeSlotServiceTest`              | Service    | 25      |
+| `ModelTest`                        | Model      | 25      |
 | `PasswordUtilTest`                 | Util       | 22      |
 | `LocalizationManagerTest`          | Util       | 36      |
 | `NavigationHelperTest`             | Util       | 4       |
+| `CalendarBuilderTest`              | Util       | 11      |
+| `DatabaseConnectionTest`           | Util       | 8       |
 | `SessionManagerTest`               | Controller | 14      |
-| `LoginControllerTest`              | Controller | 7       |
-| `SignupControllerTest`             | Controller | 9       |
-| `StudentDashboardControllerTest`   | Controller | 11      |
-| `TeacherDashboardControllerTest`   | Controller | 16      |
-| `BookingViewControllerTest`        | Controller | 14      |
-| `TeacherProfileViewControllerTest` | Controller | 14      |
+| `LoginControllerTest`              | Controller | 12      |
+| `SignupControllerTest`             | Controller | 15      |
+| `StudentDashboardControllerTest`   | Controller | 35      |
+| `TeacherDashboardControllerTest`   | Controller | 33      |
+| `BookingViewControllerTest`        | Controller | 20      |
+| `TeacherProfileViewControllerTest` | Controller | 19      |
 | **Total**                          |            | **383** |
 
 These tests verify that individual components behave as expected. Passing all tests confirms that recent code changes did not introduce regressions.
@@ -133,7 +137,7 @@ These tests verify that individual components behave as expected. Passing all te
 | Security (Vulnerabilities)    | Grade A      | A                 |
 | Maintainability (Code Smells) | Grade A or B | A                 |
 | Coverage                      | > 50%        | **87.9%**         |
-| Duplications                  | < 10%        | **4.7%**          |
+| Duplications                  | < 10%        | **4.5%**          |
 | Security Hotspots             | 0            | **0**             |
 
 These results reflect the quality of the code after cleanup. The current metrics indicate that the system is stable and maintainable.
@@ -144,7 +148,7 @@ These results reflect the quality of the code after cleanup. The current metrics
 
 ### 5.3 Usability Testing — Nielsen's Heuristic Evaluation
 
-**Method:** Nielsen's Heuristic Evaluation — 4 evaluators independently assess the UI against Nielsen's 10 Usability Heuristics, then aggregate findings.  
+**Method:** Nielsen's Heuristic Evaluation — all 4 evaluators independently assessed the UI against Nielsen's 10 Usability Heuristics, then aggregated findings.  
 **Severity Scale:** 0 = not a problem, 1 = cosmetic, 2 = minor, 3 = major, 4 = catastrophe
 
 **Phases followed:**
@@ -155,28 +159,28 @@ These results reflect the quality of the code after cleanup. The current metrics
 
 This evaluation focuses on how users interact with the interface. The findings help identify usability issues that may affect the user experience.
 
-**Output:** Individual reports + summary + debriefing notes
+**Output:** Individual reports (all 4 team members) + summary + debriefing notes
 
 ---
 
 ### 5.4 User Acceptance Testing (UAT)
 
-**Test Cases:** TC01 – TC10 (defined in Sprint 6)  
+**Test Cases:** TC01 – TC10 (see `Testing.md` and `UserAcceptanceTest.xlsx` for full case details)  
 **Execution Date:** 2026-04-18  
-**Status:** All 10 test cases PASSED
+**Status:** All 10 test cases PASSED by all 4 team members
 
-| TC ID | Test Scenario                             | Result |
-| ----- | ----------------------------------------- | ------ |
-| TC01  | Learner registration with valid data      | PASS   |
-| TC02  | Learner registration with duplicate email | PASS   |
-| TC03  | Teacher login with correct credentials    | PASS   |
-| TC04  | Learner login with wrong password         | PASS   |
-| TC05  | Teacher creates a time slot               | PASS   |
-| TC06  | Learner books an available time slot      | PASS   |
-| TC07  | Learner views their booking history       | PASS   |
-| TC08  | Teacher views bookings on dashboard       | PASS   |
-| TC09  | Language switching (EN → ZH → AR)         | PASS   |
-| TC10  | Learner views teacher profile page        | PASS   |
+| TC ID | Test Scenario                                        | Result |
+| ----- | ---------------------------------------------------- | ------ |
+| TC01  | User can register a new account                      | PASS   |
+| TC02  | User can login with valid credentials                | PASS   |
+| TC03  | Login fails with invalid credentials                 | PASS   |
+| TC04  | User can logout successfully                         | PASS   |
+| TC05  | Teacher can create and edit profile                  | PASS   |
+| TC06  | Teacher can create, edit and delete time slots       | PASS   |
+| TC07  | Student can view and book an available lesson        | PASS   |
+| TC08  | Student cannot book an already reserved slot         | PASS   |
+| TC09  | Student can cancel a booked lesson                   | PASS   |
+| TC10  | System validates invalid inputs in forms             | PASS   |
 
 These tests simulate real user actions in the system. All passing results indicate that the system behaves correctly in practical usage.
 
@@ -184,24 +188,47 @@ These tests simulate real user actions in the system. All passing results indica
 
 ### 5.5 Performance Testing (JMeter)
 
-**Tool:** Apache JMeter 5.6.x  
-**Target:** Database-facing operations
+**Tool:** Apache JMeter 5.6.3  
+**Target:** MariaDB — `music_course_platform` (localhost)
+**Results:** See `JMeter_Test_Results_Sprint7.md` for full results. See `JMeter_Performance_Testing_Guide.md` for test setup and configuration.
+
+**Test configuration:**
+
+| Parameter | Value |
+| --------- | ----- |
+| Threads (concurrent users) | 10 |
+| Ramp-up period | 5 seconds |
+| Loop count | 3 |
+| Total samples per scenario | 30 |
+| Think time | 500 ms constant delay |
 
 **Scenarios:**
-- 10 concurrent users performing login
-- 10 concurrent users creating bookings
+- 10 concurrent users performing login (SELECT on USERS table)
+- 10 concurrent users creating bookings (INSERT into BOOKING table)
 
-**Accept criteria:**
-- Average response time < 500 ms
-- Error rate < 5%
+**Results:**
 
-These tests evaluate how the system performs under concurrent usage. The results confirm that the system remains responsive under normal load conditions.
+| Scenario | Samples | Avg (ms) | Min (ms) | Max (ms) | Error % |
+| -------- | ------- | -------- | -------- | -------- | ------- |
+| Login Query | 30 | 2.5 | 0 | 10 | 0% |
+| Create Booking | 30 | 2.0 | 1 | 3 | 0% |
+| **Total** | **60** | — | — | — | **0%** |
+
+**Acceptance criteria evaluation:**
+
+| Criterion | Target | Actual | Result |
+| --------- | ------ | ------ | ------ |
+| Avg response time — Login Query | < 500 ms | 2.5 ms | ✅ PASS |
+| Avg response time — Create Booking | < 500 ms | 2.0 ms | ✅ PASS |
+| Error rate | < 5% | 0% | ✅ PASS |
+
+Both scenarios pass with a wide margin. Response times are in the 0–10 ms range because the database and test client run on the same local machine. In a production environment with network latency, times would be higher but still expected to remain well under 500 ms for these indexed queries.
 
 ---
 
 ## 6. Bug Tracking
 
-All defects discovered during testing are tracked in the Bug Tracking Table (see Bug_Tracking_Table.md).
+All defects discovered during testing are tracked in the Bug Tracking Table (see `Bug_Tracking_Table.md`).
 
 **Severity classification:**
 - Critical — system crash or data loss
@@ -234,12 +261,12 @@ These criteria define when testing starts and when it is considered complete. Th
 ## 8. Test Schedule
 
 | Activity                          | Date       | Owner        |
-| --------------------------------- | ---------- | ------------ |
+| --------------------------------- |------------|--------------|
 | Unit tests executed (final run)   | 2026-04-20 | All          |
-| SonarQube scan via Jenkins        | 2026-04-20 | Yicheng Chen |
+| SonarQube scan via Jenkins        | 2026-04-20 | All          |
 | UAT execution                     | 2026-04-18 | Su Wai Phyoe |
-| Heuristic Evaluation (individual) | 2026-04-22 | All          |
-| JMeter performance tests          | 2026-04-23 | Su Wai Phyoe |
+| Heuristic Evaluation (individual) | 2026-04-27 | All          |
+| JMeter performance tests          | 2026-04-23 | Yicheng Chen |
 | Bug tracking review               | 2026-04-24 | All          |
 | Sprint 7 report submitted         | 2026-04-25 | All          |
 
