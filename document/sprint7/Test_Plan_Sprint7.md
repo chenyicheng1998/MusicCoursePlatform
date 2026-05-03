@@ -79,7 +79,7 @@ This setup defines the environment in which all tests are executed. Keeping it c
 | Developer / Tester | Su Wai Phyoe | Unit tests (Model, Util), UAT execution,SonarQube, Heuristic Evaluation |
 | Developer / Tester | Ying Luo     | Unit tests (Controller), Bug tracking                                   |
 
-> **Note:** All four team members participated in the Heuristic Evaluation independently, as reflected in `Heuristic_Evaluation_Sprint7.md`. The Responsibility column above lists primary leads; heuristic evaluation was conducted by the full team.
+> **Note:** All four team members participated in the Heuristic Evaluation independently. The Responsibility column above lists primary leads; heuristic evaluation was conducted by the full team.
 
 Responsibilities are distributed across the team to cover all testing activities. This ensures that each part of the system is reviewed and validated.
 
