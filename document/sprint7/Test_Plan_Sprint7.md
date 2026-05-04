@@ -1,8 +1,8 @@
 # Test Plan — Sprint 7
 
 **Project:** Music Course Platform  
-**Version:** 1.0  
-**Date:** 2026-04-25  
+**Version:** 2.0  
+**Date:** 2026-05-03  
 **Prepared by:** Lu Liu, Su Wai Phyoe, Yicheng Chen, Ying Luo
 
 ---
