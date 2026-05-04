@@ -1,6 +1,6 @@
 # Diagrams
 
-Central index of modelling images (files live in `document/images/`). The [root README](../README.md) embeds the **ER diagram** (Sprint 2) and **activity diagram** (Sprint 8) only; all figures—including use case, database schema, class diagram, and sequence diagram—are linked from here for reports and hand-ins.
+Central index of modelling images (files live in `document/images/`). The [root README](../README.md#12-diagrams--modelling) embeds the **ER** and **activity** diagrams in **§12. Diagrams & modelling**; this file lists every figure (including those two) for reports and hand-ins.
 
 ## Use Case Diagram (with localization)
 

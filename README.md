@@ -107,11 +107,7 @@ The **Music Course Platform** is a JavaFX desktop application that connects musi
 
 **Unit Testing:** JUnit 5 with JaCoCo for code coverage
 
-**Diagrams:** Additional modelling images are listed in [document/Diagrams.md](document/Diagrams.md) (use case, database schema, class diagram, sequence diagram, etc.).
-
-**ER diagram (embedded):**
-
-![ER diagram](document/images/dia_er.png)
+**Modelling (diagrams):** ER diagram, activity diagram, and the full diagram index are in **[§12. Diagrams & modelling](#12-diagrams--modelling)** — not tied to a single sprint section.
 
 **Artifacts:**
 - [Sprint 2 Planning Report](document/SprintPlanReports/Sprint%202%20Planning%20Report.md)
@@ -292,22 +288,29 @@ The **Music Course Platform** is a JavaFX desktop application that connects musi
 - [Design Document](document/Design.md)
 - [User Stories](document/UserStories.md)
 - [Heuristic Evaluation Report](document/Heuristic_Evaluation_FinalReport.pdf)
-- [Diagram index (all modelling images)](document/Diagrams.md)
-- Central index: [Documentation](#documentation) table (includes Testing.md, UAT xlsx, and other project documents)
+- Central index: [Documentation](#documentation) table (includes Testing.md, UAT xlsx, Diagrams.md, and other project documents)
 
 **Artifacts:**
 - Sprint 8 planning and sprint review reports: *to be added when available*
 - [Trello Board — Sprint 8](https://trello.com/b/SCdd3doj/sep1musiccourseplatform-sprint8)
 
-**Activity diagram (embedded):**
+---
+
+## 12. Diagrams & modelling
+
+Diagrams are shared across requirements, design, and final documentation. The **full gallery** (use case, database schema, class diagram, sequence diagram, and the same ER and activity figures below) is in **[document/Diagrams.md](document/Diagrams.md)**.
+
+**ER diagram**
+
+![ER diagram](document/images/dia_er.png)
+
+**Activity diagram**
 
 ![Activity diagram](document/images/dia_activity.jpg)
 
-**Other diagrams:** See [document/Diagrams.md](document/Diagrams.md) for the class diagram, use case diagram, database schema, sequence diagram, and related assets.
-
 ---
 
-## 12. How to Run the Project
+## 13. How to Run the Project
 
 ### Prerequisites
 
@@ -392,11 +395,13 @@ docker run -it --rm `
 
 ---
 
-## 13. Testing Instructions
+## 14. Testing Instructions
 
 **Team testing summary:** [document/Testing.md](document/Testing.md) (10 core test cases; links to [UserAcceptanceTest.xlsx](document/UserAcceptanceTest.xlsx) and [Heuristic Evaluation Report](document/Heuristic_Evaluation_FinalReport.pdf)).
 
 **Sprint 7 QA** (`document/sprint7/`): [Test Plan](document/sprint7/Test_Plan_Sprint7.md) · [Bug tracking](document/sprint7/Bug_Tracking_Table.md) · [Technical changes](document/sprint7/Technical_Changes_Sprint7.md) · [JMeter guide](document/sprint7/JMeter_Performance_Testing_Guide.md) · [JMeter results](document/sprint7/JMeter_Test_Results_Sprint7.md).
+
+**SonarQube (static analysis):** Run locally as below, or rely on the **SonarQube Analysis** stage in [`MusicCoursePlatform/Jenkinsfile`](MusicCoursePlatform/Jenkinsfile) (uses credentials `sonarqube-token` and variables `SONAR_PROJECT_KEY`, `SONAR_HOST_URL`). Interpret metrics in the SonarQube UI; a written summary is in the [Statistical Code Review Report](document/Statistical%20Code%20Review%20Report.md).
 
 ### Run Unit Tests
 
@@ -413,13 +418,34 @@ mvn jacoco:report
 
 Open report at `MusicCoursePlatform/target/site/jacoco/index.html`
 
+### Static analysis (SonarQube)
+
+**Prerequisites:** A running SonarQube instance and a **user token** with permission to execute analysis.
+
+From the `MusicCoursePlatform` directory (after `mvn clean verify` so binaries and tests exist):
+
+```bash
+mvn sonar:sonar \
+  -Dsonar.projectKey=music-course-platform \
+  -Dsonar.host.url=https://YOUR_SONARQUBE_HOST \
+  -Dsonar.token=YOUR_TOKEN \
+  -Dsonar.java.binaries=target/classes \
+  -Dsonar.java.test.binaries=target/test-classes \
+  -Dsonar.sources=src/main/java \
+  -Dsonar.tests=src/test/java
+```
+
+Replace `YOUR_SONARQUBE_HOST` and `YOUR_TOKEN` with your server URL and token. The `sonar.projectKey` matches the Jenkins pipeline (`music-course-platform`); override `-Dsonar.projectKey=...` if your SonarQube project uses a different key.
+
+**Documentation:** [Statistical Code Review Report](document/Statistical%20Code%20Review%20Report.md)
+
 ### Performance Testing (JMeter)
 
 See [JMeter Performance Testing Guide](document/sprint7/JMeter_Performance_Testing_Guide.md) and [JMeter test results](document/sprint7/JMeter_Test_Results_Sprint7.md).
 
 ---
 
-## 14. Repository Structure
+## 15. Repository Structure
 
 ```
 MusicCoursePlatform/
@@ -458,7 +484,7 @@ document/
 
 ---
 
-## 15. Authors
+## 16. Authors
 
 | Name | Role |
 |------|------|
