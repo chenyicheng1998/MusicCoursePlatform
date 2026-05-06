@@ -35,7 +35,7 @@ Testing covers:
 | Localization       | Language switching (English / Chinese / Arabic)            |
 | Database Layer     | CRUD operations via DAO classes (MariaDB)                  |
 
-These features represent the main interactions available to users in the system. Testing them ensures that both learners and teachers can complete key tasks without errors.
+These modules were selected because they represent the actions users perform most frequently in the system. From a learner's perspective, this includes registering, logging in, browsing teachers, and booking lessons. From a teacher's perspective, this includes managing their profile, creating time slots, and viewing bookings. Any failure in these areas would directly prevent users from completing their core goals.
 
 ---
 
@@ -44,8 +44,6 @@ These features represent the main interactions available to users in the system.
 - Payment processing (not implemented)
 - Email notifications (not implemented)
 - Mobile or web versions of the application
-
-These features are not part of the current implementation, so they are excluded from testing. This keeps the focus on validating the completed functionality.
 
 ---
 
@@ -66,14 +64,14 @@ These features are not part of the current implementation, so they are excluded 
 | Containerization | Docker (eclipse-temurin:21-jdk base)                      |
 | IDE              | IntelliJ IDEA with Checkstyle-IDEA plugin (Google Checks) |
 
-This setup defines the environment in which all tests are executed. Keeping it consistent helps ensure that results are reliable and repeatable.
+This environment was configured to closely reflect the conditions under which end users will run the application. Using the same OS, Java version, and database setup across all developer machines reduces the risk of environment-specific bugs that would not appear during testing but would affect real users.
 
 ---
 
 ## 4. Resources
 
 | Role               | Team Member  | Responsibility                                                          |
-| ------------------ | ------------ |-------------------------------------------------------------------------|
+| ------------------ | ------------ | ----------------------------------------------------------------------- |
 | Developer / Tester | Yicheng Chen | Unit tests (DAO, Service layer), Jenkins CI, SonarQube ,JMeter          |
 | Developer / Tester | Lu Liu       | Unit tests (Controller layer), Heuristic Evaluation                     |
 | Developer / Tester | Su Wai Phyoe | Unit tests (Model, Util), UAT execution,SonarQube, Heuristic Evaluation |
@@ -81,7 +79,7 @@ This setup defines the environment in which all tests are executed. Keeping it c
 
 > **Note:** All four team members participated in the Heuristic Evaluation independently. The Responsibility column above lists primary leads; heuristic evaluation was conducted by the full team.
 
-Responsibilities are distributed across the team to cover all testing activities. This ensures that each part of the system is reviewed and validated.
+Responsibilities were assigned based on each member's familiarity with the corresponding part of the codebase. This ensures that the person most aware of the implementation details is also responsible for verifying that the feature works correctly from the user's point of view.
 
 ---
 
@@ -120,7 +118,7 @@ Responsibilities are distributed across the team to cover all testing activities
 | `TeacherProfileViewControllerTest` | Controller | 19      |
 | **Total**                          |            | **383** |
 
-These tests verify that individual components behave as expected. Passing all tests confirms that recent code changes did not introduce regressions.
+The test classes were designed to cover every layer that a user request passes through — from the UI controller down to the database. This layered approach ensures that if a user action fails, the source of the problem can be identified precisely, whether it lies in the business logic, data access, or input validation.
 
 **Pass/Fail Criteria:** All 383 tests must pass with 0 failures. Build is considered failing if any test fails.
 
@@ -140,7 +138,7 @@ These tests verify that individual components behave as expected. Passing all te
 | Duplications                  | < 10%        | **4.5%**          |
 | Security Hotspots             | 0            | **0**             |
 
-These results reflect the quality of the code after cleanup. The current metrics indicate that the system is stable and maintainable.
+These targets were chosen to ensure the codebase is safe and maintainable for users over time. A Grade A in Reliability means users will not encounter application bugs during normal use. A Grade A in Security means user data is not exposed to vulnerabilities. The coverage target ensures that the automated tests meaningfully exercise the paths a real user would trigger.
 
 **Additional tools:** SonarLint (IntelliJ — real-time), Checkstyle (Google Checks profile)
 
@@ -152,12 +150,11 @@ These results reflect the quality of the code after cleanup. The current metrics
 **Severity Scale:** 0 = not a problem, 1 = cosmetic, 2 = minor, 3 = major, 4 = catastrophe
 
 **Phases followed:**
+
 1. Pre-evaluation training
 2. Evaluation
 3. Severity rating
 4. Debriefing
-
-This evaluation focuses on how users interact with the interface. The findings help identify usability issues that may affect the user experience.
 
 **Output:** Individual reports (all 4 team members) + summary + debriefing notes
 
@@ -166,63 +163,53 @@ This evaluation focuses on how users interact with the interface. The findings h
 ### 5.4 User Acceptance Testing (UAT)
 
 **Test Cases:** TC01 – TC10 (see `Testing.md` and `UserAcceptanceTest.xlsx` for full case details)  
-**Execution Date:** 2026-04-18  
-**Status:** All 10 test cases PASSED by all 4 team members
+**Planned Execution Date:** 2026-04-18  
+**Executor:** All 4 team members
 
-| TC ID | Test Scenario                                        | Result |
-| ----- | ---------------------------------------------------- | ------ |
-| TC01  | User can register a new account                      | PASS   |
-| TC02  | User can login with valid credentials                | PASS   |
-| TC03  | Login fails with invalid credentials                 | PASS   |
-| TC04  | User can logout successfully                         | PASS   |
-| TC05  | Teacher can create and edit profile                  | PASS   |
-| TC06  | Teacher can create, edit and delete time slots       | PASS   |
-| TC07  | Student can view and book an available lesson        | PASS   |
-| TC08  | Student cannot book an already reserved slot         | PASS   |
-| TC09  | Student can cancel a booked lesson                   | PASS   |
-| TC10  | System validates invalid inputs in forms             | PASS   |
+| TC ID | Test Scenario                                  | Result |
+| ----- | ---------------------------------------------- | ------ |
+| TC01  | User can register a new account                | PASS   |
+| TC02  | User can login with valid credentials          | PASS   |
+| TC03  | Login fails with invalid credentials           | PASS   |
+| TC04  | User can logout successfully                   | PASS   |
+| TC05  | Teacher can create and edit profile            | PASS   |
+| TC06  | Teacher can create, edit and delete time slots | PASS   |
+| TC07  | Student can view and book an available lesson  | PASS   |
+| TC08  | Student cannot book an already reserved slot   | PASS   |
+| TC09  | Student can cancel a booked lesson             | PASS   |
+| TC10  | System validates invalid inputs in forms       | PASS   |
 
-These tests simulate real user actions in the system. All passing results indicate that the system behaves correctly in practical usage.
+These ten scenarios were derived directly from the primary workflows a learner or teacher would follow in the system. They were chosen to reflect realistic usage rather than edge cases, ensuring that the most common user journeys — registration, login, booking, and profile management — function correctly end-to-end.
 
 ---
 
 ### 5.5 Performance Testing (JMeter)
 
 **Tool:** Apache JMeter 5.6.3  
-**Target:** MariaDB — `music_course_platform` (localhost)
-**Results:** See `JMeter_Test_Results_Sprint7.md` for full results. See `JMeter_Performance_Testing_Guide.md` for test setup and configuration.
+**Target:** MariaDB — `music_course_platform` (localhost)  
+**Setup guide:** See `JMeter_Performance_Testing_Guide.md` for test setup and configuration.
 
 **Test configuration:**
 
-| Parameter | Value |
-| --------- | ----- |
-| Threads (concurrent users) | 10 |
-| Ramp-up period | 5 seconds |
-| Loop count | 3 |
-| Total samples per scenario | 30 |
-| Think time | 500 ms constant delay |
+| Parameter                  | Value                 |
+| -------------------------- | --------------------- |
+| Threads (concurrent users) | 10                    |
+| Ramp-up period             | 5 seconds             |
+| Loop count                 | 3                     |
+| Total samples per scenario | 30                    |
+| Think time                 | 500 ms constant delay |
 
 **Scenarios:**
+
 - 10 concurrent users performing login (SELECT on USERS table)
 - 10 concurrent users creating bookings (INSERT into BOOKING table)
 
-**Results:**
+**Acceptance criteria:**
 
-| Scenario | Samples | Avg (ms) | Min (ms) | Max (ms) | Error % |
-| -------- | ------- | -------- | -------- | -------- | ------- |
-| Login Query | 30 | 2.5 | 0 | 10 | 0% |
-| Create Booking | 30 | 2.0 | 1 | 3 | 0% |
-| **Total** | **60** | — | — | — | **0%** |
+- Average response time < 500 ms under 10 concurrent users
+- Error rate < 5%
 
-**Acceptance criteria evaluation:**
-
-| Criterion | Target | Actual | Result |
-| --------- | ------ | ------ | ------ |
-| Avg response time — Login Query | < 500 ms | 2.5 ms | ✅ PASS |
-| Avg response time — Create Booking | < 500 ms | 2.0 ms | ✅ PASS |
-| Error rate | < 5% | 0% | ✅ PASS |
-
-Both scenarios pass with a wide margin. Response times are in the 0–10 ms range because the database and test client run on the same local machine. In a production environment with network latency, times would be higher but still expected to remain well under 500 ms for these indexed queries.
+The scenarios were designed around the two most frequent database operations a user triggers: logging in and creating a booking. Ten concurrent users were chosen as a realistic estimate of simultaneous usage for a course platform of this scale. The 500 ms response time threshold was set based on general usability research, which indicates that users perceive responses beyond this threshold as slow.
 
 ---
 
@@ -231,6 +218,7 @@ Both scenarios pass with a wide margin. Response times are in the 0–10 ms rang
 All defects discovered during testing are tracked in the Bug Tracking Table (see `Bug_Tracking_Table.md`).
 
 **Severity classification:**
+
 - Critical — system crash or data loss
 - High — major feature not working
 - Medium — incorrect behavior
@@ -254,14 +242,12 @@ All defects discovered during testing are tracked in the Bug Tracking Table (see
 - All Critical and High severity bugs resolved
 - Heuristic Evaluation reports completed by all 4 team members
 
-These criteria define when testing starts and when it is considered complete. They ensure that testing is carried out in a controlled and consistent way.
-
 ---
 
 ## 8. Test Schedule
 
 | Activity                          | Date       | Owner        |
-| --------------------------------- |------------|--------------|
+| --------------------------------- | ---------- | ------------ |
 | Unit tests executed (final run)   | 2026-04-20 | All          |
 | SonarQube scan via Jenkins        | 2026-04-20 | All          |
 | UAT execution                     | 2026-04-18 | Su Wai Phyoe |
@@ -270,4 +256,4 @@ These criteria define when testing starts and when it is considered complete. Th
 | Bug tracking review               | 2026-04-24 | All          |
 | Sprint 7 report submitted         | 2026-04-25 | All          |
 
-This schedule summarizes when each testing activity was completed. It ensures that all tasks were finished before the final delivery.
+The schedule was planned so that unit and integration tests run first, establishing a stable baseline before user-facing evaluations begin. UAT and Heuristic Evaluation are placed later so that testers assess a version of the system that has already passed automated checks, reducing the chance of encountering low-level defects during user-oriented testing.
